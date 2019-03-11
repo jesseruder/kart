@@ -169,7 +169,7 @@ function engine.newScene(renderWidth,renderHeight)
     scene.modelList = {}
 
     engine.camera = {
-        pos = cpml.vec3(0, 1, 0),
+        pos = cpml.vec3(0, 0.3, 0),
         angle = cpml.vec3(1, 0, 0),
         perspective = TransposeMatrix(cpml.mat4.from_perspective(60, renderWidth/renderHeight, 0.1, 10000)),
         transform = cpml.mat4(),
@@ -213,6 +213,7 @@ function engine.newScene(renderWidth,renderHeight)
     -- renders the models in the scene to the threeCanvas
     -- will draw threeCanvas if drawArg is not given or is true (use if you want to scale the game canvas to window)
     scene.render = function (self, drawArg)
+        love.graphics.clear(0,0,0,0)
         love.graphics.setColor(1,1,1)
         love.graphics.setCanvas({self.threeCanvas, depth=true})
         love.graphics.clear(0,0,0,0)

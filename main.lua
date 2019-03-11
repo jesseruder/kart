@@ -7,20 +7,87 @@ function love.load()
     love.graphics.setBackgroundColor(0,0.7,0.95)
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.graphics.setLineStyle("rough")
-    love.window.setMode(GraphicsWidth,GraphicsHeight, {vsync = -1})
+    --love.window.setMode(GraphicsWidth,GraphicsHeight, {vsync = -1, msaa = 4})
 
     -- for capping game logic at 60 manually
     LogicRate = 60
     LogicAccumulator = 0
     PhysicsStep = true
+    WorldSize = 10
+    SkyboxHeight = 10
 
     love.graphics.setCanvas()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
 
     imageDirt = love.graphics.newImage("assets/grass.png")
-    local model = Engine.newModel({ {0,0,0, 0,0}, {1,0,0, 1,0}, {0,0,1, 0,1} }, imageDirt, {2,0,0})
+    imageDirt:setWrap('repeat','repeat')
+    rect({
+        {-WorldSize, 0, -WorldSize,    -WorldSize, -WorldSize},
+        {WorldSize, 0, -WorldSize,      WorldSize, -WorldSize},
+        {WorldSize, 0, WorldSize,       WorldSize, WorldSize},
+        {-WorldSize, 0, WorldSize,     -WorldSize, WorldSize}
+    }, imageDirt)
+
+
+    imageSkybox = love.graphics.newImage("assets/skybox.png")
+    -- front
+    rect({
+        {-WorldSize, 0, -WorldSize,                 0.25, 0.5},
+        {-WorldSize, SkyboxHeight, -WorldSize,      0.25, 0.3333},
+        {WorldSize, SkyboxHeight, -WorldSize,       0.5, 0.3333},
+        {WorldSize, 0, -WorldSize,                  0.5, 0.5}
+    }, imageSkybox)
+
+    -- right
+    rect({
+        {WorldSize, 0, -WorldSize,                 0.5, 0.5},
+        {WorldSize, SkyboxHeight, -WorldSize,      0.5, 0.3333},
+        {WorldSize, SkyboxHeight, WorldSize,       0.75, 0.3333},
+        {WorldSize, 0, WorldSize,                  0.75, 0.5}
+    }, imageSkybox)
+
+    -- back
+    rect({
+        {WorldSize, 0, WorldSize,                 0.75, 0.5},
+        {WorldSize, SkyboxHeight, WorldSize,      0.75, 0.3333},
+        {-WorldSize, SkyboxHeight, WorldSize,       1, 0.3333},
+        {-WorldSize, 0, WorldSize,                  1, 0.5}
+    }, imageSkybox)
+
+    -- left
+    rect({
+        {-WorldSize, 0, WorldSize,                 0, 0.5},
+        {-WorldSize, SkyboxHeight, WorldSize,      0, 0.3333},
+        {-WorldSize, SkyboxHeight, -WorldSize,       0.25, 0.3333},
+        {-WorldSize, 0, -WorldSize,                  0.25, 0.5}
+    }, imageSkybox)
+
+    -- top
+    rect({
+        {-WorldSize, SkyboxHeight, -WorldSize,     0.25, 0.3333},
+        {WorldSize, SkyboxHeight, -WorldSize,      0.5, 0.3333},
+        {WorldSize, SkyboxHeight, WorldSize,       0.5, 0},
+        {-WorldSize, SkyboxHeight, WorldSize,      0.25, 0}
+    }, imageSkybox)
+
+end
+
+--[[
+1     2
+
+4     3
+]]--
+function rect(coords, texture)
+    local model = Engine.newModel({ coords[1], coords[2], coords[4] }, texture)
     table.insert(Scene.modelList, model)
+
+    local model2 = Engine.newModel({ coords[2], coords[3], coords[4] }, texture)
+    table.insert(Scene.modelList, model2)
+end
+
+function skybox()
+
 end
 
 function love.update(dt)
