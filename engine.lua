@@ -168,12 +168,13 @@ function engine.newScene(renderWidth,renderHeight)
     scene.twoCanvas = love.graphics.newCanvas(renderWidth, renderHeight)
     scene.modelList = {}
 
-    scene.camera = {
-        pos = cpml.vec3(-10, 0, 0),
-        angle = cpml.vec3(0, 0, 0),
+    engine.camera = {
+        pos = cpml.vec3(0, 1, 0),
+        angle = cpml.vec3(1, 0, 0),
         perspective = TransposeMatrix(cpml.mat4.from_perspective(60, renderWidth/renderHeight, 0.1, 10000)),
         transform = cpml.mat4(),
     }
+    -- camera.perspective = TransposeMatrix(cpml.mat4.from_perspective(90, love.graphics.getWidth()/love.graphics.getHeight(), 0.001, 10000))
 
     -- should be called in love.update every frame
     scene.update = function (self)
@@ -194,7 +195,7 @@ function engine.newScene(renderWidth,renderHeight)
         if love.keyboard.isDown("lctrl") then
             speed = speed * 10
         end
-        local Camera = scene.camera
+        local Camera = engine.camera
         local pos = Camera.pos
         
         local mul = love.keyboard.isDown("w") and 1 or (love.keyboard.isDown("s") and -1 or 0)
@@ -217,9 +218,14 @@ function engine.newScene(renderWidth,renderHeight)
         love.graphics.clear(0,0,0,0)
         love.graphics.setShader(self.threeShader)
 
-        local Camera = self.camera
+        local Camera = engine.camera
         Camera.transform = cpml.mat4()
-        local t, a, p = Camera.transform, Camera.angle, CopyTable(Camera.pos)
+        local t, a = Camera.transform, Camera.angle
+        local p = {}
+        p.x = Camera.pos.x
+        p.y = Camera.pos.y
+        p.z = Camera.pos.z
+
         p.x = p.x * -1
         p.y = p.y * -1
         p.z = p.z * -1
@@ -273,7 +279,7 @@ function engine.newScene(renderWidth,renderHeight)
     -- useful to call from love.mousemoved
     -- a simple first person mouse look function
     scene.mouseLook = function (self, x, y, dx, dy)
-        local Camera = self.camera
+        local Camera = engine.camera
         Camera.angle.x = Camera.angle.x + math.rad(dx * 0.5)
         Camera.angle.y = math.max(math.min(Camera.angle.y + math.rad(dy * 0.5), math.pi/2), -1*math.pi/2)
     end

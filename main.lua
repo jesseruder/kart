@@ -17,15 +17,15 @@ function love.load()
     love.graphics.setCanvas()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
-    Scene.camera.perspective = TransposeMatrix(cpml.mat4.from_perspective(90, love.graphics.getWidth()/love.graphics.getHeight(), 0.001, 10000))
 
-    local model = Engine.newModel({ {0,0,0}, {0,1,0}, {0,0,1} }, nil, nil, {1,0,0}, { 
-        {"VertexPosition", "float", 3}, 
-    })
+    imageDirt = love.graphics.newImage("assets/grass.png")
+    local model = Engine.newModel({ {0,0,0, 0,0}, {1,0,0, 1,0}, {0,0,1, 0,1} }, imageDirt, {2,0,0})
     table.insert(Scene.modelList, model)
 end
 
 function love.update(dt)
+    Scene:basicCamera(dt)
+    
     LogicAccumulator = LogicAccumulator+dt
 
     -- update 3d scene
@@ -36,8 +36,6 @@ function love.update(dt)
         PhysicsStep = true
     end
 
-
-    Scene:basicCamera(dt)
     -- update everything
 end
 
