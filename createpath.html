@@ -66,6 +66,59 @@ input.text{
 
 */
 
+let DISTANCE_BETWEEN_ROAD_POINTS = 5; //5
+let allPoints = [];
+let minx = 0;
+let maxx = 0;
+let miny = 0;
+let maxy = 0;
+
+function getBezierXY(t, sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey) {
+  return {
+    x: Math.pow(1-t,3) * sx + 3 * t * Math.pow(1 - t, 2) * cp1x 
+      + 3 * t * t * (1 - t) * cp2x + t * t * t * ex,
+    y: Math.pow(1-t,3) * sy + 3 * t * Math.pow(1 - t, 2) * cp1y 
+      + 3 * t * t * (1 - t) * cp2y + t * t * t * ey
+  };
+}
+
+function getBezierAngle(t, sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey) {
+  var dx = Math.pow(1-t, 2)*(cp1x-sx) + 2*t*(1-t)*(cp2x-cp1x) + t * t * (ex - cp2x);
+  var dy = Math.pow(1-t, 2)*(cp1y-sy) + 2*t*(1-t)*(cp2y-cp1y) + t * t * (ey - cp2y);
+  return -Math.atan2(dx, dy) + 0.5*Math.PI;
+}
+
+function getBezierPoints(ctx, sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey) {
+  let points = [{x: sx, y: sy}];
+  points[0].angle = getBezierAngle(0, sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey);
+
+  let t = 0.0;
+  while (t < 1.0) {
+      let inc = 0.01;
+      let distance = 0;
+      let point;
+      while (distance < DISTANCE_BETWEEN_ROAD_POINTS) {
+        point = getBezierXY(t + inc, sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey);
+        let lastPoint = points[points.length - 1];
+        distance = Math.sqrt(Math.pow(point.x - lastPoint.x, 2) + Math.pow(point.y - lastPoint.y, 2));
+        inc += 0.01;
+      }
+
+      point.angle = getBezierAngle(t + inc, sx, sy, cp1x, cp1y, cp2x, cp2y, ex, ey);
+
+      t += inc;
+      if (t < 1.0) {
+        points.push(point);
+      }
+  }
+
+  for (let i = 0; i < points.length; i++) {
+    drawPoint(ctx,points[i].x,points[i].y,1.5,"#000000");
+  }
+
+  allPoints = allPoints.concat(points);
+}
+
 function HSVtoRGB(h,s,v,opacity){
   // inputs h=hue=0-360, s=saturation=0-1, v=value=0-1
   // algorithm from Wikipedia on HSV conversion
@@ -180,6 +233,19 @@ function drawSpline(ctx,pts,t,closed){
         }
         cp=cp.concat(cp[0],cp[1]);   
         for(var i=2;i<n+2;i+=2){
+            if (pts[i] > maxx) {
+                maxx = pts[i];
+            }
+            if (pts[i] < minx) {
+                minx = pts[i];
+            }
+            if (pts[i+1] > maxy) {
+                maxy = pts[i+1];
+            }
+            if (pts[i+1] < miny) {
+                miny = pts[i+1];
+            }
+
             var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
             if(!showDetails){color="#555555"}
             ctx.strokeStyle=hexToCanvasColor(color,0.75);       
@@ -188,6 +254,7 @@ function drawSpline(ctx,pts,t,closed){
             ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
             ctx.stroke();
             ctx.closePath();
+            getBezierPoints(ctx, pts[i],pts[i+1], cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
             if(showDetails){
                drawControlLine(ctx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
                drawControlLine(ctx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
@@ -242,6 +309,10 @@ function drawSpline(ctx,pts,t,closed){
             drawPoint(ctx,pts[i],pts[i+1],2.5,"#ffff00");
         }
     }
+
+
+
+  console.log("{" + allPoints.map((point) => "{" + (point.x - minx)/(maxx - minx) + ", " + (point.y - miny)/(maxy - miny) + ", " + point.angle + "}").join(',\n') + "}");
 }
 function multiAnimate(){
     animate(1,function(){animate(0,function(){animate(0.33333)})});

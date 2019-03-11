@@ -1,4 +1,5 @@
 Engine = require "engine"
+require "path"
 
 function love.load()
     -- window graphics settings
@@ -71,6 +72,8 @@ function love.load()
         {-WorldSize, SkyboxHeight, WorldSize,      0.25, 0}
     }, imageSkybox)
 
+
+    makeRoad()
 end
 
 --[[
@@ -84,10 +87,6 @@ function rect(coords, texture)
 
     local model2 = Engine.newModel({ coords[2], coords[3], coords[4] }, texture)
     table.insert(Scene.modelList, model2)
-end
-
-function skybox()
-
 end
 
 function love.update(dt)
@@ -118,4 +117,37 @@ end
 function love.mousemoved(x,y, dx,dy)
     -- forward mouselook to Scene object for first person camera control
     Scene:mouseLook(x,y, dx,dy)
+end
+
+function makeRoad()
+    local elev = 0.01
+    local road_width = 0.5
+    local road_scale = 20
+
+    local imageRoad = love.graphics.newImage("assets/road.png")
+    local lastPoint = PATH_POINTS[#PATH_POINTS]
+    for k,v in pairs(PATH_POINTS) do
+
+        local lx = lastPoint[1] * road_scale - road_scale / 2.0
+        local ly = lastPoint[2] * road_scale - road_scale / 2.0
+        local la = lastPoint[3]
+        local ldx = math.cos(la + math.pi/2) * road_width
+        local ldy = math.sin(la + math.pi/2) * road_width
+
+        local x = v[1] * road_scale - road_scale / 2.0
+        local y = v[2] * road_scale - road_scale / 2.0
+        local a = v[3]
+        local dx = math.cos(a + math.pi/2) * road_width
+        local dy = math.sin(a + math.pi/2) * road_width
+
+        --elev = elev + 0.05
+        rect({
+            {lx - ldx, elev, ly - ldy,    0, 0},
+            {x - dx, elev, y - dy,   0,1},
+            {x + dx, elev, y + dy,     1,1},
+            {lx + ldx, elev, ly + ldy,    1,0}
+        }, imageRoad)
+
+        lastPoint = v
+    end
 end
