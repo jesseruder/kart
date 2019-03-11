@@ -16,12 +16,15 @@ engine.objFormat = {
 -- each vert is its own table that contains three coordinate numbers, and may contain 2 extra numbers as uv coordinates
 -- another example, this with uvs: { {0,0,0, 0,0}, {0,1,0, 1,0}, {0,0,1, 0,1} }
 -- polygons are automatically created with three consecutive verts
-function engine.newModel(verts, texture, coords, color, format)
+function engine.newModel(verts, texture, coords, color, format, scale)
     local m = {}
 
     -- default values if no arguments are given
     if coords == nil then
         coords = {0,0,0}
+    end
+    if scale == nil then
+        scale = 1.0
     end
     if color == nil then
         color = {1,1,1}
@@ -44,15 +47,21 @@ function engine.newModel(verts, texture, coords, color, format)
 
     -- translate verts by given coords
     for i=1, #verts do
-        verts[i][1] = verts[i][1] + coords[1]
-        verts[i][2] = verts[i][2] + coords[2]
-        verts[i][3] = verts[i][3] + coords[3]
+        local newVert = {}
+        newVert[1] = (verts[i][1] + coords[1]) * scale
+        newVert[2] = (verts[i][2] + coords[2]) * scale
+        newVert[3] = (verts[i][3] + coords[3]) * scale
 
         -- if not given uv coordinates, put in random ones
         if #verts[i] < 5 then
-            verts[i][4] = love.math.random()
-            verts[i][5] = love.math.random()
+            newVert[4] = love.math.random()
+            newVert[5] = love.math.random()
+        else
+            newVert[4] = verts[i][4]
+            newVert[5] = verts[i][5]
         end
+
+        verts[i] = newVert;
     end
 
     -- define the Model object's properties

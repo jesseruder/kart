@@ -16,6 +16,7 @@ function love.load()
     PhysicsStep = true
     WorldSize = 30
     SkyboxHeight = 30
+    Car = {size = 0.2}
 
     love.graphics.setCanvas()
 
@@ -74,6 +75,7 @@ function love.load()
 
 
     makeRoad()
+    makeCar()
 end
 
 --[[
@@ -82,15 +84,53 @@ end
 4     3
 ]]--
 function rect(coords, texture)
-    local model = Engine.newModel({ coords[1], coords[2], coords[4] }, texture)
+    local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, texture)
     table.insert(Scene.modelList, model)
+end
 
-    local model2 = Engine.newModel({ coords[2], coords[3], coords[4] }, texture)
-    table.insert(Scene.modelList, model2)
+function rectColor(coords, color, scale)
+    local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, nil, nil, color, { 
+        {"VertexPosition", "float", 3}, 
+    }, scale)
+    table.insert(Scene.modelList, model)
+    return model
+end
+
+function makeCar()
+    local front = rectColor({
+        {-1, -1, 1},
+        {-1, 1, 1},
+        {1, 1, 1},
+        {1, -1, 1}
+    }, {1, 0, 0}, Car.size)
+
+    local back = rectColor({
+        {-1, -1, -1},
+        {-1, 1, -1},
+        {1, 1, -1},
+        {1, -1, -1}
+    }, {1, 0, 0}, Car.size)
+
+    local left = rectColor({
+        {-1, -1, 1},
+        {-1, 1, 1},
+        {-1, 1, -1},
+        {-1, -1, -1}
+    }, {1, 0, 0}, Car.size)
+
+    local right = rectColor({
+        {1, -1, 1},
+        {1, 1, 1},
+        {1, 1, -1},
+        {1, -1, -1}
+    }, {1, 0, 0}, Car.size)
+
+
+    Car.models = {front, back, left, right}
 end
 
 function love.update(dt)
-    Scene:basicCamera(dt)
+    -- Scene:basicCamera(dt)
     
     LogicAccumulator = LogicAccumulator+dt
 
@@ -103,6 +143,25 @@ function love.update(dt)
     end
 
     -- update everything
+    --Car.x = dt * 0.5 + Car.x
+    local speed = love.keyboard.isDown("space") and 1 or 0
+    Car.x = dt * speed * math.cos(Car.angle) + Car.x
+    Car.z = dt * speed * math.sin(Car.angle) + Car.z
+
+    local direction = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
+    Car.angle = dt * direction + Car.angle
+
+    local Camera = Engine.camera
+    local CameraPos = Camera.pos
+    CameraPos.y = 1
+    CameraPos.x = Car.x - math.cos(Car.angle) * 2
+    CameraPos.z = Car.z - math.sin(Car.angle) * 2
+    Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
+    Camera.angle.y = 0.3
+
+    for k,v in pairs(Car.models) do
+        v:setTransform({Car.x, Car.size / 2.0, Car.z})
+    end
 end
 
 function love.draw()
@@ -116,7 +175,7 @@ end
 
 function love.mousemoved(x,y, dx,dy)
     -- forward mouselook to Scene object for first person camera control
-    Scene:mouseLook(x,y, dx,dy)
+    -- Scene:mouseLook(x,y, dx,dy)
 end
 
 function makeRoad()
@@ -126,6 +185,10 @@ function makeRoad()
 
     local imageRoad = love.graphics.newImage("assets/road.png")
     local lastPoint = PATH_POINTS[#PATH_POINTS]
+    Car.x = PATH_POINTS[1][1]
+    Car.z = PATH_POINTS[1][2]
+    Car.angle = PATH_POINTS[1][3]
+
     for k,v in pairs(PATH_POINTS) do
 
         local lx = lastPoint[1] * road_scale - road_scale / 2.0
