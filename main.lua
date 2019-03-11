@@ -13,8 +13,8 @@ function love.load()
     LogicRate = 60
     LogicAccumulator = 0
     PhysicsStep = true
-    WorldSize = 10
-    SkyboxHeight = 10
+    WorldSize = 30
+    SkyboxHeight = 30
 
     love.graphics.setCanvas()
 
