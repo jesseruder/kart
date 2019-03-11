@@ -68,20 +68,6 @@ function GenerateWorld()
     -- initializing the update queue that holds all entities
     ThingList = {}
     ThePlayer = CreateThing(NewPlayer(0,128,0))
-    PlayerInventory = {items = {}, hotbarSelect=1}
-
-    for i=1, 36 do
-        PlayerInventory.items[i] = 0
-    end
-    PlayerInventory.items[1] = 1
-    PlayerInventory.items[2] = 4
-    PlayerInventory.items[3] = 45
-    PlayerInventory.items[4] = 3
-    PlayerInventory.items[5] = 5
-    PlayerInventory.items[6] = 17
-    PlayerInventory.items[7] = 18
-    PlayerInventory.items[8] = 20
-    PlayerInventory.items[9] = 89
 
     -- generate the world, store in 2d hash table
     ChunkHashTable = {}
@@ -314,10 +300,6 @@ function love.mousemoved(x,y, dx,dy)
     Scene:mouseLook(x,y, dx,dy)
 end
 
-function love.wheelmoved(x,y)
-    PlayerInventory.hotbarSelect = math.floor( ((PlayerInventory.hotbarSelect - y -1)%9 +1) +0.5)
-end
-
 function love.mousepressed(x,y, b)
     -- forward mousepress events to all things in ThingList
     for i=1, #ThingList do
@@ -329,10 +311,6 @@ function love.mousepressed(x,y, b)
     local pos = ThePlayer.cursorpos
     local value = 0
 
-    if b == 2 then
-        pos = ThePlayer.cursorposPrev
-        value = PlayerInventory.items[PlayerInventory.hotbarSelect]
-    end
 
     local cx,cy,cz = pos.x, pos.y, pos.z
     local chunk = pos.chunk
@@ -358,9 +336,6 @@ function love.keypressed(k)
 
     -- simplified hotbar number press code, thanks nico-abram!
     local numberPress = tonumber(k)
-    if numberPress ~= nil and numberPress >= 1 and numberPress <= 9 then
-        PlayerInventory.hotbarSelect = numberPress
-    end
 end
 
 function lerp(a,b,t) return (1-t)*a + t*b end
