@@ -169,7 +169,7 @@ function engine.newScene(renderWidth,renderHeight)
     scene.modelList = {}
 
     scene.camera = {
-        pos = cpml.vec3(0, 0, 0),
+        pos = cpml.vec3(-10, 0, 0),
         angle = cpml.vec3(0, 0, 0),
         perspective = TransposeMatrix(cpml.mat4.from_perspective(60, renderWidth/renderHeight, 0.1, 10000)),
         transform = cpml.mat4(),
@@ -194,7 +194,7 @@ function engine.newScene(renderWidth,renderHeight)
         if love.keyboard.isDown("lctrl") then
             speed = speed * 10
         end
-        local Camera = engine.camera
+        local Camera = scene.camera
         local pos = Camera.pos
         
         local mul = love.keyboard.isDown("w") and 1 or (love.keyboard.isDown("s") and -1 or 0)
