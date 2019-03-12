@@ -349,7 +349,21 @@ function main(t){
     //   Drawing a spline takes one call.  The points are an array [x0,y0,x1,y1,...],
     //   the tension is t (typically 0.33 to 0.5), and true/false tells whether to
     //   connect the endpoints of the data to make a closed curve.
-    drawSpline(ctx,[20,100,100,100,150,50,200,150,250,50,300,70,310,130,350,180,200,250,50,200],t,true);
+    drawSpline(ctx,[20,100,
+    100,100,
+    150,50,
+    200,150,
+    250,50,
+    300,70,
+    310,130,
+    350,180,
+    200,300,
+    200,200,
+    290,190,
+    340,300,
+    150,340,
+    100,250,
+    20,170],t,true);
     //   Update the passive display of tension t.
     document.getElementById("t").value=Math.round(1000*t)/1000;
 }

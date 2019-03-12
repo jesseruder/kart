@@ -17,7 +17,7 @@ function love.load()
     WorldSize = 30
     SkyboxHeight = 30
     MaxClosestRoadDistance = 2.5
-    RoadScale = 30
+    RoadScale = 35
     Car = {size = 0.2, roadIndex = 0, accel = 500, turnAngle = math.pi*0.25, turnSpeed = 1.5, vel = {x = 0, z = 0}}
 
     love.graphics.setCanvas()
@@ -159,7 +159,7 @@ function love.update(dt)
 
     local turnAngle
     if isDrift then
-        frictionConst = 200
+        frictionConst = 150
         turnAngle = Car.angle + turnDirection * -math.pi / 4
     else
         turnAngle = Car.angle + turnDirection * Car.turnAngle
@@ -181,7 +181,7 @@ function love.update(dt)
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
 
-    local DIST_TO_CHECK = 100
+    local DIST_TO_CHECK = 10
     local closestRoadIndex = 0
     local closestRoadDistance = 100000000000
     for idx = Car.roadIndex - DIST_TO_CHECK, Car.roadIndex + DIST_TO_CHECK do
