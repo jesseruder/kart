@@ -24,7 +24,6 @@ function sendMultiplayerUpdate()
 end
 
 function updateCarFromRemote(car, remote)
-    print("update from remote")
     car.size = remote.size
     car.vel = remote.vel
     car.color = remote.color
@@ -51,11 +50,8 @@ local otherCars = {}
 function getMultiplayerUpdate()
     if client.connected then
         for id, car in pairs(share.cars) do
-            print(id)
             if id ~= client.id then -- Not me
-                print("found car!")
                 if not otherCars[id] then
-                    print("make car!")
                     otherCars[id] = makeCar()
                 end
 
