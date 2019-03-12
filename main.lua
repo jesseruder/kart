@@ -80,9 +80,9 @@ function love.load()
     makeRoad()
     makeCar()
 
-    local music = love.audio.newSource("assets/music.mp3", "stream")
-    music:setLooping(true)
-    music:play()
+    --local music = love.audio.newSource("assets/music.mp3", "stream")
+    --music:setLooping(true)
+    --music:play()
 end
 
 --[[
@@ -155,20 +155,31 @@ function love.update(dt)
     local frictionConst = 100
     local accel = love.keyboard.isDown("space") and 1 or 0
     local turnDirection = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
-    local turnAngle = Car.angle + turnDirection * Car.turnAngle
+    local isDrift = love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")
+
+    local turnAngle
+    if isDrift then
+        frictionConst = 200
+        turnAngle = Car.angle + turnDirection * -math.pi / 4
+    else
+        turnAngle = Car.angle + turnDirection * Car.turnAngle
+    end
 
     local frictionx = Car.vel.x * dt * -frictionConst
     local frictionz = Car.vel.z * dt * -frictionConst
     local carax = dt * accel * math.cos(turnAngle) * Car.accel
     local caraz = dt * accel * math.sin(turnAngle) * Car.accel
-    Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt
+
+    if isDrift then
+        Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt * 0.5
+    else
+        Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt
+    end
 
     Car.vel.x = Car.vel.x + (frictionx + carax) * dt
     Car.vel.z = Car.vel.z + (frictionz + caraz) * dt
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
-
-    --Car.angle = dt * direction * Car.turnSpeed + Car.angle
 
     local DIST_TO_CHECK = 100
     local closestRoadIndex = 0
@@ -211,6 +222,8 @@ function love.update(dt)
 
     local desiredCamX = (PATH_POINTS[cameraIndex][1] * RoadScale - RoadScale / 2.0)
     local desiredCamZ = (PATH_POINTS[cameraIndex][2] * RoadScale - RoadScale / 2.0)
+
+    -- this makes it a constant distance from the car. avoids jumps as camera switches between road sections
     --local desiredDistFromCar = math.sqrt(math.pow(Car.x - desiredCamX, 2) + math.pow(Car.z - desiredCamZ, 2))
     --desiredCamX = Car.x + (desiredCamX - Car.x) * camDistFromCar / desiredDistFromCar 
     --desiredCamZ = Car.z + (desiredCamZ - Car.z) * camDistFromCar / desiredDistFromCar 
