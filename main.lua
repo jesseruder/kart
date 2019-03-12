@@ -1,8 +1,12 @@
 Engine = require "engine"
 require "path"
 require "heightmap"
+local cs = require 'https://raw.githubusercontent.com/castle-games/share.lua/master/cs.lua'
+local client = cs.client
 
-RESET_CAR = true
+client.useCastleConfig()
+
+RESET_CAR = false
 PLAY_MUSIC = false
 
 function love.load()
@@ -24,7 +28,16 @@ function love.load()
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
     RoadRadius = 1.0
-    Car = {size = 0.2, roadIndex = 0, accel = 500, turnAngle = math.pi*0.25, turnSpeed = 1.5, vel = {x = 0, z = 0}, offRoadMaxSpeed = 1.5}
+    Car = {
+        size = 0.2,
+        roadIndex = 0,
+        accel = 500,
+        turnAngle = math.pi*0.25,
+        turnSpeed = 1.5,
+        vel = {x = 0, z = 0},
+        offRoadMaxSpeed = 1.5,
+        normal = {x = 0, y = 0, z = 1}
+    }
 
     love.graphics.setCanvas()
 
@@ -202,7 +215,9 @@ function love.update(dt)
     Car.vel.z = Car.vel.z + (frictionz + caraz) * dt
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
-    Car.y = heightAtPoint(Car.x, Car.z)
+    local hap = heightAtPoint(Car.x, Car.z)
+    Car.y = hap.height + 0.1
+    Car.normal = hap.normal
 
     local DIST_TO_CHECK = 10
     local closestRoadIndex = 0
@@ -316,7 +331,7 @@ function love.update(dt)
         CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx-- / camt
         CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz-- / camt
     --end
-    CameraPos.y = 1 + math.max(Car.y, heightAtPoint(CameraPos.x, CameraPos.z))
+    CameraPos.y = 1 + math.max(Car.y, heightAtPoint(CameraPos.x, CameraPos.z).height)
 
     Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
     Camera.angle.y = 0.3
@@ -365,10 +380,10 @@ function makeRoad()
 
         --elev = elev + 0.05
         rect({
-            {lx - ldx, elev + heightAtPoint(lx - ldx, ly - ldy), ly - ldy,    0, 0},
-            {x - dx, elev + heightAtPoint(x - dx, y - dy), y - dy,   0,1},
-            {x + dx, elev + heightAtPoint(x + dx, y + dy), y + dy,     1,1},
-            {lx + ldx, elev + heightAtPoint(lx + ldx, ly + ldy), ly + ldy,    1,0}
+            {lx - ldx, elev + heightAtPoint(lx - ldx, ly - ldy).height, ly - ldy,    0, 0},
+            {x - dx, elev + heightAtPoint(x - dx, y - dy).height, y - dy,   0,1},
+            {x + dx, elev + heightAtPoint(x + dx, y + dy).height, y + dy,     1,1},
+            {lx + ldx, elev + heightAtPoint(lx + ldx, ly + ldy).height, ly + ldy,    1,0}
         }, imageRoad)
 
         lastPoint = v

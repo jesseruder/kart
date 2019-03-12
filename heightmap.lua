@@ -28,9 +28,12 @@ function addMountain(centerX, centerY, height, slope)
     local dist = math.ceil(height / slope)
     for x = centerX - dist, centerX + dist do
         for y = centerY - dist, centerY + dist do
-            local thisHeight = height - slope * math.sqrt(math.pow(centerX - x, 2) + math.pow(centerY - y, 2))
-            if HEIGHTS[x] and HEIGHTS[x][y] and thisHeight > HEIGHTS[x][y] then
-                HEIGHTS[x][y] = thisHeight
+            local percentage = math.sqrt(math.pow(centerX - x, 2) + math.pow(centerY - y, 2)) / dist
+            if percentage <= 1.0 then
+                local thisHeight = (math.cos(percentage * math.pi) + 1)/2.0 * height
+                if HEIGHTS[x] and HEIGHTS[x][y] and thisHeight > HEIGHTS[x][y] then
+                    HEIGHTS[x][y] = thisHeight
+                end
             end
         end
     end
@@ -121,7 +124,7 @@ function heightAtPoint(x, y)
         normal = normalizeVec(crossVec(minusVec(xVec, baseVec), minusVec(xyVec, baseVec)))
     else
         -- on the x,y   x,y+1    x+1,y+1  triangle
-        normal = normalizeVec(crossVec(minusVec(yVec, baseVec), minusVec(xyVec, baseVec)))
+        normal = normalizeVec(crossVec(minusVec(xyVec, baseVec), minusVec(yVec, baseVec)))
     end
 
     --print(normal.x .. " " .. normal.y .. " " .. normal.z)
@@ -131,5 +134,8 @@ function heightAtPoint(x, y)
         {x = x, y = y, z = 0},
         {x = 0, y = 0, z = 1}
     )
-    return intersection.z
+    return {
+        height = intersection.z,
+        normal = normal
+    }
 end
