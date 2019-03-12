@@ -3,6 +3,7 @@ require "path"
 require "heightmap"
 
 RESET_CAR = true
+PLAY_MUSIC = false
 
 function love.load()
     -- window graphics settings
@@ -22,7 +23,8 @@ function love.load()
     SkyboxHeight = 30
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
-    Car = {size = 0.2, roadIndex = 0, accel = 500, turnAngle = math.pi*0.25, turnSpeed = 1.5, vel = {x = 0, z = 0}}
+    RoadRadius = 1.0
+    Car = {size = 0.2, roadIndex = 0, accel = 500, turnAngle = math.pi*0.25, turnSpeed = 1.5, vel = {x = 0, z = 0}, offRoadMaxSpeed = 1.5}
 
     love.graphics.setCanvas()
 
@@ -98,9 +100,11 @@ function love.load()
     makeRoad()
     makeCar()
 
-    --local music = love.audio.newSource("assets/music.mp3", "stream")
-    --music:setLooping(true)
-    --music:play()
+    if PLAY_MUSIC then
+        local music = love.audio.newSource("assets/music.mp3", "stream")
+        music:setLooping(true)
+        music:play()
+    end
 end
 
 --[[
@@ -227,6 +231,14 @@ function love.update(dt)
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
     end
 
+    if closestRoadDistance > RoadRadius then
+        local speed = math.sqrt(math.pow(Car.vel.x, 2) + math.pow(Car.vel.z, 2))
+        if speed > Car.offRoadMaxSpeed then
+            Car.vel.x = Car.vel.x * Car.offRoadMaxSpeed / speed
+            Car.vel.z = Car.vel.z * Car.offRoadMaxSpeed / speed
+        end
+    end
+
     local Camera = Engine.camera
     local CameraPos = Camera.pos
     local cameraSpeed = 3 --3
@@ -330,7 +342,6 @@ end
 
 function makeRoad()
     local elev = 0.05
-    local road_width = 1.0
 
     local imageRoad = love.graphics.newImage("assets/road.png")
     local lastPoint = PATH_POINTS[#PATH_POINTS]
@@ -343,14 +354,14 @@ function makeRoad()
         local lx = lastPoint[1] * RoadScale - RoadScale / 2.0
         local ly = lastPoint[2] * RoadScale - RoadScale / 2.0
         local la = lastPoint[3]
-        local ldx = math.cos(la + math.pi/2) * road_width
-        local ldy = math.sin(la + math.pi/2) * road_width
+        local ldx = math.cos(la + math.pi/2) * RoadRadius
+        local ldy = math.sin(la + math.pi/2) * RoadRadius
 
         local x = v[1] * RoadScale - RoadScale / 2.0
         local y = v[2] * RoadScale - RoadScale / 2.0
         local a = v[3]
-        local dx = math.cos(a + math.pi/2) * road_width
-        local dy = math.sin(a + math.pi/2) * road_width
+        local dx = math.cos(a + math.pi/2) * RoadRadius
+        local dy = math.sin(a + math.pi/2) * RoadRadius
 
         --elev = elev + 0.05
         rect({
