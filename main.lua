@@ -1,5 +1,8 @@
 Engine = require "engine"
 require "path"
+require "heightmap"
+
+RESET_CAR = false
 
 function love.load()
     -- window graphics settings
@@ -15,6 +18,7 @@ function love.load()
     LogicAccumulator = 0
     PhysicsStep = true
     WorldSize = 30
+    GridSize = 0.5
     SkyboxHeight = 30
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
@@ -24,14 +28,28 @@ function love.load()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
 
+    makeHeightMap()
     imageDirt = love.graphics.newImage("assets/grass.png")
     imageDirt:setWrap('repeat','repeat')
-    rect({
-        {-WorldSize, 0, -WorldSize,    -WorldSize/4, -WorldSize/4},
-        {WorldSize, 0, -WorldSize,      WorldSize/4, -WorldSize/4},
-        {WorldSize, 0, WorldSize,       WorldSize/4, WorldSize/4},
-        {-WorldSize, 0, WorldSize,     -WorldSize/4, WorldSize/4}
-    }, imageDirt)
+
+    local groundVerts = {}
+    for x = 1, #HEIGHTS-1 do
+        for y = 1, #HEIGHTS[x]-1 do
+            local worldX = x * GridSize - WorldSize
+            local worldY = y * GridSize - WorldSize
+
+            table.insert(groundVerts, {worldX, HEIGHTS[x][y], worldY,    worldX/4, worldY/4})
+            table.insert(groundVerts, {worldX+GridSize, HEIGHTS[x+1][y], worldY,    (worldX + GridSize)/4, worldY/4})
+            table.insert(groundVerts, {worldX, HEIGHTS[x][y+1], worldY+GridSize,    worldX/4, (worldY + GridSize)/4})
+
+
+            table.insert(groundVerts, {worldX+GridSize, HEIGHTS[x+1][y], worldY,    (worldX + GridSize)/4, worldY/4})
+            table.insert(groundVerts, {worldX+GridSize, HEIGHTS[x+1][y+1], worldY+GridSize,    (worldX + GridSize)/4, (worldY + GridSize)/4})
+            table.insert(groundVerts, {worldX, HEIGHTS[x][y+1], worldY+GridSize,    worldX/4, (worldY + GridSize)/4})
+        end
+    end
+    local groundModel = Engine.newModel(groundVerts, imageDirt)
+    table.insert(Scene.modelList, groundModel)
 
 
     imageSkybox = love.graphics.newImage("assets/skybox.png")
@@ -180,6 +198,7 @@ function love.update(dt)
     Car.vel.z = Car.vel.z + (frictionz + caraz) * dt
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
+    Car.y = heightAtPoint(Car.x, Car.z)
 
     local DIST_TO_CHECK = 10
     local closestRoadIndex = 0
@@ -203,7 +222,7 @@ function love.update(dt)
     end
     Car.roadIndex = closestRoadIndex
     -- reset car
-    if closestRoadDistance > MaxClosestRoadDistance then
+    if RESET_CAR and closestRoadDistance > MaxClosestRoadDistance then
         Car.x = PATH_POINTS[closestRoadIndex][1] * RoadScale - RoadScale / 2.0
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
     end
@@ -212,7 +231,7 @@ function love.update(dt)
     local CameraPos = Camera.pos
     local cameraSpeed = 3 --3
     local desiredCamDist = 3
-    CameraPos.y = 1
+    CameraPos.y = Car.y + 1
 
     local CAM_DIST_TO_CHECK = 50
     local lastCamIdx
@@ -267,6 +286,16 @@ function love.update(dt)
         lastTestCamZ = testCamZ
     end
 
+    if not desiredCamX then
+        local camIdx = Car.roadIndex - 5
+        if camIdx <= 0 then
+            camIdx = camIdx + #PATH_POINTS
+        end
+
+        desiredCamX = (PATH_POINTS[camIdx][1] * RoadScale - RoadScale / 2.0)
+        desiredCamZ = (PATH_POINTS[camIdx][2] * RoadScale - RoadScale / 2.0)
+    end
+
 
     local cdx = desiredCamX - CameraPos.x
     local cdz = desiredCamZ - CameraPos.z
@@ -281,7 +310,7 @@ function love.update(dt)
     Camera.angle.y = 0.3
 
     for k,v in pairs(Car.models) do
-        v:setTransform({Car.x, Car.size / 2.0, Car.z}, {-Car.angle, cpml.vec3.unit_y})
+        v:setTransform({Car.x, Car.size / 2.0 + Car.y, Car.z}, {-Car.angle, cpml.vec3.unit_y})
     end
 end
 
@@ -306,6 +335,7 @@ function makeRoad()
     local imageRoad = love.graphics.newImage("assets/road.png")
     local lastPoint = PATH_POINTS[#PATH_POINTS]
     Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0
+    Car.y = 0
     Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0
     Car.angle = PATH_POINTS[1][3]
 
