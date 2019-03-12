@@ -27,6 +27,7 @@ end
 
 function server.update(dt)
     for id, home in pairs(server.homes) do -- Combine mouse info from clients into share
+        print(id .. "  " .. home.car.x .. "  " .. home.car.y)
         share.cars[id] = home.car
     end
 end

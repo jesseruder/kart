@@ -292,6 +292,7 @@ function love.update(dt)
     Camera.angle.y = 0.3
 
     updateCarPosition(Car)
+    doMultiplayerUpdate()
 end
 
 function love.draw()
