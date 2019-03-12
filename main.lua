@@ -17,8 +17,8 @@ function love.load()
     WorldSize = 30
     SkyboxHeight = 30
     MaxClosestRoadDistance = 2.5
-    RoadScale = 20
-    Car = {size = 0.2, roadIndex = 0, speed = 3, turnSpeed = 3}
+    RoadScale = 30
+    Car = {size = 0.2, roadIndex = 0, accel = 500, turnAngle = math.pi*0.25, turnSpeed = 1.5, vel = {x = 0, z = 0}}
 
     love.graphics.setCanvas()
 
@@ -27,10 +27,10 @@ function love.load()
     imageDirt = love.graphics.newImage("assets/grass.png")
     imageDirt:setWrap('repeat','repeat')
     rect({
-        {-WorldSize, 0, -WorldSize,    -WorldSize, -WorldSize},
-        {WorldSize, 0, -WorldSize,      WorldSize, -WorldSize},
-        {WorldSize, 0, WorldSize,       WorldSize, WorldSize},
-        {-WorldSize, 0, WorldSize,     -WorldSize, WorldSize}
+        {-WorldSize, 0, -WorldSize,    -WorldSize/4, -WorldSize/4},
+        {WorldSize, 0, -WorldSize,      WorldSize/4, -WorldSize/4},
+        {WorldSize, 0, WorldSize,       WorldSize/4, WorldSize/4},
+        {-WorldSize, 0, WorldSize,     -WorldSize/4, WorldSize/4}
     }, imageDirt)
 
 
@@ -76,8 +76,13 @@ function love.load()
     }, imageSkybox)
 
 
+    imageCheese = love.graphics.newImage("assets/cheese.png")
     makeRoad()
     makeCar()
+
+    local music = love.audio.newSource("assets/music.mp3", "stream")
+    music:setLooping(true)
+    music:play()
 end
 
 --[[
@@ -85,9 +90,10 @@ end
 
 4     3
 ]]--
-function rect(coords, texture)
-    local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, texture)
+function rect(coords, texture, scale)
+    local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, texture, nil, nil, nil, scale)
     table.insert(Scene.modelList, model)
+    return model
 end
 
 function rectColor(coords, color, scale)
@@ -99,33 +105,33 @@ function rectColor(coords, color, scale)
 end
 
 function makeCar()
-    local front = rectColor({
-        {-1, -1, 1},
-        {-1, 1, 1},
-        {1, 1, 1},
-        {1, -1, 1}
-    }, {1, 0, 0}, Car.size)
+    local front = rect({
+        {-1, -1, 1,   0,0},
+        {-1, 1, 1,    0,1},
+        {1, 1, 1,     1,1},
+        {1, -1, 1,    1,0}
+    }, imageCheese, Car.size)
 
-    local back = rectColor({
-        {-1, -1, -1},
-        {-1, 1, -1},
-        {1, 1, -1},
-        {1, -1, -1}
-    }, {1, 0, 0}, Car.size)
+    local back = rect({
+        {-1, -1, -1,  0,0},
+        {-1, 1, -1,   0,1},
+        {1, 1, -1,    1,1},
+        {1, -1, -1,   1,0}
+    }, imageCheese, Car.size)
 
-    local left = rectColor({
-        {-1, -1, 1},
-        {-1, 1, 1},
-        {-1, 1, -1},
-        {-1, -1, -1}
-    }, {1, 0, 0}, Car.size)
+    local left = rect({
+        {-1, -1, 1,   0,0},
+        {-1, 1, 1,    0,1},
+        {-1, 1, -1,   1,1},
+        {-1, -1, -1,   1,0}
+    }, imageCheese, Car.size)
 
-    local right = rectColor({
-        {1, -1, 1},
-        {1, 1, 1},
-        {1, 1, -1},
-        {1, -1, -1}
-    }, {1, 0, 0}, Car.size)
+    local right = rect({
+        {1, -1, 1,    0,0},
+        {1, 1, 1,     0,1},
+        {1, 1, -1,    1, 1},
+        {1, -1, -1,   1,0}
+    }, imageCheese, Car.size)
 
 
     Car.models = {front, back, left, right}
@@ -146,12 +152,23 @@ function love.update(dt)
 
     -- update everything
     --Car.x = dt * 0.5 + Car.x
-    local speed = love.keyboard.isDown("space") and 1 or 0
-    Car.x = dt * speed * math.cos(Car.angle) * Car.speed + Car.x
-    Car.z = dt * speed * math.sin(Car.angle) * Car.speed + Car.z
+    local frictionConst = 100
+    local accel = love.keyboard.isDown("space") and 1 or 0
+    local turnDirection = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
+    local turnAngle = Car.angle + turnDirection * Car.turnAngle
 
-    local direction = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
-    Car.angle = dt * direction * Car.turnSpeed + Car.angle
+    local frictionx = Car.vel.x * dt * -frictionConst
+    local frictionz = Car.vel.z * dt * -frictionConst
+    local carax = dt * accel * math.cos(turnAngle) * Car.accel
+    local caraz = dt * accel * math.sin(turnAngle) * Car.accel
+    Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt
+
+    Car.vel.x = Car.vel.x + (frictionx + carax) * dt
+    Car.vel.z = Car.vel.z + (frictionz + caraz) * dt
+    Car.x = Car.x + Car.vel.x * dt
+    Car.z = Car.z + Car.vel.z * dt
+
+    --Car.angle = dt * direction * Car.turnSpeed + Car.angle
 
     local DIST_TO_CHECK = 100
     local closestRoadIndex = 0
@@ -174,6 +191,7 @@ function love.update(dt)
         end
     end
     Car.roadIndex = closestRoadIndex
+    -- reset car
     if closestRoadDistance > MaxClosestRoadDistance then
         Car.x = PATH_POINTS[closestRoadIndex][1] * RoadScale - RoadScale / 2.0
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
@@ -187,11 +205,18 @@ function love.update(dt)
         cameraIndex = cameraIndex + #PATH_POINTS
     end
 
-    local cameraSpeed = 3
+    local cameraSpeed = 3 --3
+    local camDistFromCar = 2
     CameraPos.y = 1
 
-    local cdx = (PATH_POINTS[cameraIndex][1] * RoadScale - RoadScale / 2.0) - CameraPos.x
-    local cdz = (PATH_POINTS[cameraIndex][2] * RoadScale - RoadScale / 2.0) - CameraPos.z
+    local desiredCamX = (PATH_POINTS[cameraIndex][1] * RoadScale - RoadScale / 2.0)
+    local desiredCamZ = (PATH_POINTS[cameraIndex][2] * RoadScale - RoadScale / 2.0)
+    --local desiredDistFromCar = math.sqrt(math.pow(Car.x - desiredCamX, 2) + math.pow(Car.z - desiredCamZ, 2))
+    --desiredCamX = Car.x + (desiredCamX - Car.x) * camDistFromCar / desiredDistFromCar 
+    --desiredCamZ = Car.z + (desiredCamZ - Car.z) * camDistFromCar / desiredDistFromCar 
+
+    local cdx = desiredCamX - CameraPos.x
+    local cdz = desiredCamZ - CameraPos.z
     local camt = math.sqrt(math.pow(cdx, 2) + math.pow(cdz, 2))
 
     if camt > 0.1 then
