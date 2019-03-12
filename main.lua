@@ -210,32 +210,72 @@ function love.update(dt)
 
     local Camera = Engine.camera
     local CameraPos = Camera.pos
-
-    local cameraIndex = Car.roadIndex - 5
-    if cameraIndex <= 0 then
-        cameraIndex = cameraIndex + #PATH_POINTS
-    end
-
     local cameraSpeed = 3 --3
-    local camDistFromCar = 2
+    local desiredCamDist = 3
     CameraPos.y = 1
 
-    local desiredCamX = (PATH_POINTS[cameraIndex][1] * RoadScale - RoadScale / 2.0)
-    local desiredCamZ = (PATH_POINTS[cameraIndex][2] * RoadScale - RoadScale / 2.0)
+    local CAM_DIST_TO_CHECK = 50
+    local lastCamIdx
+    local lastTestCamX
+    local lastTestCamZ
+    local desiredCamX
+    local desiredCamZ
+    for idx = Car.roadIndex - CAM_DIST_TO_CHECK, Car.roadIndex do
+        local realIdx = idx
+        if realIdx <= 0 then
+            realIdx = realIdx + #PATH_POINTS
+        end
+        if realIdx > #PATH_POINTS then
+            realIdx = realIdx - #PATH_POINTS
+        end
+        
+        local testCamX = (PATH_POINTS[realIdx][1] * RoadScale - RoadScale / 2.0)
+        local testCamZ = (PATH_POINTS[realIdx][2] * RoadScale - RoadScale / 2.0)
+        local testCamDist = math.sqrt(math.pow(Car.x - testCamX, 2) + math.pow(Car.z - testCamZ, 2))
+        
+        -- We're close enough!
+        if testCamDist < desiredCamDist then
+            if lastCamIdx then
+                -- start at last road section, iterate until we're the correct distance
+                local vecX = testCamX - lastTestCamX
+                local vecZ = testCamZ - lastTestCamZ
+                local amt = 0.0
+                while amt < 1.0 do
+                    local x = lastTestCamX + vecX * amt
+                    local z = lastTestCamZ + vecZ * amt
+                    local dist = math.sqrt(math.pow(Car.x - x, 2) + math.pow(Car.z - z, 2))
+                    if dist < desiredCamDist then
+                        desiredCamX = x
+                        desiredCamZ = z
+                        break
+                    end
+                    amt = amt + 0.002
+                end
+            else
+                -- should never happen
+                desiredCamX = testCamX
+                desiredCamZ = testCamZ
+            end
+        end
 
-    -- this makes it a constant distance from the car. avoids jumps as camera switches between road sections
-    --local desiredDistFromCar = math.sqrt(math.pow(Car.x - desiredCamX, 2) + math.pow(Car.z - desiredCamZ, 2))
-    --desiredCamX = Car.x + (desiredCamX - Car.x) * camDistFromCar / desiredDistFromCar 
-    --desiredCamZ = Car.z + (desiredCamZ - Car.z) * camDistFromCar / desiredDistFromCar 
+        if desiredCamX then
+            break
+        end
+
+        lastCamIdx = realIdx
+        lastTestCamX = testCamX
+        lastTestCamZ = testCamZ
+    end
+
 
     local cdx = desiredCamX - CameraPos.x
     local cdz = desiredCamZ - CameraPos.z
     local camt = math.sqrt(math.pow(cdx, 2) + math.pow(cdz, 2))
 
-    if camt > 0.1 then
-        CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx / camt
-        CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz / camt
-    end
+    --if camt > 0.1 then
+        CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx-- / camt
+        CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz-- / camt
+    --end
 
     Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
     Camera.angle.y = 0.3
