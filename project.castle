@@ -1,3 +1,5 @@
 main: combined.lua
 multiplayer:
   - enabled: true
+owner: jesse
+title: Kart
