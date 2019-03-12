@@ -1,10 +1,8 @@
 Engine = require "engine"
 require "path"
 require "heightmap"
-local cs = require 'https://raw.githubusercontent.com/castle-games/share.lua/master/cs.lua'
-local client = cs.client
-
-client.useCastleConfig()
+require "car"
+require "multiplayer"
 
 RESET_CAR = false
 PLAY_MUSIC = false
@@ -28,20 +26,12 @@ function love.load()
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
     RoadRadius = 1.0
-    Car = {
-        size = 0.2,
-        roadIndex = 0,
-        accel = 500,
-        turnAngle = math.pi*0.25,
-        turnSpeed = 1.5,
-        vel = {x = 0, z = 0},
-        offRoadMaxSpeed = 1.5,
-        normal = {x = 0, y = 0, z = 1}
-    }
 
     love.graphics.setCanvas()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
+
+    Car = makeCar()
 
     makeHeightMap()
     imageDirt = love.graphics.newImage("assets/grass.png")
@@ -109,15 +99,13 @@ function love.load()
     }, imageSkybox)
 
 
-    imageCheese = love.graphics.newImage("assets/cheese.png")
     makeRoad()
-    makeCar()
 
-    if PLAY_MUSIC then
+    --[[if PLAY_MUSIC then
         local music = love.audio.newSource("assets/music.mp3", "stream")
         music:setLooping(true)
         music:play()
-    end
+    end]]--
 end
 
 --[[
@@ -137,39 +125,6 @@ function rectColor(coords, color, scale)
     }, scale)
     table.insert(Scene.modelList, model)
     return model
-end
-
-function makeCar()
-    local front = rect({
-        {-1, -1, 1,   0,0},
-        {-1, 1, 1,    0,1},
-        {1, 1, 1,     1,1},
-        {1, -1, 1,    1,0}
-    }, imageCheese, Car.size)
-
-    local back = rect({
-        {-1, -1, -1,  0,0},
-        {-1, 1, -1,   0,1},
-        {1, 1, -1,    1,1},
-        {1, -1, -1,   1,0}
-    }, imageCheese, Car.size)
-
-    local left = rect({
-        {-1, -1, 1,   0,0},
-        {-1, 1, 1,    0,1},
-        {-1, 1, -1,   1,1},
-        {-1, -1, -1,   1,0}
-    }, imageCheese, Car.size)
-
-    local right = rect({
-        {1, -1, 1,    0,0},
-        {1, 1, 1,     0,1},
-        {1, 1, -1,    1, 1},
-        {1, -1, -1,   1,0}
-    }, imageCheese, Car.size)
-
-
-    Car.models = {front, back, left, right}
 end
 
 function love.update(dt)
@@ -336,9 +291,7 @@ function love.update(dt)
     Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
     Camera.angle.y = 0.3
 
-    for k,v in pairs(Car.models) do
-        v:setTransform({Car.x, Car.size / 2.0 + Car.y, Car.z}, {-Car.angle, cpml.vec3.unit_y})
-    end
+    updateCarPosition(Car)
 end
 
 function love.draw()
