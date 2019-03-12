@@ -16,7 +16,7 @@ function love.load()
     PhysicsStep = true
     WorldSize = 30
     SkyboxHeight = 30
-    MaxClosestRoadDistance = 4
+    MaxClosestRoadDistance = 2.5
     RoadScale = 20
     Car = {size = 0.2, roadIndex = 0, speed = 3, turnSpeed = 3}
 
@@ -153,7 +153,7 @@ function love.update(dt)
     local direction = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
     Car.angle = dt * direction * Car.turnSpeed + Car.angle
 
-    local DIST_TO_CHECK = 20
+    local DIST_TO_CHECK = 100
     local closestRoadIndex = 0
     local closestRoadDistance = 100000000000
     for idx = Car.roadIndex - DIST_TO_CHECK, Car.roadIndex + DIST_TO_CHECK do
@@ -197,9 +197,10 @@ function love.update(dt)
     if camt > 0.1 then
         CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx / camt
         CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz / camt
-        Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
-        Camera.angle.y = 0.3
     end
+
+    Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
+    Camera.angle.y = 0.3
 
     for k,v in pairs(Car.models) do
         v:setTransform({Car.x, Car.size / 2.0, Car.z}, {-Car.angle, cpml.vec3.unit_y})
