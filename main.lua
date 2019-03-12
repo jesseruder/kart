@@ -2,7 +2,7 @@ Engine = require "engine"
 require "path"
 require "heightmap"
 
-RESET_CAR = false
+RESET_CAR = true
 
 function love.load()
     -- window graphics settings
@@ -231,7 +231,6 @@ function love.update(dt)
     local CameraPos = Camera.pos
     local cameraSpeed = 3 --3
     local desiredCamDist = 3
-    CameraPos.y = Car.y + 1
 
     local CAM_DIST_TO_CHECK = 50
     local lastCamIdx
@@ -305,6 +304,7 @@ function love.update(dt)
         CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx-- / camt
         CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz-- / camt
     --end
+    CameraPos.y = 1 + math.max(Car.y, heightAtPoint(CameraPos.x, CameraPos.z))
 
     Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
     Camera.angle.y = 0.3
@@ -329,7 +329,7 @@ function love.mousemoved(x,y, dx,dy)
 end
 
 function makeRoad()
-    local elev = 0.01
+    local elev = 0.05
     local road_width = 1.0
 
     local imageRoad = love.graphics.newImage("assets/road.png")
@@ -354,10 +354,10 @@ function makeRoad()
 
         --elev = elev + 0.05
         rect({
-            {lx - ldx, elev, ly - ldy,    0, 0},
-            {x - dx, elev, y - dy,   0,1},
-            {x + dx, elev, y + dy,     1,1},
-            {lx + ldx, elev, ly + ldy,    1,0}
+            {lx - ldx, elev + heightAtPoint(lx - ldx, ly - ldy), ly - ldy,    0, 0},
+            {x - dx, elev + heightAtPoint(x - dx, y - dy), y - dy,   0,1},
+            {x + dx, elev + heightAtPoint(x + dx, y + dy), y + dy,     1,1},
+            {lx + ldx, elev + heightAtPoint(lx + ldx, ly + ldy), ly + ldy,    1,0}
         }, imageRoad)
 
         lastPoint = v

@@ -18,7 +18,10 @@ function makeHeightMap()
         xi = xi + 1
     end
 
-    addMountain(WorldSize / GridSize, WorldSize / GridSize, 7, 0.2)
+    local numRows = 2 * WorldSize / GridSize
+    for i = 0, 10 do
+        addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 10), 0.1)
+    end
 end
 
 function addMountain(centerX, centerY, height, slope)
@@ -26,7 +29,7 @@ function addMountain(centerX, centerY, height, slope)
     for x = centerX - dist, centerX + dist do
         for y = centerY - dist, centerY + dist do
             local thisHeight = height - slope * math.sqrt(math.pow(centerX - x, 2) + math.pow(centerY - y, 2))
-            if thisHeight > HEIGHTS[x][y] then
+            if HEIGHTS[x] and HEIGHTS[x][y] and thisHeight > HEIGHTS[x][y] then
                 HEIGHTS[x][y] = thisHeight
             end
         end
