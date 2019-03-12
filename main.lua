@@ -7,7 +7,7 @@ require "multiplayer"
 RESET_CAR = false
 PLAY_MUSIC = false
 
-function love.load()
+function client.load()
     -- window graphics settings
     GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight
@@ -31,6 +31,7 @@ function love.load()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
 
+    imageCheese = love.graphics.newImage("assets/cheese.png")
     Car = makeCar()
 
     makeHeightMap()
@@ -127,7 +128,7 @@ function rectColor(coords, color, scale)
     return model
 end
 
-function love.update(dt)
+function client.update(dt)
     -- Scene:basicCamera(dt)
     
     LogicAccumulator = LogicAccumulator+dt
@@ -292,10 +293,12 @@ function love.update(dt)
     Camera.angle.y = 0.3
 
     updateCarPosition(Car)
-    doMultiplayerUpdate()
+    sendMultiplayerUpdate()
 end
 
-function love.draw()
+function client.draw()
+    getMultiplayerUpdate()
+
     -- draw 3d scene
     Scene:render(true)
 

@@ -1,7 +1,12 @@
 local cs = require 'https://raw.githubusercontent.com/castle-games/share.lua/master/cs.lua'
 local server = cs.server
 
-server.useCastleConfig()
+if USE_CASTLE_CONFIG then
+    server.useCastleConfig()
+else
+    server.enabled = true
+    server.start('22122') -- Port of server
+end
 
 local share = server.share -- Maps to `client.share` -- can write
 local homes = server.homes -- `homes[id]` maps to `client.home` for that `id` -- can read
@@ -27,7 +32,8 @@ end
 
 function server.update(dt)
     for id, home in pairs(server.homes) do -- Combine mouse info from clients into share
-        print(id .. "  " .. home.car.x .. "  " .. home.car.y)
-        share.cars[id] = home.car
+        if home.car then
+            share.cars[id] = home.car
+        end
     end
 end

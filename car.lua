@@ -12,7 +12,6 @@ function makeCar()
         normal = {x = 0, y = 0, z = 1},
         color = color
     }
-    local imageCheese = love.graphics.newImage("assets/cheese.png")
 
     local front = rectColor({
         {-1, -1, 1,   0,0},

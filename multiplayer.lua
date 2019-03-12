@@ -1,12 +1,17 @@
 local cs = require 'https://raw.githubusercontent.com/castle-games/share.lua/master/cs.lua'
-local client = cs.client
+client = cs.client
 
-client.useCastleConfig()
+if USE_CASTLE_CONFIG then
+    client.useCastleConfig()
+else
+    client.enabled = true
+    client.start('127.0.0.1:22122') -- IP address ('127.0.0.1' is same computer) and port of server
+end
 
 local share = client.share -- Maps to `server.share` -- can read
 local home = client.home -- Maps to `server.homes[id]` with our `id` -- can write
 
-function doMultiplayerUpdate()
+function sendMultiplayerUpdate()
     if client.connected then
         home.car.size = Car.size
         home.car.vel = Car.vel
@@ -14,6 +19,7 @@ function doMultiplayerUpdate()
         home.car.x = Car.x
         home.car.y = Car.y
         home.car.z = Car.z
+        home.car.angle = Car.angle
     end
 end
 
@@ -25,11 +31,12 @@ function updateCarFromRemote(car, remote)
     car.x = remote.x
     car.y = remote.y
     car.z = remote.z
+    car.angle = remote.angle
 end
 
 function client.connect() -- Called on connect from server
     home.car = {}
-    doMultiplayerUpdate()
+    sendMultiplayerUpdate()
     print("connected!")
 end
 
@@ -41,7 +48,7 @@ function client.receive(...) -- Called when server does `server.send(id, ...)` w
 end
 
 local otherCars = {}
-function updateMultiplayer()
+function getMultiplayerUpdate()
     if client.connected then
         for id, car in pairs(share.cars) do
             print(id)
