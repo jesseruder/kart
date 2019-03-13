@@ -16,33 +16,33 @@ function makeCar(color)
         color = color
     }
 
-    local front = rectColor({
+    local front = rect({
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {1, 1, 1,     1,1},
         {1, -1, 1,    1,0}
-    }, color, Car.size)
+    }, imageCheese, Car.size)
 
-    local back = rectColor({
+    local back = rect({
         {-1, -1, -1,  0,0},
         {-1, 1, -1,   0,1},
         {1, 1, -1,    1,1},
         {1, -1, -1,   1,0}
-    }, color, Car.size)
+    }, imageCheese, Car.size)
 
-    local left = rectColor({
+    local left = rect({
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {-1, 1, -1,   1,1},
         {-1, -1, -1,   1,0}
-    }, color, Car.size)
+    }, imageCheese, Car.size)
 
-    local right = rectColor({
+    local right = rect({
         {1, -1, 1,    0,0},
         {1, 1, 1,     0,1},
         {1, 1, -1,    1, 1},
         {1, -1, -1,   1,0}
-    }, color, Car.size)
+    }, imageCheese, Car.size)
 
 
     Car.models = {front, back, left, right}

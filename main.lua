@@ -5,10 +5,35 @@ require "car"
 require "multiplayer"
 
 RESET_CAR = true
-PLAY_MUSIC = false
+PLAY_MUSIC = true
 
 function resetGame()
-    GameStarted = false
+    if ACTUAL_GAME then
+        GameStarted = false
+        GameCountdown = false
+        GameCountdownTime = 0
+        GameCountdownBright = 0.0
+    else
+        GameStarted = true
+        GameCountdown = false
+        GameCountdownTime = 0
+        GameCountdownBright = 0.0
+    end
+end
+
+function startGame()
+    if GameStarted == true then
+        return
+    end
+
+    GameStarted = true
+    GameCountdown = true
+    GameCountdownTime = 0
+    GameCountdownBright = 0.0
+    if PLAY_MUSIC then
+        AmbientMusic:stop()
+        Music:play()
+    end
 end
 
 function client.load()
@@ -32,6 +57,14 @@ function client.load()
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
     RoadRadius = 1.0
+
+    IntroCameraRotation = math.pi
+    IntroCameraRotationDist = 5
+    IntroCameraRotationSpeed = 0.2
+
+    BigFont = love.graphics.newFont(20)
+    HugeFont = love.graphics.newFont(100)
+    DefaultFont = love.graphics.getFont()
 
     love.graphics.setCanvas()
 
@@ -108,11 +141,14 @@ function client.load()
 
     makeRoad()
 
-    --[[if PLAY_MUSIC then
-        local music = love.audio.newSource("assets/music.mp3", "stream")
-        music:setLooping(true)
-        music:play()
-    end]]--
+    if PLAY_MUSIC then
+        AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
+        AmbientMusic:setLooping(true)
+        AmbientMusic:play()
+
+        Music = love.audio.newSource("assets/music.mp3", "stream")
+        Music:setLooping(true)
+    end
 end
 
 --[[
@@ -151,6 +187,10 @@ function client.update(dt)
     --Car.x = dt * 0.5 + Car.x
     local frictionConst = 100
     local accel = love.keyboard.isDown("space") and 1 or 0
+    if GameStarted == false or GameCountdown == true then
+        accel = 0
+    end
+
     local turnDirection = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
     local isDrift = love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")
 
@@ -284,6 +324,11 @@ function client.update(dt)
         desiredCamZ = (PATH_POINTS[camIdx][2] * RoadScale - RoadScale / 2.0)
     end
 
+    if GameStarted == false then
+        IntroCameraRotation = IntroCameraRotation + dt * IntroCameraRotationSpeed
+        desiredCamX = Car.x + math.cos(IntroCameraRotation) * IntroCameraRotationDist
+        desiredCamZ = Car.z + math.sin(IntroCameraRotation) * IntroCameraRotationDist
+    end
 
     local cdx = desiredCamX - CameraPos.x
     local cdz = desiredCamZ - CameraPos.z
@@ -303,21 +348,77 @@ function client.update(dt)
     end
 
     sendMultiplayerUpdate()
+
+    GameCountdownTime = GameCountdownTime + dt
+    GameCountdownBright = GameCountdownBright - dt * 2
 end
 
 function client.draw()
     getMultiplayerUpdate()
 
     -- draw 3d scene
-    Scene:render(true)
+    if client.connected then
+        Scene:render(true)
+    else
+        love.graphics.clear(0,0,0,0)
+    end
 
     -- draw HUD
     Scene:renderFunction(
         function ()
             love.graphics.setColor(1, 1, 1)
-            love.graphics.print("FPS: " .. love.timer.getFPS(), 0, 0)
+            --love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 0)
             if client.connected then
-                love.graphics.print("Ping: " .. client.getPing(), 0, 20)
+                --love.graphics.print("Ping: " .. client.getPing(), 20, 20)
+                --love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 200, 20)
+
+                if GameStarted == false then
+                    love.graphics.setFont(BigFont)
+                    if love.keyboard.isDown("space") then
+                        love.graphics.print("waiting...", GraphicsWidth / 2 - 100, GraphicsHeight - 80)
+                    else
+                        love.graphics.print("hold [space] when ready", GraphicsWidth / 2 - 180, GraphicsHeight - 80)
+                    end
+                    love.graphics.setFont(DefaultFont)
+                end
+
+                if GameCountdown == true then
+                    love.graphics.setFont(HugeFont)
+
+                    local text = nil
+                    local time3 = 0.666
+                    local time2 = time3 + 0.948
+                    local time1 = time3 + 1.896
+                    local timeStart = time3 + 3.78
+                    local timeBright = 0.1
+
+                    if GameCountdownTime > timeStart then
+                        GameCountdown = false
+                    elseif GameCountdownTime > time1 then
+                        text = "1"
+                        if GameCountdownTime - time1 < timeBright then
+                            GameCountdownBright = 1.0
+                        end
+                    elseif GameCountdownTime > time2 then
+                        text = "2"
+                        if GameCountdownTime - time2 < timeBright then
+                            GameCountdownBright = 1.0
+                        end
+                    elseif GameCountdownTime > time3 then
+                        text = "3"
+                        if GameCountdownTime - time3 < timeBright then
+                            GameCountdownBright = 1.0
+                        end
+                    end
+
+                    if text then
+                        love.graphics.print(text, GraphicsWidth / 2 - 85, GraphicsHeight / 2 - 120)
+                    end
+
+                    love.graphics.setFont(DefaultFont)
+                end
+            else
+                love.graphics.print("Connecting...", GraphicsWidth / 2 - 50, GraphicsHeight / 2 - 20)
             end
         end, false
     )

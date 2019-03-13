@@ -20,6 +20,8 @@ function sendMultiplayerUpdate()
         home.car.y = Car.y
         home.car.z = Car.z
         home.car.angle = Car.angle
+
+        home.requestingStart = love.keyboard.isDown("space")
     end
 end
 
@@ -47,13 +49,20 @@ function client.receive(...) -- Called when server does `server.send(id, ...)` w
 end
 
 local otherCars = {}
+NumPlayers = 0
 function getMultiplayerUpdate()
     if client.connected then
+        if share.isGameRunning then
+            startGame()
+        end
+
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false
         end
 
+        NumPlayers = 0
         for id, car in pairs(share.cars) do
+            NumPlayers = NumPlayers + 1
             if id ~= client.id or USE_REMOTE_CAR then -- Not me
                 if not car and otherCard[id] then
                     removeCar(otherCars[id])

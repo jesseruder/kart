@@ -188,6 +188,7 @@ function engine.newScene(renderWidth,renderHeight)
         #ifdef PIXEL
         uniform float xPixelSize;
         uniform float yPixelSize;
+        uniform float overlayOpacity;
 
         vec4 blurColor(Image texture, vec2 texture_coords, float size)
         {
@@ -205,7 +206,7 @@ function engine.newScene(renderWidth,renderHeight)
             vec4 o = Texel(texture, texture_coords);
             outColor = (o * 2 + blurColor(texture, texture_coords, 1)) / 3.0;
             
-            return outColor;
+            return outColor * overlayOpacity + vec4(0.0, 0.0, 0.0, 1.0) * (1.0 - overlayOpacity);
         }
         #endif
     ]]
@@ -310,6 +311,18 @@ function engine.newScene(renderWidth,renderHeight)
         love.graphics.setShader(self.postProcessingShader)
         self.postProcessingShader:send("xPixelSize", 1 / (520*2))
         self.postProcessingShader:send("yPixelSize", 1 / ((520*9/16)*2))
+
+        local opacity = 1.0
+        if GameStarted == false then
+            opacity = 0.3
+        end
+        if GameCountdown == true then
+            opacity = GameCountdownBright
+            if opacity < 0.3 then
+                opacity = 0.3
+            end
+        end
+        self.postProcessingShader:send("overlayOpacity", opacity)
         if drawArg == nil or drawArg == true then
             love.graphics.draw(self.threeCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,-1, self.renderWidth/2, self.renderHeight/2)
         end
