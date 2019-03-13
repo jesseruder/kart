@@ -11,7 +11,7 @@ LocalBananas = {}
 
 function loadItemImages()
     ItemTypes = {
-        {
+        --[[{
             name = "mushroom",
             image = love.graphics.newImage("assets/items/mushroom.png"),
             action = function() 
@@ -32,7 +32,7 @@ function loadItemImages()
             action = function() 
                 DizzyItemEnabledTime = 5.0
             end
-        },
+        },]]--
         {
             name = "banana",
             image = love.graphics.newImage("assets/items/banana.png"),

@@ -27,6 +27,7 @@ do
     local idToPeer = {}
     local nextId = 1
     local numClients = 0
+    local accumTime = 0.0
 
     function server.useCastleConfig()
         if castle then
@@ -166,7 +167,13 @@ do
         end
     end
 
-    function server.postupdate()
+    function server.postupdate(dt)
+        accumTime = accumTime + dt
+        if accumTime < 1.0 / 30.0 then
+            return
+        end
+        accumTime = 0.0
+
         -- Send state updates to everyone
         for peer, id in pairs(peerToId) do
             local diff = share:__diff(id)
@@ -201,6 +208,7 @@ do
 
     local host
     local peer
+    local accumTime = 0.0
 
     function client.useCastleConfig()
         if castle then
@@ -217,7 +225,7 @@ do
     end
 
     function client.start(address)
-        host = enet.host_create()
+        host = enet.host_create(nil, 1, 1)
         if useCompression then
             host:compress_with_range_coder()
         end
@@ -242,91 +250,89 @@ do
     function client.preupdate(dt)
         -- Process network events
         if host then
-            while true do
-                if not host then break end
-                local event = host:service(0)
-                if not event then break end
+            if not host then return end
+            local event = host:service(0)
+            if not event then return end
 
-                -- Server connected?
-                if event.type == 'connect' then
-                    -- Ignore this, wait till we receive id (see below)
+            -- Server connected?
+            if event.type == 'connect' then
+                -- Ignore this, wait till we receive id (see below)
+            end
+
+            -- Server disconnected?
+            if event.type == 'disconnect' then
+                if client.disconnect then
+                    client.disconnect()
+                end
+                client.connected = false
+                client.id = nil
+                for k in pairs(share) do
+                    share[k] = nil
+                end
+                for k in pairs(home) do
+                    home[k] = nil
+                end
+                host = nil
+                peer = nil
+            end
+
+            -- Received a request?
+            if event.type == 'receive' then
+                local request = marshal.decode(event.data)
+
+                -- Message?
+                if request.message then
+                    if client.receive then
+                        client.receive(unpack(request.message, 1, request.message.nArgs))
+                    end
                 end
 
-                -- Server disconnected?
-                if event.type == 'disconnect' then
-                    if client.disconnect then
-                        client.disconnect()
+                -- Diff / exact? (do this first so we have it in `.connect` below)
+                if request.diff then
+                    if client.changing then
+                        client.changing(request.diff)
                     end
-                    client.connected = false
-                    client.id = nil
+                    assert(state.apply(share, request.diff) == share)
+                    if client.changed then
+                        client.changed(request.diff)
+                    end
+                end
+                if request.exact then -- `state.apply` may return a new value
+                    if client.changing then
+                        client.changing(request.exact)
+                    end
+                    local new = state.apply(share, request.exact)
+                    for k, v in pairs(new) do
+                        share[k] = v
+                    end
                     for k in pairs(share) do
-                        share[k] = nil
+                        if not new[k] then
+                            share[k] = nil
+                        end
                     end
-                    for k in pairs(home) do
-                        home[k] = nil
+                    if client.changed then
+                        client.changed(request.exact)
                     end
-                    host = nil
-                    peer = nil
                 end
 
-                -- Received a request?
-                if event.type == 'receive' then
-                    local request = marshal.decode(event.data)
-
-                    -- Message?
-                    if request.message then
-                        if client.receive then
-                            client.receive(unpack(request.message, 1, request.message.nArgs))
-                        end
+                -- Id?
+                if request.id and not client.id then
+                    peer = event.peer
+                    client.connected = true
+                    client.id = request.id
+                    if client.connect then
+                        client.connect()
                     end
+                    peer:send(marshal.encode({ exact = home:__diff(0, true) }))
+                end
 
-                    -- Diff / exact? (do this first so we have it in `.connect` below)
-                    if request.diff then
-                        if client.changing then
-                            client.changing(request.diff)
-                        end
-                        assert(state.apply(share, request.diff) == share)
-                        if client.changed then
-                            client.changed(request.diff)
-                        end
+                -- Full?
+                if request.full then
+                    if client.full then
+                        client.full()
                     end
-                    if request.exact then -- `state.apply` may return a new value
-                        if client.changing then
-                            client.changing(request.exact)
-                        end
-                        local new = state.apply(share, request.exact)
-                        for k, v in pairs(new) do
-                            share[k] = v
-                        end
-                        for k in pairs(share) do
-                            if not new[k] then
-                                share[k] = nil
-                            end
-                        end
-                        if client.changed then
-                            client.changed(request.exact)
-                        end
-                    end
-
-                    -- Id?
-                    if request.id then
-                        peer = event.peer
-                        client.connected = true
-                        client.id = request.id
-                        if client.connect then
-                            client.connect()
-                        end
-                        peer:send(marshal.encode({ exact = home:__diff(0, true) }))
-                    end
-
-                    -- Full?
-                    if request.full then
-                        if client.full then
-                            client.full()
-                        end
-                        if castle and castle.connectionFailed then
-                            castle.connectionFailed('full')
-                        end
+                    if castle and castle.connectionFailed then
+                        castle.connectionFailed('full')
                     end
                 end
             end
@@ -334,6 +340,12 @@ do
     end
 
     function client.postupdate(dt)
+        accumTime = accumTime + dt
+        if accumTime < 1.0 / 30.0 then
+            --return
+        end
+        accumTime = 0.0
+
         -- Send state updates to server
         if peer then
             local diff = home:__diff(0)
