@@ -173,8 +173,8 @@ function engine.newScene(renderWidth,renderHeight)
             if (fogDistance > 5.0) {
                 // start fog
                 fogAmount = (fogDistance - 5.0) / 20.0;
-                if (fogAmount > 0.5) {
-                    fogAmount = 0.5;
+                if (fogAmount > 0.7) {
+                    fogAmount = 0.7;
                 }
                 fogAmount = fogAmount * fog_amt;
             }
