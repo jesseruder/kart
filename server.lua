@@ -11,6 +11,8 @@ end
 local share = server.share -- Maps to `client.share` -- can write
 local homes = server.homes -- `homes[id]` maps to `client.home` for that `id` -- can read
 
+local isGameRunning = false
+
 function server.connect(id) -- Called on connect from client with `id`
     print('client ' .. id .. ' connected')
 end

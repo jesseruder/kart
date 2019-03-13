@@ -1,6 +1,7 @@
 
-USE_CASTLE_CONFIG = false
-USE_REMOTE_CAR = true
+USE_CASTLE_CONFIG = true
+USE_REMOTE_CAR = false
+ACTUAL_GAME = true
 
 if CASTLE_SERVER or not USE_CASTLE_CONFIG then
     require 'server'

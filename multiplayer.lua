@@ -49,14 +49,32 @@ end
 local otherCars = {}
 function getMultiplayerUpdate()
     if client.connected then
+        for k,v in pairs(otherCars) do
+            v.seenThisUpdate = false
+        end
+
         for id, car in pairs(share.cars) do
             if id ~= client.id or USE_REMOTE_CAR then -- Not me
+                if not car and otherCard[id] then
+                    removeCar(otherCars[id])
+                    otherCards[id] = nil
+                    break
+                end
+
                 if not otherCars[id] then
                     otherCars[id] = makeCar(car.color)
                 end
 
+                otherCars[id].seenThisUpdate = false
                 updateCarFromRemote(otherCars[id], car)
                 updateCarPosition(otherCars[id])
+            end
+        end
+
+        for k,v in pairs(otherCars) do
+            if v.seenThisUpdate == false then
+                removeCar(otherCars[k])
+                otherCars[k] = nil
             end
         end
     end

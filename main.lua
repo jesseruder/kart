@@ -7,7 +7,13 @@ require "multiplayer"
 RESET_CAR = true
 PLAY_MUSIC = false
 
+function resetGame()
+    GameStarted = false
+end
+
 function client.load()
+    resetGame()
+
     -- window graphics settings
     GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight

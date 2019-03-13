@@ -55,3 +55,9 @@ function updateCarPosition(car)
         v:setTransform({car.x, car.size / 2.0 + car.y, car.z}, {-car.angle, cpml.vec3.unit_y})
     end
 end
+
+function removeCar(car)
+    for k,v in pairs(car.models) do
+        v.dead = true
+    end
+end

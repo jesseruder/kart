@@ -20,7 +20,7 @@ function makeHeightMap()
 
     local numRows = 2 * WorldSize / GridSize
     for i = 0, 10 do
-        addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 10), 0.1)
+        --addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 10), 0.1)
     end
 end
 
