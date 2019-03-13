@@ -72,7 +72,9 @@ MAX_MOTION_BLUR = 0.5
 
 function client.load()
     -- window graphics settings
-    GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
+    --GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
+    GraphicsWidth = love.graphics.getWidth()
+    GraphicsHeight = love.graphics.getHeight()
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight
     OffsetX = 0
     OffsetY = 0
