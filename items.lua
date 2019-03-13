@@ -8,6 +8,8 @@ DizzyItemEnabledTime = nil
 ServerAddBanana = nil
 ServerRemoveBanana = nil
 LocalBananas = {}
+itemRadius = 0.4
+bananaRadius = 0.4
 
 function loadItemImages()
     ItemTypes = {
@@ -150,7 +152,7 @@ end
 function makeBanana()
     local x = Car.x + math.cos(Car.angle) * -0.7
     local z = Car.z + math.sin(Car.angle) * -0.7
-    local y = heightAtPoint(x, z).height + 0.1
+    local y = heightAtPoint(x, z).height + 0.2
     ServerAddBanana = {x = x, y = y, z = z, id = "banana" .. math.floor(math.random() * 1000000)}
 end
 
@@ -181,7 +183,7 @@ function updateBananas()
             end
 
             local dist = math.sqrt(math.pow(v.x - Car.x, 2) + math.pow(v.z - Car.z, 2))
-            if dist < 0.3 then
+            if dist < bananaRadius then
                 slipBanana()
                 ServerRemoveBanana = id
             end
@@ -286,7 +288,7 @@ function updateItems(dt)
         else
             if not MyTakenItem and not MyItem then
                 local distance = math.sqrt(math.pow(item.x - Car.x, 2) + math.pow(item.z - Car.z, 2))
-                if distance < 0.3 then
+                if distance < itemRadius then
                     MyTakenItem = item.id
                     MyItem = ItemTypes[math.floor(math.random() * #ItemTypes) + 1]
                     itemRemoveTimeRemaining = itemRemoveTime

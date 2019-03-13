@@ -90,7 +90,7 @@ function client.load()
     SkyboxHeight = 30
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
-    RoadRadius = 1.0
+    RoadRadius = 1.5
     CAR_RANDOM_POS = 0.8
     MotionBlurAmount = 0.0
 
@@ -177,9 +177,9 @@ function client.load()
 
 
     makeRoad()
-    makeItems(10)
     makeItems(40)
-    makeItems(100)
+    makeItems(140)
+    makeItems(230)
 
     if PLAY_MUSIC then
         AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
@@ -330,7 +330,7 @@ function client.update(dt)
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
     local hap = heightAtPoint(Car.x, Car.z)
-    Car.y = hap.height + 0.1
+    Car.y = hap.height + 0.15
     Car.normal = hap.normal
 
     local DIST_TO_CHECK = 10
@@ -564,6 +564,8 @@ function client.draw()
                     if MyItem then
                         local size = 100
                         local padding = 20
+                        love.graphics.setColor(1, 1, 1, 1)
+                        love.graphics.print("[return] to use", GraphicsWidth - size - padding, GraphicsHeight - size - padding - 20)
                         love.graphics.setColor(1, 1, 1, 0.7)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
@@ -585,7 +587,7 @@ function love.mousemoved(x,y, dx,dy)
 end
 
 function makeRoad()
-    local elev = 0.05
+    local elev = 0.1
 
     local imageRoad = love.graphics.newImage("assets/road.png")
     local imageFinishLine = love.graphics.newImage("assets/finish-line.png")
