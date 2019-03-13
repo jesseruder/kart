@@ -13,12 +13,16 @@ function resetGame()
         GameCountdown = false
         GameCountdownTime = 0
         GameCountdownBright = 0.0
+        Lap = 1
+        EligibleForNextLap = false
         IsRequestingStart = false
     else
         GameStarted = true
         GameCountdown = false
         GameCountdownTime = 0
         GameCountdownBright = 0.0
+        Lap = 1
+        EligibleForNextLap = false
         IsRequestingStart = false
     end
 end
@@ -158,6 +162,11 @@ function client.load()
     end
 end
 
+function recordLap()
+    Lap = Lap + 1
+    EligibleForNextLap = false
+end
+
 --[[
 1     2
 
@@ -264,6 +273,14 @@ function client.update(dt)
     if RESET_CAR and closestRoadDistance > MaxClosestRoadDistance then
         Car.x = PATH_POINTS[closestRoadIndex][1] * RoadScale - RoadScale / 2.0
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
+    end
+
+    if Car.roadIndex > #PATH_POINTS * 0.4 and Car.roadIndex < #PATH_POINTS * 0.6 then
+        EligibleForNextLap = true
+    end
+
+    if Car.roadIndex > 0 and Car.roadIndex < 5 and EligibleForNextLap == true then
+        recordLap()
     end
 
     if closestRoadDistance > RoadRadius then
@@ -389,6 +406,7 @@ function client.draw()
             if client.connected then
                 love.graphics.print("Ping: " .. client.getPing(), 20, 20)
                 love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 200, 20)
+                love.graphics.print("Lap: " .. Lap, GraphicsWidth - 200, 40)
 
                 if GameStarted == false then
                     love.graphics.setFont(BigFont)
