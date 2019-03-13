@@ -1,4 +1,4 @@
-local cs = require 'https://raw.githubusercontent.com/castle-games/share.lua/master/cs.lua'
+local cs = require 'share.cs'
 client = cs.client
 
 if USE_CASTLE_CONFIG then

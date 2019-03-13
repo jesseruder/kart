@@ -1,10 +1,10 @@
 
-USE_CASTLE_CONFIG = true
+USE_CASTLE_CONFIG = false
 USE_REMOTE_CAR = false
 ACTUAL_GAME = true
 
 RESET_CAR = true
-PLAY_MUSIC = true
+PLAY_MUSIC = false
 
 if CASTLE_SERVER or not USE_CASTLE_CONFIG then
     require 'server'
