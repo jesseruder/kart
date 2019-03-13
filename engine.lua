@@ -363,6 +363,11 @@ function engine.newScene(renderWidth,renderHeight)
         elseif MotionBlurAmount < 0.0 then
             MotionBlurAmount = 0.0
         end
+
+        if shouldDizzyScreen() then
+            MotionBlurAmount = 0.8
+        end
+
         self.motionBlurShader:send("amount", MotionBlurAmount)
 
         love.graphics.draw(self.postProcessingCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
@@ -374,8 +379,13 @@ function engine.newScene(renderWidth,renderHeight)
         love.graphics.setCanvas()
         love.graphics.setShader()
 
+        local flip = 1
+        if shouldSwitchScreen() then
+            flip = -1
+        end
+
         if drawArg == nil or drawArg == true then
-            love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2-OffsetX, self.renderHeight/2 - OffsetY)
+            love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,flip, self.renderWidth/2-OffsetX, self.renderHeight/2 - OffsetY)
         end
     end
 
@@ -389,8 +399,12 @@ function engine.newScene(renderWidth,renderHeight)
         func()
         love.graphics.setCanvas()
 
+        local flip = 1
+        if shouldSwitchScreen() then
+            flip = -1
+        end
         if drawArg == nil or drawArg == true then
-            love.graphics.draw(Scene.twoCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2 - OffsetX, self.renderHeight/2 - OffsetY)
+            love.graphics.draw(Scene.twoCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,flip, self.renderWidth/2 - OffsetX, self.renderHeight/2 - OffsetY)
         end
     end
 

@@ -25,6 +25,13 @@ function sendMultiplayerUpdate()
         home.isFinished = IsFinished
 
         home.takenItem = MyTakenItem
+
+        home.switchItemEnabled = SwitchItemEnabledTime and true or false
+        home.dizzyItemEnabled = DizzyItemEnabledTime and true or false
+        home.addBanana = ServerAddBanana
+        ServerAddBanana = nil
+        home.removeBanana = ServerRemoveBanana
+        ServerRemoveBanana = nil
     end
 end
 
@@ -60,6 +67,9 @@ function getMultiplayerUpdate()
         AllTakenItems = share.takenItems or {}
         Winner = share.winner
         AmIWinner = Winner == client.id
+        SwitchItemUsers = share.switchItemUsers
+        DizzyItemUsers = share.dizzyItemUsers
+        Bananas = share.bananas
 
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false

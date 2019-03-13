@@ -68,7 +68,7 @@ function stopCheering()
     end
 end
 
-MAX_MOTION_BLUR = 0.8
+MAX_MOTION_BLUR = 0.5
 
 function client.load()
     -- window graphics settings
@@ -101,6 +101,7 @@ function client.load()
     BigFont = love.graphics.newFont(20)
     HugeFont = love.graphics.newFont(100)
     DefaultFont = love.graphics.getFont()
+    loadItemImages()
 
     love.graphics.setCanvas()
 
@@ -233,6 +234,13 @@ function triColor(coords, color, scale)
     return model
 end
 
+function love.keypressed(key)
+    if MyItem and key == "return" then
+        MyItem.action()
+        MyItem = nil
+    end
+end
+
 function client.update(dt)
     if ServerGameState and ServerGameState ~= GameState then
         if ServerGameState == "countdown" then
@@ -265,7 +273,6 @@ function client.update(dt)
 
         GameState = ServerGameState
     end
-
 
     -- Scene:basicCamera(dt)
     
@@ -303,10 +310,16 @@ function client.update(dt)
     local carax = dt * accel * math.cos(turnAngle) * Car.accel
     local caraz = dt * accel * math.sin(turnAngle) * Car.accel
 
-    if isDrift then
-        Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt * 0.5
+    if isSlipping then
+        Car.angle = Car.angle + 5 * dt
+        carax = 0
+        caraz = 0
     else
-        Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt
+        if isDrift then
+            Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt * 0.5
+        else
+            Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt
+        end
     end
 
     Car.vel.x = Car.vel.x + (frictionx + carax) * dt
@@ -551,9 +564,8 @@ function client.draw()
                     if MyItem then
                         local size = 100
                         local padding = 20
-                        love.graphics.setColor(1, 0, 0, 0.5)
-                        love.graphics.rectangle("fill", GraphicsWidth - size - padding, GraphicsHeight - size - padding, size, size)
-                        love.graphics.setColor(1, 1, 1, 1)
+                        love.graphics.setColor(1, 1, 1, 0.7)
+                        love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
                 end
             else
