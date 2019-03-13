@@ -16,7 +16,7 @@ engine.objFormat = {
 -- each vert is its own table that contains three coordinate numbers, and may contain 2 extra numbers as uv coordinates
 -- another example, this with uvs: { {0,0,0, 0,0}, {0,1,0, 1,0}, {0,0,1, 0,1} }
 -- polygons are automatically created with three consecutive verts
-function engine.newModel(verts, texture, coords, color, format, scale)
+function engine.newModel(verts, texture, coords, color, format, scale, fogAmount)
     local m = {}
 
     -- default values if no arguments are given
@@ -79,6 +79,7 @@ function engine.newModel(verts, texture, coords, color, format, scale)
     m.dead = false
     m.wireframe = false
     m.culling = false
+    m.fogAmount = fogAmount
 
     m.setVerts = function (self, verts)
         if #verts > 0 then
@@ -148,6 +149,7 @@ function engine.newScene(renderWidth,renderHeight)
     scene.threeShader = love.graphics.newShader[[
         uniform mat4 view;
         uniform mat4 model_matrix;
+        uniform float fog_amt;
         varying float fogDistance;
 
         #ifdef VERTEX
@@ -174,6 +176,7 @@ function engine.newScene(renderWidth,renderHeight)
                 if (fogAmount > 0.5) {
                     fogAmount = 0.5;
                 }
+                fogAmount = fogAmount * fog_amt;
             }
 
             return (color*texturecolor*(1.0 - fogAmount)) + (vec4(0.0, 0.0, 0.0, 1.0) * fogAmount);
@@ -211,11 +214,33 @@ function engine.newScene(renderWidth,renderHeight)
         #endif
     ]]
 
+    scene.motionBlurShader = love.graphics.newShader[[
+        #ifdef VERTEX
+        #endif
+
+        #ifdef PIXEL
+        uniform Image oldCanvas;
+        uniform float amount;
+
+        vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
+        {
+            vec4 o = Texel(texture, texture_coords);
+            // smear down
+            vec4 old = Texel(oldCanvas, texture_coords + vec2(0.0, -0.003));
+
+            return o * (1.0 - amount) + old * amount;
+        }
+        #endif
+    ]]
+
     scene.renderWidth = renderWidth
     scene.renderHeight = renderHeight
 
     -- create a canvas that will store the rendered 3d scene
     scene.threeCanvas = love.graphics.newCanvas(renderWidth, renderHeight)
+    scene.postProcessingCanvas = love.graphics.newCanvas(renderWidth, renderHeight)
+    scene.motionBlurCanvas = love.graphics.newCanvas(renderWidth, renderHeight)
+    scene.motionBlurCanvasOld = love.graphics.newCanvas(renderWidth, renderHeight)
     -- create a canvas that will store a 2d layer that can be drawn on top of the 3d scene
     scene.twoCanvas = love.graphics.newCanvas(renderWidth, renderHeight)
     scene.modelList = {}
@@ -292,6 +317,11 @@ function engine.newScene(renderWidth,renderHeight)
             local model = self.modelList[i]
             if model ~= nil and model.visible and #model.verts > 0 then
                 self.threeShader:send("model_matrix", model.transform)
+                local fogAmount = 1.0
+                if model.fogAmount then
+                    fogAmount = model.fogAmount
+                end
+                self.threeShader:send("fog_amt", fogAmount)
                 -- need the inverse to compute normals when model is rotated
                 --self.threeShader:send("model_matrix_inverse", TransposeMatrix(InvertMatrix(model.transform)))
                 love.graphics.setWireframe(model.wireframe)
@@ -304,10 +334,9 @@ function engine.newScene(renderWidth,renderHeight)
             end
         end
 
-        love.graphics.setShader()
-        love.graphics.setCanvas()
-
+        -- anti alias and overlay
         love.graphics.setColor(1,1,1)
+        love.graphics.setCanvas({self.postProcessingCanvas})
         love.graphics.setShader(self.postProcessingShader)
         self.postProcessingShader:send("xPixelSize", 1 / (520*2))
         self.postProcessingShader:send("yPixelSize", 1 / ((520*9/16)*2))
@@ -323,10 +352,31 @@ function engine.newScene(renderWidth,renderHeight)
             end
         end
         self.postProcessingShader:send("overlayOpacity", opacity)
-        if drawArg == nil or drawArg == true then
-            love.graphics.draw(self.threeCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,-1, self.renderWidth/2, self.renderHeight/2)
+        love.graphics.draw(self.threeCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,-1, self.renderWidth/2, self.renderHeight/2)
+
+        -- motion blur
+        love.graphics.setCanvas({self.motionBlurCanvas})
+        love.graphics.setShader(self.motionBlurShader)
+        self.motionBlurShader:send("oldCanvas", self.motionBlurCanvasOld)
+        if MotionBlurAmount > MAX_MOTION_BLUR then
+            MotionBlurAmount = MAX_MOTION_BLUR
+        elseif MotionBlurAmount < 0.0 then
+            MotionBlurAmount = 0.0
         end
+        self.motionBlurShader:send("amount", MotionBlurAmount)
+
+        love.graphics.draw(self.postProcessingCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
+
+        -- copy motionBlurCanvas into motionBlurCanvasOld for next frame
+        love.graphics.setCanvas({self.motionBlurCanvasOld})
+        love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
+
+        love.graphics.setCanvas()
         love.graphics.setShader()
+
+        if drawArg == nil or drawArg == true then
+            love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
+        end
     end
 
     -- renders the given func to the twoCanvas

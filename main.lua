@@ -38,6 +38,8 @@ function startGame()
     end
 end
 
+MAX_MOTION_BLUR = 0.8
+
 function client.load()
     resetGame()
 
@@ -60,6 +62,7 @@ function client.load()
     RoadScale = 35
     RoadRadius = 1.0
     CAR_RANDOM_POS = 0.8
+    MotionBlurAmount = 0.0
 
     IntroCameraRotation = math.pi
     IntroCameraRotationDist = 5
@@ -107,7 +110,7 @@ function client.load()
         {-WorldSize, SkyboxHeight, -WorldSize,      0.25, 0.3333},
         {WorldSize, SkyboxHeight, -WorldSize,       0.5, 0.3333},
         {WorldSize, 0, -WorldSize,                  0.5, 0.5}
-    }, imageSkybox)
+    }, imageSkybox, nil, 0.0)
 
     -- right
     rect({
@@ -115,7 +118,7 @@ function client.load()
         {WorldSize, SkyboxHeight, -WorldSize,      0.5, 0.3333},
         {WorldSize, SkyboxHeight, WorldSize,       0.75, 0.3333},
         {WorldSize, 0, WorldSize,                  0.75, 0.5}
-    }, imageSkybox)
+    }, imageSkybox, nil, 0.0)
 
     -- back
     rect({
@@ -123,7 +126,7 @@ function client.load()
         {WorldSize, SkyboxHeight, WorldSize,      0.75, 0.3333},
         {-WorldSize, SkyboxHeight, WorldSize,       1, 0.3333},
         {-WorldSize, 0, WorldSize,                  1, 0.5}
-    }, imageSkybox)
+    }, imageSkybox, nil, 0.0)
 
     -- left
     rect({
@@ -131,7 +134,7 @@ function client.load()
         {-WorldSize, SkyboxHeight, WorldSize,      0, 0.3333},
         {-WorldSize, SkyboxHeight, -WorldSize,       0.25, 0.3333},
         {-WorldSize, 0, -WorldSize,                  0.25, 0.5}
-    }, imageSkybox)
+    }, imageSkybox, nil, 0.0)
 
     -- top
     rect({
@@ -139,7 +142,7 @@ function client.load()
         {WorldSize, SkyboxHeight, -WorldSize,      0.5, 0.3333},
         {WorldSize, SkyboxHeight, WorldSize,       0.5, 0},
         {-WorldSize, SkyboxHeight, WorldSize,      0.25, 0}
-    }, imageSkybox)
+    }, imageSkybox, nil, 0.0)
 
 
     makeRoad()
@@ -160,8 +163,8 @@ end
 
 4     3
 ]]--
-function rect(coords, texture, scale)
-    local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, texture, nil, nil, nil, scale)
+function rect(coords, texture, scale, fogAmount)
+    local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, texture, nil, nil, nil, scale, fogAmount)
     table.insert(Scene.modelList, model)
     return model
 end
@@ -227,6 +230,9 @@ function client.update(dt)
 
     Car.vel.x = Car.vel.x + (frictionx + carax) * dt
     Car.vel.z = Car.vel.z + (frictionz + caraz) * dt
+    local carSpeed = math.sqrt(math.pow(Car.vel.x, 2) + math.pow(Car.vel.z, 2))
+    MotionBlurAmount = carSpeed / 10.0
+
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
     local hap = heightAtPoint(Car.x, Car.z)
