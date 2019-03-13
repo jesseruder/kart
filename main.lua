@@ -7,7 +7,7 @@ require "items"
 
 function resetGame()
     if ACTUAL_GAME then
-        Laps = 1
+        Laps = 3
     else
         Laps = 1
     end
