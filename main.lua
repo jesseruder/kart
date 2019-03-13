@@ -7,44 +7,70 @@ require "items"
 
 function resetGame()
     if ACTUAL_GAME then
-        GameStarted = false
-        GameCountdown = false
-        GameCountdownTime = 0
-        GameCountdownBright = 0.0
-        Lap = 1
-        EligibleForNextLap = false
-        IsRequestingStart = false
+        Laps = 1
     else
-        GameStarted = true
-        GameCountdown = false
-        GameCountdownTime = 0
-        GameCountdownBright = 0.0
-        Lap = 1
-        EligibleForNextLap = false
-        IsRequestingStart = false
+        Laps = 1
+    end
+
+    GameState = "intro"
+    GameCountdownTime = 1000000
+    GameCountdownBright = 0.0
+    Lap = 1
+    IsFinished = false
+    EligibleForNextLap = false
+    IsRequestingStart = false
+    MyItem = nil
+    MyTakenItem = nil
+
+    Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
+    Car.y = 0
+    Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
+    Car.angle = PATH_POINTS[1][3]
+end
+
+local time3 = 0.666
+local time2 = time3 + 0.948
+local time1 = time3 + 1.896
+local timeStart = time3 + 3.78
+local timeBright = 0.1
+
+local playingAmbient = true
+function switchToAmbient()
+    if PLAY_MUSIC and playingAmbient == false then
+        AmbientMusic:play()
+        Music:stop()
+        playingAmbient = true
     end
 end
 
-function startGame()
-    if GameStarted == true then
-        return
-    end
-
-    GameStarted = true
-    GameCountdown = true
-    GameCountdownTime = 0
-    GameCountdownBright = 0.0
-    if PLAY_MUSIC then
+function switchToMusic()
+    if PLAY_MUSIC and playingAmbient then
         AmbientMusic:stop()
         Music:play()
+        playingAmbient = false
+    end
+end
+
+function restartMusic()
+    if PLAY_MUSIC then
+        AmbientMusic:stop()
+        Music:stop()
+        Music:play()
+        playingAmbient = false
+    end
+end
+
+function stopCheering()
+    if PLAY_MUSIC then
+        Music:setVolume(1.0)
+        BooSound:stop()
+        ApplauseSound:stop()
     end
 end
 
 MAX_MOTION_BLUR = 0.8
 
 function client.load()
-    resetGame()
-
     -- window graphics settings
     GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight
@@ -162,12 +188,22 @@ function client.load()
 
         Music = love.audio.newSource("assets/music.mp3", "stream")
         Music:setLooping(true)
+
+        ApplauseSound = love.audio.newSource("assets/applause.mp3", "stream")
+        ApplauseSound:setLooping(true)
+        BooSound = love.audio.newSource("assets/boo.mp3", "stream")
+        BooSound:setLooping(true)
     end
+
+    resetGame()
 end
 
 function recordLap()
     Lap = Lap + 1
     EligibleForNextLap = false
+    if Lap > Laps then
+        IsFinished = true
+    end
 end
 
 --[[
@@ -198,6 +234,39 @@ function triColor(coords, color, scale)
 end
 
 function client.update(dt)
+    if ServerGameState and ServerGameState ~= GameState then
+        if ServerGameState == "countdown" then
+            GameCountdownTime = 0
+            GameCountdownBright = 0.0
+            restartMusic()
+            stopCheering()
+        elseif ServerGameState == "running" then
+            switchToMusic()
+            stopCheering()
+            if love.keyboard.isDown("space") then
+                -- give car some intial velocity
+                Car.vel.x = math.cos(Car.angle) * 5
+                Car.vel.z = math.sin(Car.angle) * 5
+            end
+        elseif ServerGameState == "intro" then
+            resetGame()
+            switchToAmbient()
+            stopCheering()
+        elseif ServerGameState == "postgame" then
+            if PLAY_MUSIC then
+                Music:setVolume(0.5)
+                if AmIWinner then
+                    ApplauseSound:play()
+                else
+                    BooSound:play()
+                end
+            end
+        end
+
+        GameState = ServerGameState
+    end
+
+
     -- Scene:basicCamera(dt)
     
     LogicAccumulator = LogicAccumulator+dt
@@ -214,7 +283,7 @@ function client.update(dt)
     --Car.x = dt * 0.5 + Car.x
     local frictionConst = 100
     local accel = love.keyboard.isDown("space") and 1 or 0
-    if GameStarted == false or GameCountdown == true then
+    if GameState ~= "running" then
         accel = 0
     end
 
@@ -362,10 +431,21 @@ function client.update(dt)
         desiredCamZ = (PATH_POINTS[camIdx][2] * RoadScale - RoadScale / 2.0)
     end
 
-    if GameStarted == false then
+    if GameState == "intro" then
         IntroCameraRotation = IntroCameraRotation + dt * IntroCameraRotationSpeed
         desiredCamX = Car.x + math.cos(IntroCameraRotation) * IntroCameraRotationDist
         desiredCamZ = Car.z + math.sin(IntroCameraRotation) * IntroCameraRotationDist
+    end
+
+    local winnerCar = Car
+    if Winner and otherCars[Winner] then
+        winnerCar = otherCars[Winner]
+    end
+
+    if GameState == "postgame" then
+        IntroCameraRotation = IntroCameraRotation + dt * IntroCameraRotationSpeed
+        desiredCamX = winnerCar.x + math.cos(IntroCameraRotation) * IntroCameraRotationDist
+        desiredCamZ = winnerCar.z + math.sin(IntroCameraRotation) * IntroCameraRotationDist
     end
 
     local cdx = desiredCamX - CameraPos.x
@@ -411,29 +491,33 @@ function client.draw()
                 love.graphics.print("Ping: " .. client.getPing(), 20, 40)
                 love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 100, 20)
 
-                if GameStarted == false then
+                if GameState == "intro" then
                     love.graphics.setFont(BigFont)
                     if IsRequestingStart == true then
-                        love.graphics.print("getting ready...", GraphicsWidth / 2 - 130, GraphicsHeight - 80)
+                        love.graphics.print("getting ready...", GraphicsWidth / 2 - 80, GraphicsHeight - 80)
                     else
-                        love.graphics.print("hold [space] when ready", GraphicsWidth / 2 - 180, GraphicsHeight - 80)
+                        love.graphics.print("hold [space] when ready", GraphicsWidth / 2 - 130, GraphicsHeight - 80)
                     end
                     love.graphics.setFont(DefaultFont)
                 end
 
-                if GameCountdown == true then
+                if GameState == "postgame" then
+                    local text = "You lost"
+                    if AmIWinner and AmIWinner == true then
+                        text = "You win!!"
+                    end
+
+                    love.graphics.setFont(HugeFont)
+                    love.graphics.print(text, GraphicsWidth / 2 - 200, GraphicsHeight / 2 - 50)
+                    love.graphics.setFont(DefaultFont)
+                end
+
+                if GameState == "countdown" then
                     love.graphics.setFont(HugeFont)
 
                     local text = nil
-                    local time3 = 0.666
-                    local time2 = time3 + 0.948
-                    local time1 = time3 + 1.896
-                    local timeStart = time3 + 3.78
-                    local timeBright = 0.1
 
-                    if GameCountdownTime > timeStart then
-                        GameCountdown = false
-                    elseif GameCountdownTime > time1 then
+                    if GameCountdownTime > time1 then
                         text = "1"
                         if GameCountdownTime - time1 < timeBright then
                             GameCountdownBright = 1.0
@@ -451,14 +535,18 @@ function client.draw()
                     end
 
                     if text and GameCountdownBright > 0.98 then
-                        love.graphics.print(text, GraphicsWidth / 2 - 85, GraphicsHeight / 2 - 120)
+                        love.graphics.print(text, GraphicsWidth / 2 - 30, GraphicsHeight / 2 - 50)
                     end
 
                     love.graphics.setFont(DefaultFont)
                 end
 
-                if GameStarted == true and GameCountdown == false then
-                    love.graphics.print("Lap: " .. Lap, GraphicsWidth - 100, 40)
+                if GameState == "running" then
+                    local printLap = Lap
+                    if printLap > Laps then
+                        printLap = Laps
+                    end
+                    love.graphics.print("Lap: " .. printLap, GraphicsWidth - 100, 40)
 
                     if MyItem then
                         local size = 100
@@ -492,10 +580,6 @@ function makeRoad()
     imageFinishLine:setWrap('repeat','repeat')
 
     local lastPoint = PATH_POINTS[#PATH_POINTS]
-    Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
-    Car.y = 0
-    Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
-    Car.angle = PATH_POINTS[1][3]
     local finishLineTexY = 0
     local finishLineTexInc = 1
 

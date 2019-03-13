@@ -342,10 +342,10 @@ function engine.newScene(renderWidth,renderHeight)
         self.postProcessingShader:send("yPixelSize", 1 / ((520*9/16)*2))
 
         local opacity = 1.0
-        if GameStarted == false then
+        if GameState == "intro" then
             opacity = 0.3
         end
-        if GameCountdown == true then
+        if GameState == "countdown" then
             opacity = GameCountdownBright
             if opacity < 0.3 then
                 opacity = 0.3

@@ -11,8 +11,9 @@ end
 local share = server.share -- Maps to `client.share` -- can write
 local homes = server.homes -- `homes[id]` maps to `client.home` for that `id` -- can read
 
-local isGameRunning = false
+local gameState = "intro"
 local startTime = nil
+local winner = nil
 
 function server.connect(id) -- Called on connect from client with `id`
     print('client ' .. id .. ' connected')
@@ -34,8 +35,18 @@ function server.load()
 end
 
 function server.update(dt)
-    if isGameRunning == false and startTime and os.time() >= startTime then
-        isGameRunning = true
+    if gameState == "intro" and startTime and os.time() >= startTime then
+        gameState = "countdown"
+        startTime = os.time() + 4
+    end
+
+    if gameState == "countdown" and startTime and os.time() >= startTime then
+        gameState = "running"
+        startTime = nil
+    end
+
+    if gameState == "postgame" and startTime and os.time() >= startTime then
+        gameState = "intro"
         startTime = nil
     end
 
@@ -54,18 +65,25 @@ function server.update(dt)
         if home.takenItem then
             takenItems[home.takenItem] = true
         end
+
+        if home.isFinished and gameState == "running" then
+            gameState = "postgame"
+            winner = id
+            startTime = os.time() + 8
+        end
     end
 
-    share.isGameRunning = isGameRunning
+    share.gameState = gameState
     share.isRequestingStart = startTime and isRequestingStart
     share.takenItems = takenItems
+    share.winner = winner
 
-    if isRequestingStart == true and isGameRunning == false and not startTime then
+    if isRequestingStart == true and gameState == "intro" and not startTime then
         -- wait 3 seconds
         startTime = os.time() + 2
     end
 
-    if isRequestingStart == false then
+    if isRequestingStart == false and gameState == "intro" then
         startTime = nil
     end
 end

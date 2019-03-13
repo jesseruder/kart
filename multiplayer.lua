@@ -21,7 +21,8 @@ function sendMultiplayerUpdate()
         home.car.z = Car.z
         home.car.angle = Car.angle
 
-        home.requestingStart = love.keyboard.isDown("space")
+        home.requestingStart = love.keyboard.isDown("space") and not GameResetTimer
+        home.isFinished = IsFinished
 
         home.takenItem = MyTakenItem
     end
@@ -50,16 +51,15 @@ end
 function client.receive(...) -- Called when server does `server.send(id, ...)` with our `id`
 end
 
-local otherCars = {}
+otherCars = {}
 NumPlayers = 0
 function getMultiplayerUpdate()
     if client.connected then
-        if share.isGameRunning then
-            startGame()
-        end
-
+        ServerGameState = share.gameState
         IsRequestingStart = share.isRequestingStart or false
         AllTakenItems = share.takenItems or {}
+        Winner = share.winner
+        AmIWinner = Winner == client.id
 
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false

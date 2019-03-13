@@ -4,8 +4,6 @@ local itemSize = 0.1
 local itemRemoveTimeRemaining = nil
 local itemRemoveTime = 3.0
 
-MyItem = nil
-MyTakenItem = nil
 AllTakenItems = {}
 
 function makeItems(roadIdx)
