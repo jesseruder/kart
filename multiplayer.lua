@@ -56,6 +56,8 @@ function getMultiplayerUpdate()
             startGame()
         end
 
+        IsRequestingStart = share.isRequestingStart
+
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false
         end

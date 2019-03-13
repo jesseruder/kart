@@ -13,11 +13,13 @@ function resetGame()
         GameCountdown = false
         GameCountdownTime = 0
         GameCountdownBright = 0.0
+        IsRequestingStart = false
     else
         GameStarted = true
         GameCountdown = false
         GameCountdownTime = 0
         GameCountdownBright = 0.0
+        IsRequestingStart = false
     end
 end
 
@@ -145,6 +147,7 @@ function client.load()
     if PLAY_MUSIC then
         AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
         AmbientMusic:setLooping(true)
+        AmbientMusic:setVolume(0.5)
         AmbientMusic:play()
 
         Music = love.audio.newSource("assets/music.mp3", "stream")
@@ -376,15 +379,15 @@ function client.draw()
     Scene:renderFunction(
         function ()
             love.graphics.setColor(1, 1, 1)
-            --love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 0)
+            love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 0)
             if client.connected then
-                --love.graphics.print("Ping: " .. client.getPing(), 20, 20)
+                love.graphics.print("Ping: " .. client.getPing(), 20, 20)
                 love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 200, 20)
 
                 if GameStarted == false then
                     love.graphics.setFont(BigFont)
-                    if love.keyboard.isDown("space") then
-                        love.graphics.print("waiting...", GraphicsWidth / 2 - 100, GraphicsHeight - 80)
+                    if IsRequestingStart == true then
+                        love.graphics.print("getting ready...", GraphicsWidth / 2 - 130, GraphicsHeight - 80)
                     else
                         love.graphics.print("hold [space] when ready", GraphicsWidth / 2 - 180, GraphicsHeight - 80)
                     end
@@ -420,7 +423,7 @@ function client.draw()
                         end
                     end
 
-                    if text then
+                    if text and GameCountdownBright > 0.98 then
                         love.graphics.print(text, GraphicsWidth / 2 - 85, GraphicsHeight / 2 - 120)
                     end
 
@@ -446,11 +449,16 @@ function makeRoad()
     local elev = 0.05
 
     local imageRoad = love.graphics.newImage("assets/road.png")
+    local imageFinishLine = love.graphics.newImage("assets/finish-line.png")
+    imageFinishLine:setWrap('repeat','repeat')
+
     local lastPoint = PATH_POINTS[#PATH_POINTS]
     Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.y = 0
     Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.angle = PATH_POINTS[1][3]
+    local finishLineTexY = 0
+    local finishLineTexInc = 1
 
     for k,v in pairs(PATH_POINTS) do
         local lx = lastPoint[1] * RoadScale - RoadScale / 2.0
@@ -465,13 +473,23 @@ function makeRoad()
         local dx = math.cos(a + math.pi/2) * RoadRadius
         local dy = math.sin(a + math.pi/2) * RoadRadius
 
+        local i = imageRoad
+        local texCoordBegin = 0
+        local texCoordEnd = 1
+        if k > 1 and k < 4 then
+            i = imageFinishLine
+            texCoordBegin = finishLineTexY
+            texCoordEnd = finishLineTexY + finishLineTexInc
+            finishLineTexY = finishLineTexY + finishLineTexInc
+        end
+
         --elev = elev + 0.05
         rect({
-            {lx - ldx, elev + heightAtPoint(lx - ldx, ly - ldy).height, ly - ldy,    0, 0},
-            {x - dx, elev + heightAtPoint(x - dx, y - dy).height, y - dy,   0,1},
-            {x + dx, elev + heightAtPoint(x + dx, y + dy).height, y + dy,     1,1},
-            {lx + ldx, elev + heightAtPoint(lx + ldx, ly + ldy).height, ly + ldy,    1,0}
-        }, imageRoad)
+            {lx - ldx, elev + heightAtPoint(lx - ldx, ly - ldy).height, ly - ldy,    0, texCoordBegin},
+            {x - dx, elev + heightAtPoint(x - dx, y - dy).height, y - dy,   0,texCoordEnd},
+            {x + dx, elev + heightAtPoint(x + dx, y + dy).height, y + dy,     1,texCoordEnd},
+            {lx + ldx, elev + heightAtPoint(lx + ldx, ly + ldy).height, ly + ldy,    1,texCoordBegin}
+        }, i)
 
         lastPoint = v
     end

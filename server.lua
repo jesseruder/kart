@@ -48,6 +48,7 @@ function server.update(dt)
         if home.car then
             share.cars[id] = home.car
             share.isGameRunning = isGameRunning
+            share.isRequestingStart = startTime and isRequestingStart
         end
     end
 
