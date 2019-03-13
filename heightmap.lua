@@ -18,10 +18,13 @@ function makeHeightMap()
         xi = xi + 1
     end
 
+    math.randomseed(128310)
     local numRows = 2 * WorldSize / GridSize
     for i = 0, 10 do
-        --addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 10), 0.1)
+        addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 7), math.random() * 0.2 + 0.05)
     end
+
+    math.randomseed(os.time())
 end
 
 function addMountain(centerX, centerY, height, slope)

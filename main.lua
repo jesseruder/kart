@@ -57,6 +57,7 @@ function client.load()
     MaxClosestRoadDistance = 2.5
     RoadScale = 35
     RoadRadius = 1.0
+    CAR_RANDOM_POS = 0.8
 
     IntroCameraRotation = math.pi
     IntroCameraRotationDist = 5
@@ -164,6 +165,14 @@ end
 
 function rectColor(coords, color, scale)
     local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, nil, nil, color, { 
+        {"VertexPosition", "float", 3}, 
+    }, scale)
+    table.insert(Scene.modelList, model)
+    return model
+end
+
+function triColor(coords, color, scale)
+    local model = Engine.newModel({ coords[1], coords[2], coords[3] }, nil, nil, color, { 
         {"VertexPosition", "float", 3}, 
     }, scale)
     table.insert(Scene.modelList, model)
@@ -370,7 +379,7 @@ function client.draw()
             --love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 0)
             if client.connected then
                 --love.graphics.print("Ping: " .. client.getPing(), 20, 20)
-                --love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 200, 20)
+                love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 200, 20)
 
                 if GameStarted == false then
                     love.graphics.setFont(BigFont)
@@ -438,9 +447,9 @@ function makeRoad()
 
     local imageRoad = love.graphics.newImage("assets/road.png")
     local lastPoint = PATH_POINTS[#PATH_POINTS]
-    Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0
+    Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.y = 0
-    Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0
+    Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.angle = PATH_POINTS[1][3]
 
     for k,v in pairs(PATH_POINTS) do

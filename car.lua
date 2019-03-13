@@ -44,8 +44,35 @@ function makeCar(color)
         {1, -1, -1,   1,0}
     }, imageCheese, Car.size)
 
+    local hatTopHeight = 1.8
+    local hatBottomHeight = 0.9
+    local hatBrimSize = 1.2
 
-    Car.models = {front, back, left, right}
+    local hatFront = triColor({
+        {-hatBrimSize, hatBottomHeight, hatBrimSize},
+        {hatBrimSize, hatBottomHeight, hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    local hatBack = triColor({
+        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    local hatLeft = triColor({
+        {-hatBrimSize, hatBottomHeight, hatBrimSize},
+        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    local hatRight = triColor({
+        {hatBrimSize, hatBottomHeight, hatBrimSize},
+        {hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    Car.models = {front, back, left, right, hatFront, hatBack, hatLeft, hatRight}
 
     return Car
 end
