@@ -46,11 +46,16 @@ function shouldSwitchScreen()
         return false
     end
 
-    if #SwitchItemUsers > 1 then
+    local count = 0
+    for k,v in pairs(SwitchItemUsers) do
+        count = count + 1
+    end
+
+    if count > 1 then
         return true
     end
 
-    if #SwitchItemUsers == 1 and not SwitchItemUsers[client.id] then
+    if count == 1 and not SwitchItemUsers[client.id] then
         return true
     end
 
@@ -62,11 +67,16 @@ function shouldDizzyScreen()
         return false
     end
 
-    if #DizzyItemUsers > 1 then
+    local count = 0
+    for k,v in pairs(DizzyItemUsers) do
+        count = count + 1
+    end
+
+    if count > 1 then
         return true
     end
 
-    if #DizzyItemUsers == 1 and not DizzyItemUsers[client.id] then
+    if count == 1 and not DizzyItemUsers[client.id] then
         return true
     end
 
