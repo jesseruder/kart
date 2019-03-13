@@ -325,7 +325,7 @@ function client.update(dt)
     Car.vel.x = Car.vel.x + (frictionx + carax) * dt
     Car.vel.z = Car.vel.z + (frictionz + caraz) * dt
     local carSpeed = math.sqrt(math.pow(Car.vel.x, 2) + math.pow(Car.vel.z, 2))
-    MotionBlurAmount = carSpeed / 10.0
+    MotionBlurAmount = carSpeed / 13.0
 
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
@@ -566,7 +566,7 @@ function client.draw()
                         local padding = 20
                         love.graphics.setColor(1, 1, 1, 1)
                         love.graphics.print("[return] to use", GraphicsWidth - size - padding, GraphicsHeight - size - padding - 20)
-                        love.graphics.setColor(1, 1, 1, 0.7)
+                        love.graphics.setColor(1, 1, 1, 0.9)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
                 end

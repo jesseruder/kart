@@ -1,7 +1,7 @@
 
-USE_CASTLE_CONFIG = true
+USE_CASTLE_CONFIG = false
 USE_REMOTE_CAR = false
-ACTUAL_GAME = true
+ACTUAL_GAME = false
 
 RESET_CAR = true
 PLAY_MUSIC = true
