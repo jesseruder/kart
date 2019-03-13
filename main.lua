@@ -3,9 +3,7 @@ require "path"
 require "heightmap"
 require "car"
 require "multiplayer"
-
-RESET_CAR = true
-PLAY_MUSIC = true
+require "items"
 
 function resetGame()
     if ACTUAL_GAME then
@@ -50,6 +48,8 @@ function client.load()
     -- window graphics settings
     GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight
+    OffsetX = 0
+    OffsetY = 0
     love.graphics.setBackgroundColor(0,0.7,0.95)
     love.graphics.setDefaultFilter("linear", "linear")
     love.graphics.setLineStyle("rough")
@@ -150,6 +150,9 @@ function client.load()
 
 
     makeRoad()
+    makeItems(10)
+    makeItems(40)
+    makeItems(100)
 
     if PLAY_MUSIC then
         AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
@@ -383,6 +386,7 @@ function client.update(dt)
     end
 
     sendMultiplayerUpdate()
+    updateItems(dt)
 
     GameCountdownTime = GameCountdownTime + dt
     GameCountdownBright = GameCountdownBright - dt * 2
@@ -401,12 +405,11 @@ function client.draw()
     -- draw HUD
     Scene:renderFunction(
         function ()
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 0)
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 20)
             if client.connected then
-                love.graphics.print("Ping: " .. client.getPing(), 20, 20)
-                love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 200, 20)
-                love.graphics.print("Lap: " .. Lap, GraphicsWidth - 200, 40)
+                love.graphics.print("Ping: " .. client.getPing(), 20, 40)
+                love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 100, 20)
 
                 if GameStarted == false then
                     love.graphics.setFont(BigFont)
@@ -453,15 +456,27 @@ function client.draw()
 
                     love.graphics.setFont(DefaultFont)
                 end
+
+                if GameStarted == true and GameCountdown == false then
+                    love.graphics.print("Lap: " .. Lap, GraphicsWidth - 100, 40)
+
+                    if MyItem then
+                        local size = 100
+                        local padding = 20
+                        love.graphics.setColor(1, 0, 0, 0.5)
+                        love.graphics.rectangle("fill", GraphicsWidth - size - padding, GraphicsHeight - size - padding, size, size)
+                        love.graphics.setColor(1, 1, 1, 1)
+                    end
+                end
             else
                 love.graphics.print("Connecting...", GraphicsWidth / 2 - 50, GraphicsHeight / 2 - 20)
             end
-        end, false
+        end, true
     )
 
-    love.graphics.setColor(1,1,1)
-    local scale = love.graphics.getWidth()/InterfaceWidth
-    love.graphics.draw(Scene.twoCanvas, love.graphics.getWidth()/2,love.graphics.getHeight()/2 +1, 0, scale,scale, InterfaceWidth/2, InterfaceHeight/2)
+    --love.graphics.setColor(1,1,1)
+    --local scale = love.graphics.getWidth()/InterfaceWidth
+    --love.graphics.draw(Scene.twoCanvas, InterfaceWidth/2,InterfaceHeight/2, 0, scale,scale, InterfaceWidth/2 - OffsetX, InterfaceHeight/2 - OffsetY)
 end
 
 function love.mousemoved(x,y, dx,dy)

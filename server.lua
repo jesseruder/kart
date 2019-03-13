@@ -40,17 +40,25 @@ function server.update(dt)
     end
 
     local isRequestingStart = false
+    local takenItems = {}
+
     for id, home in pairs(server.homes) do -- Combine mouse info from clients into share
+        if home.car then
+            share.cars[id] = home.car
+        end
+
         if home.requestingStart then
             isRequestingStart = true
         end
 
-        if home.car then
-            share.cars[id] = home.car
-            share.isGameRunning = isGameRunning
-            share.isRequestingStart = startTime and isRequestingStart
+        if home.takenItem then
+            takenItems[home.takenItem] = true
         end
     end
+
+    share.isGameRunning = isGameRunning
+    share.isRequestingStart = startTime and isRequestingStart
+    share.takenItems = takenItems
 
     if isRequestingStart == true and isGameRunning == false and not startTime then
         -- wait 3 seconds

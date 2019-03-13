@@ -375,7 +375,7 @@ function engine.newScene(renderWidth,renderHeight)
         love.graphics.setShader()
 
         if drawArg == nil or drawArg == true then
-            love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
+            love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2-OffsetX, self.renderHeight/2 - OffsetY)
         end
     end
 
@@ -390,7 +390,7 @@ function engine.newScene(renderWidth,renderHeight)
         love.graphics.setCanvas()
 
         if drawArg == nil or drawArg == true then
-            love.graphics.draw(Scene.twoCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
+            love.graphics.draw(Scene.twoCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2 - OffsetX, self.renderHeight/2 - OffsetY)
         end
     end
 

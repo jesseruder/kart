@@ -22,6 +22,8 @@ function sendMultiplayerUpdate()
         home.car.angle = Car.angle
 
         home.requestingStart = love.keyboard.isDown("space")
+
+        home.takenItem = MyTakenItem
     end
 end
 
@@ -56,7 +58,8 @@ function getMultiplayerUpdate()
             startGame()
         end
 
-        IsRequestingStart = share.isRequestingStart
+        IsRequestingStart = share.isRequestingStart or false
+        AllTakenItems = share.takenItems or {}
 
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false
