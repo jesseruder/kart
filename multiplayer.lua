@@ -50,9 +50,9 @@ local otherCars = {}
 function getMultiplayerUpdate()
     if client.connected then
         for id, car in pairs(share.cars) do
-            if id ~= client.id then -- Not me
+            if id ~= client.id or USE_REMOTE_CAR then -- Not me
                 if not otherCars[id] then
-                    otherCars[id] = makeCar()
+                    otherCars[id] = makeCar(car.color)
                 end
 
                 updateCarFromRemote(otherCars[id], car)

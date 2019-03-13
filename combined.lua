@@ -1,5 +1,6 @@
 
-USE_CASTLE_CONFIG = true
+USE_CASTLE_CONFIG = false
+USE_REMOTE_CAR = true
 
 if CASTLE_SERVER or not USE_CASTLE_CONFIG then
     require 'server'

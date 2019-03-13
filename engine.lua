@@ -148,10 +148,13 @@ function engine.newScene(renderWidth,renderHeight)
     scene.threeShader = love.graphics.newShader[[
         uniform mat4 view;
         uniform mat4 model_matrix;
+        varying float fogDistance;
 
         #ifdef VERTEX
         vec4 position(mat4 transform_projection, vec4 vertex_position) {
-            return view * model_matrix * vertex_position;
+            vec4 result = view * model_matrix * vertex_position;
+            fogDistance = length(result.xyz);
+            return result;
         }
         #endif
 
@@ -163,7 +166,46 @@ function engine.newScene(renderWidth,renderHeight)
             {
                 discard;
             }
-            return color*texturecolor;
+
+            float fogAmount = 0.0;
+            if (fogDistance > 5.0) {
+                // start fog
+                fogAmount = (fogDistance - 5.0) / 20.0;
+                if (fogAmount > 0.5) {
+                    fogAmount = 0.5;
+                }
+            }
+
+            return (color*texturecolor*(1.0 - fogAmount)) + (vec4(0.0, 0.0, 0.0, 1.0) * fogAmount);
+        }
+        #endif
+    ]]
+
+    scene.postProcessingShader = love.graphics.newShader[[
+        #ifdef VERTEX
+        #endif
+
+        #ifdef PIXEL
+        uniform float xPixelSize;
+        uniform float yPixelSize;
+
+        vec4 blurColor(Image texture, vec2 texture_coords, float size)
+        {
+            vec4 l = Texel(texture, texture_coords - vec2(xPixelSize * size, 0));
+            vec4 r = Texel(texture, texture_coords + vec2(xPixelSize * size, 0));
+            vec4 t = Texel(texture, texture_coords - vec2(0, yPixelSize * size));
+            vec4 b = Texel(texture, texture_coords + vec2(0, yPixelSize * size));
+            return (l + r + t + b) / 4.0;
+        }
+
+        vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
+        {
+            vec4 outColor;
+        
+            vec4 o = Texel(texture, texture_coords);
+            outColor = (o * 2 + blurColor(texture, texture_coords, 1)) / 3.0;
+            
+            return outColor;
         }
         #endif
     ]]
@@ -265,9 +307,13 @@ function engine.newScene(renderWidth,renderHeight)
         love.graphics.setCanvas()
 
         love.graphics.setColor(1,1,1)
+        love.graphics.setShader(self.postProcessingShader)
+        self.postProcessingShader:send("xPixelSize", 1 / (520*2))
+        self.postProcessingShader:send("yPixelSize", 1 / ((520*9/16)*2))
         if drawArg == nil or drawArg == true then
             love.graphics.draw(self.threeCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,-1, self.renderWidth/2, self.renderHeight/2)
         end
+        love.graphics.setShader()
     end
 
     -- renders the given func to the twoCanvas

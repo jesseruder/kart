@@ -1,6 +1,9 @@
 
-function makeCar()
-    local color = {math.random(), math.random(), math.random()}
+function makeCar(color)
+    if not color then
+        color = {math.random(), math.random(), math.random()}
+    end
+
     local Car = {
         size = 0.2,
         roadIndex = 0,

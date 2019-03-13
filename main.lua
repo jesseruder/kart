@@ -4,7 +4,7 @@ require "heightmap"
 require "car"
 require "multiplayer"
 
-RESET_CAR = false
+RESET_CAR = true
 PLAY_MUSIC = false
 
 function client.load()
@@ -12,9 +12,9 @@ function client.load()
     GraphicsWidth, GraphicsHeight = 520*2, (520*9/16)*2
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight
     love.graphics.setBackgroundColor(0,0.7,0.95)
-    love.graphics.setDefaultFilter("nearest", "nearest")
+    love.graphics.setDefaultFilter("linear", "linear")
     love.graphics.setLineStyle("rough")
-    --love.window.setMode(GraphicsWidth,GraphicsHeight, {vsync = -1, msaa = 4})
+    -- love.window.setMode(GraphicsWidth,GraphicsHeight, {vsync = -1, msaa = 8})
 
     -- for capping game logic at 60 manually
     LogicRate = 60
@@ -292,7 +292,10 @@ function client.update(dt)
     Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
     Camera.angle.y = 0.3
 
-    updateCarPosition(Car)
+    if not USE_REMOTE_CAR then
+        updateCarPosition(Car)
+    end
+
     sendMultiplayerUpdate()
 end
 
@@ -301,6 +304,17 @@ function client.draw()
 
     -- draw 3d scene
     Scene:render(true)
+
+    -- draw HUD
+    Scene:renderFunction(
+        function ()
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.print("FPS: " .. love.timer.getFPS(), 0, 0)
+            if client.connected then
+                love.graphics.print("Ping: " .. client.getPing(), 0, 20)
+            end
+        end, false
+    )
 
     love.graphics.setColor(1,1,1)
     local scale = love.graphics.getWidth()/InterfaceWidth
