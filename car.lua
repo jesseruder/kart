@@ -44,13 +44,6 @@ function makeCar(color)
         {1, -1, -1,   1,1}
     }, carFront, Car.size)
 
-    local right = rect({
-        {1, -1, 1,    0,1},
-        {1, 1, 1,     0,0},
-        {1, 1, -1,    1,0},
-        {1, -1, -1,   1,1}
-    }, carFront, Car.size)
-
     local top = rect({
         {-1, 1, 1,    1,0},
         {1, 1, 1,     0,0},

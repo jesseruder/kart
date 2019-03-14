@@ -150,6 +150,8 @@ function engine.newScene(renderWidth,renderHeight)
         uniform mat4 view;
         uniform mat4 model_matrix;
         uniform float fog_amt;
+        uniform float fog_startDist;
+        uniform float fog_divide;
         uniform float wave;
         uniform float time;
         uniform vec4 fogColor;
@@ -183,9 +185,9 @@ function engine.newScene(renderWidth,renderHeight)
             }
 
             float fogAmount = 0.0;
-            if (fogDistance > 5.0) {
+            if (fogDistance > fog_startDist) {
                 // start fog
-                fogAmount = (fogDistance - 5.0) / 20.0;
+                fogAmount = (fogDistance - fog_startDist) / fog_divide;
                 if (fogAmount > 0.7) {
                     fogAmount = 0.7;
                 }
@@ -335,6 +337,8 @@ function engine.newScene(renderWidth,renderHeight)
                     fogAmount = model.fogAmount
                 end
                 self.threeShader:send("fog_amt", fogAmount)
+                self.threeShader:send("fog_divide", FogDivide)
+                self.threeShader:send("fog_startDist", FogStartDist)
                 self.threeShader:send("fogColor", FogColor)
                 local wave = 0.0
                 if model.wave then

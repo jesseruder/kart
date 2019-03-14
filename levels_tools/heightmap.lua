@@ -19,6 +19,10 @@ function makeHeightMap()
     end
 end
 
+function addMountainRelative(px, py, height, slope)
+    addMountain(math.floor((WorldSize * 2 * px) / GridSize), math.floor((WorldSize * 2 * py) / GridSize), height, slope)
+end
+
 function addMountain(centerX, centerY, height, slope)
     local dist = math.ceil(height / slope)
     for x = centerX - dist, centerX + dist do

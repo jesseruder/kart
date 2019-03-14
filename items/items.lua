@@ -24,6 +24,7 @@ function loadItemImages()
         {
             name = "mushroom",
             image = love.graphics.newImage("assets/items/mushroom.png"),
+            frequency = 10,
             action = function() 
                 Car.vel.x = math.cos(Car.angle) * 15
                 Car.vel.z = math.sin(Car.angle) * 15
@@ -32,6 +33,7 @@ function loadItemImages()
         {
             name = "switch",
             image = love.graphics.newImage("assets/items/switch.png"),
+            frequency = 2,
             action = function() 
                 SwitchItemEnabledTime = 2.0
             end
@@ -39,6 +41,7 @@ function loadItemImages()
         {
             name = "dizzy",
             image = love.graphics.newImage("assets/items/dizzy.png"),
+            frequency = 2,
             action = function() 
                 DizzyItemEnabledTime = 5.0
             end
@@ -46,11 +49,13 @@ function loadItemImages()
         {
             name = "banana",
             image = love.graphics.newImage("assets/items/banana.png"),
+            frequency = 10,
             action = makeBanana
         },
         {
             name = "redshell",
             image = love.graphics.newImage("assets/items/redshell.png"),
+            frequency = 5,
             action = makeShell
         }
     }
@@ -206,7 +211,7 @@ function updateItems(dt)
                 local distance = math.sqrt(math.pow(item.x - Car.x, 2) + math.pow(item.z - Car.z, 2))
                 if distance < itemRadius then
                     MyTakenItem = item.id
-                    MyItem = ItemTypes[math.floor(math.random() * #ItemTypes) + 1]
+                    MyItem = randomItem()
                     itemRemoveTimeRemaining = itemRemoveTime
                     -- TODO add to AllTakenItems
                 end
@@ -215,6 +220,23 @@ function updateItems(dt)
 
         for k,v in pairs(item.models) do
             v:setTransform({item.x, item.y + dy, item.z}, {item.rotation, cpml.vec3.unit_y})
+        end
+    end
+end
+
+function randomItem()
+    local totalFrequency = 0
+    for itemIdx,item in pairs(ItemTypes) do
+        totalFrequency = totalFrequency + item.frequency
+    end
+
+    local rn = math.random() * totalFrequency
+    local sum = 0
+
+    for itemIdx,item in pairs(ItemTypes) do
+        sum = sum + item.frequency
+        if sum > rn then
+            return item
         end
     end
 end

@@ -5,6 +5,7 @@ function loadMoonLevel()
         return _heightAtPoint(x, y)
     end
 
+    FontColor = {1, 1, 1, 1}
     WorldSize = 30
     RoadScale = 35
     RoadRadius = 1.5
@@ -26,6 +27,8 @@ function loadMoonLevel()
     makeItems(230)
 
     FogColor = {0,0,0,1}
+    FogStartDist = 5
+    FogDivide = 20
 end
 
 -- generate with createpath.html

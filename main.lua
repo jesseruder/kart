@@ -105,7 +105,7 @@ function client.load()
     loadShonenCharacter()
     Car = makeCar()
 
-    loadWaterLevel()
+    loadGrassLevel()
 
     if ACTUAL_GAME == false then
         makeItems(5)
@@ -429,11 +429,12 @@ function client.draw()
     -- draw HUD
     Scene:renderFunction(
         function ()
-            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.setColor(FontColor[1], FontColor[2], FontColor[3], 1)
             love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 20)
             if client.connected then
                 love.graphics.print("Ping: " .. client.getPing(), 20, 40)
                 love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 100, 20)
+                love.graphics.setColor(1,1,1,1)
 
                 if GameState == "intro" then
                     love.graphics.setFont(BigFont)
@@ -490,12 +491,13 @@ function client.draw()
                     if printLap > Laps then
                         printLap = Laps
                     end
+
+                    love.graphics.setColor(FontColor[1], FontColor[2], FontColor[3], 1)
                     love.graphics.print("Lap: " .. printLap, GraphicsWidth - 100, 40)
 
                     if MyItem then
                         local size = 100
                         local padding = 20
-                        love.graphics.setColor(1, 1, 1, 1)
                         love.graphics.print("[return] to use", GraphicsWidth - size - padding, GraphicsHeight - size - padding - 20)
                         love.graphics.setColor(1, 1, 1, 0.9)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)

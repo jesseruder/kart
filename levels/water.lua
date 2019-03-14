@@ -8,6 +8,7 @@ function loadWaterLevel()
         }
     end
 
+    FontColor = {0, 0, 0, 1}
     WorldSize = 50
     RoadScale = 50
     RoadRadius = 2.5
@@ -30,6 +31,8 @@ function loadWaterLevel()
     end
 
     FogColor = {1,1,1,1}
+    FogStartDist = 5
+    FogDivide = 20
 end
 
 -- generate with createpath.html
