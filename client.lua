@@ -297,6 +297,7 @@ function client.update(dt)
     -- update 3d scene
     PhysicsStep = false
     if LogicAccumulator >= 1/LogicRate then
+        dt = LogicAccumulator
         LogicAccumulator = LogicAccumulator - 1/LogicRate
         PhysicsStep = true
     else

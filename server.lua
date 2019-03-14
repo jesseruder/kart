@@ -69,6 +69,14 @@ local ServerLogicAccumulator = 0.0
 local ServerLogicRate = 60
 
 function server.update(dt)
+    ServerLogicAccumulator = ServerLogicAccumulator+dt
+    if ServerLogicAccumulator >= 1/ServerLogicRate then
+        dt = ServerLogicAccumulator
+        ServerLogicAccumulator = ServerLogicAccumulator - 1/LogicRate
+    else
+        return
+    end
+
     time = time + dt
     frames = frames + 1
     local printThisFrame = false
@@ -80,12 +88,6 @@ function server.update(dt)
         frames = 0
     end
 
-    ServerLogicAccumulator = ServerLogicAccumulator+dt
-    if ServerLogicAccumulator >= 1/ServerLogicRate then
-        ServerLogicAccumulator = ServerLogicAccumulator - 1/LogicRate
-    else
-        return
-    end
 
     for cark, car in pairs(share.cars) do
         if car.hitByShellTime then

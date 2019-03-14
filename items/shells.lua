@@ -19,7 +19,6 @@ function updateShells(dt)
                 if LocalShells[id].serverX == v.x and LocalShells[id].serverY == v.y and LocalShells[id].serverZ == v.z then
                     LocalShells[id].x = LocalShells[id].x + v.velx * dt
                     LocalShells[id].z = LocalShells[id].z + v.velz * dt
-                    LocalShells[id].y = heightAtPoint(LocalShells[id].x, LocalShells[id].z).height + 0.2
                 else
                     LocalShells[id].serverX = v.x
                     LocalShells[id].serverY = v.y
@@ -29,6 +28,9 @@ function updateShells(dt)
                     LocalShells[id].y = v.y
                     LocalShells[id].z = v.z
                 end
+
+                -- need this for water level
+                LocalShells[id].y = heightAtPoint(LocalShells[id].x, LocalShells[id].z).height + 0.2
 
                 for k,model in pairs(LocalShells[id].models) do
                     model:setTransform({LocalShells[id].x, LocalShells[id].y, LocalShells[id].z}, {0, cpml.vec3.unit_y})
