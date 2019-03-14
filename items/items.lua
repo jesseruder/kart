@@ -105,6 +105,16 @@ end
 
 AllTakenItems = {}
 
+function clearItems()
+    for itemIdx,item in pairs(items) do
+        for k,v in pairs(item.models) do
+            v.dead = true
+        end
+    end
+
+    items = {}
+end
+
 function makeItems(roadIdx)
     local a = PATH_POINTS[roadIdx][3]
     local dx = math.cos(a + math.pi/2) * 0.7

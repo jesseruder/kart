@@ -29,6 +29,7 @@ function loadWaterLevel()
     skybox(skyboxImage)
     terrain(terrainImage, true)
     makeRoad(roadImage)
+    clearItems()
     makeItems(40)
     makeItems(140)
     makeItems(200)
@@ -36,7 +37,7 @@ function loadWaterLevel()
     heightAtPoint = function(x, y)
         -- same as shader
         return {
-            height = -0.2 + 0.1 * math.sin(TimeElapsed * 0.2 + y * 0.3) + 0.1 * math.sin(TimeElapsed * 0.25 + 1.0 + x * 1.2),
+            height = -0.2 + 0.1 * math.sin(TimeElapsed * 0.5 + y * 0.7) + 0.1 * math.sin(TimeElapsed * 0.7 + 1.0 + x * 1.2),
             normal = {0,1,0}
         }
     end

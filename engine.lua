@@ -161,7 +161,7 @@ function engine.newScene(renderWidth,renderHeight)
         vec4 position(mat4 transform_projection, vec4 vertex_position) {
             vec4 p = vertex_position;
             if (wave > 0.0) {
-                p.y = p.y + 0.1 * sin(time * 0.2 + p.z * 0.3) + 0.1 * sin(time * 0.25 + 1.0 + p.x * 1.2);
+                p.y = p.y + 0.1 * sin(time * 0.5 + p.z * 0.7) + 0.1 * sin(time * 0.7 + 1.0 + p.x * 1.2);
             }
 
             vec4 result = view * model_matrix * p;
