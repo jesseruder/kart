@@ -237,7 +237,7 @@ function love.keypressed(key)
         end
 
         if loadCharacter then
-            IntroCameraRotation = -math.pi/3
+            IntroCameraRotation = -math.pi/4
             removeCar(Car)
             Characters[CharacterIndex]()
             Car = makeCar()
@@ -271,25 +271,28 @@ function client.update(dt)
     end
 
     Scene:update()
+    getMultiplayerUpdate(dt)
     
     if GameState == "choose_character" then
         ChooseCharacterCameraRotationDist = 1.0
         ChooseCharacterCameraRotationSpeed = 0.6
-        local height = 0.3
+        local height = 0.4
         local speed = 0.9
 
         if ChooseCharacterState == "accessory" then
             ChooseCharacterCameraRotationDist = 1.5
-            height = 0.5
+            height = 0.6
         end
 
         local Camera = Engine.camera
         IntroCameraRotation = IntroCameraRotation + dt * ChooseCharacterCameraRotationSpeed
-        local dx = Car.x + math.cos(IntroCameraRotation) * ChooseCharacterCameraRotationDist - Camera.pos.x
-        local dz = Car.z + math.sin(IntroCameraRotation) * ChooseCharacterCameraRotationDist - Camera.pos.z
+        Car.angle = -IntroCameraRotation
+
+        local dx = Car.x + ChooseCharacterCameraRotationDist - Camera.pos.x
+        local dz = Car.z - Camera.pos.z
         local dy = height - Camera.pos.y
 
-        local s = 1.0--math.sqrt(dx*dx + dy*dy + dz*dz)
+        local s = 1--math.sqrt(dx*dx + dy*dy + dz*dz)
 
         Camera.pos.x = Camera.pos.x + speed * dx * dt / s
         Camera.pos.y = Camera.pos.y + speed * dy * dt / s
@@ -297,10 +300,11 @@ function client.update(dt)
 
         Camera.angle.x = math.pi-math.atan2(Car.x - Camera.pos.x, Car.z - Camera.pos.z)
         Camera.angle.y = 0.3
+
+
+        updateCarPosition(Car)
         return
     end
-
-    getMultiplayerUpdate(dt)
 
     if ServerGameState and ServerGameState ~= GameState then
         if ServerGameState == "countdown" then
@@ -632,7 +636,7 @@ function client.draw()
                         text = "CHOOSE YOUR ACCESSORY"
                     end
                     love.graphics.print(text, GraphicsWidth / 2 - 160, 100)
-                    love.graphics.print("<- -> [ENTER]", GraphicsWidth / 2 - 100, GraphicsHeight - 50)
+                    love.graphics.print("<- -> [ENTER]", GraphicsWidth / 2 - 100, GraphicsHeight - 80)
                     love.graphics.setFont(DefaultFont)
                 end
             else
