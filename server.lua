@@ -61,6 +61,10 @@ function server.load()
 end
 
 function server.update(dt)
+    if CASTLE_SERVER then
+        dt = dt * 0.1
+    end
+
     for cark, car in pairs(share.cars) do
         if car.hitByShellTime then
             car.hitByShellTime = car.hitByShellTime - dt
@@ -215,7 +219,7 @@ function server.update(dt)
         local dx = desiredX - shell.x
         local dz = desiredZ - shell.z
 
-        local SHELL_SPEED = 4
+        local SHELL_SPEED = 8
         local speed = math.sqrt(dx * dx + dz * dz)
 
         shell.velx = dx * SHELL_SPEED / speed
