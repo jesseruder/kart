@@ -51,7 +51,8 @@ function server.load()
     for i=1, #Levels do
         SortedLevels[i] = i
     end
-    SortedLevels = shuffle(SortedLevels)
+    --SortedLevels = shuffle(SortedLevels)
+    SortedLevels = {3,1,2}
     LevelIndex = 1
 
     share.level = SortedLevels[LevelIndex]
@@ -224,7 +225,7 @@ function server.update(dt)
         local dx = desiredX - shell.x
         local dz = desiredZ - shell.z
 
-        local SHELL_SPEED = 8
+        local SHELL_SPEED = 6
         local speed = math.sqrt(dx * dx + dz * dz)
 
         shell.velx = dx * SHELL_SPEED / speed
