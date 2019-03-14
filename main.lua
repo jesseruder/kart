@@ -145,6 +145,12 @@ function client.load()
         BooSound = love.audio.newSource("assets/boo.mp3", "stream")
         BooSound:setLooping(true)
     end
+
+
+
+
+    --loadGrassLevel()
+    --resetGame()
 end
 
 function recordLap()

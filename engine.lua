@@ -400,10 +400,7 @@ function engine.newScene(renderWidth,renderHeight)
 
         -- copy motionBlurCanvas into motionBlurCanvasOld for next frame
         love.graphics.setCanvas({self.motionBlurCanvasOld})
-
-        love.graphics.clear(0,0,0,0)
         love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
-
         love.graphics.setCanvas()
         love.graphics.setShader()
 
