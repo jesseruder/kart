@@ -18,13 +18,15 @@ function loadWaterLevel()
 
     makeHeightMap()
 
+    updatePathPoints()
+    makeRoad(waterRoadImage)
+
     if CASTLE_SERVER then
         return
     end
 
     skybox(waterSkyboxImage)
     terrain(waterTerrainImage, true)
-    makeRoad(waterRoadImage)
     clearItems()
     makeItems(40)
     makeItems(140)

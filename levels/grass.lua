@@ -25,13 +25,16 @@ function loadGrassLevel()
 
     addMountainRelative(0.5, 0.30, 3, 0.07)
 
+    updatePathPoints()
+    makeJump(10)
+    makeRoad(grassRoadImage)
+
     if CASTLE_SERVER then
         return
     end
 
     skybox(grassSkyboxImage)
     terrain(grassTerrainImage)
-    makeRoad(grassRoadImage)
     clearItems()
     makeItems(40)
     makeItems(140)

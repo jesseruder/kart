@@ -52,7 +52,10 @@ function server.load()
         SortedLevels[i] = i
     end
     --SortedLevels = shuffle(SortedLevels)
-    SortedLevels = {3,1,2}
+    -- grass: 1
+    -- moon: 2
+    -- water: 3
+    SortedLevels = {1,1,2}
     LevelIndex = 1
 
     share.level = SortedLevels[LevelIndex]
@@ -145,6 +148,7 @@ function server.update(dt)
                 share.cars[id].size = home.car.size
                 share.cars[id].vel = home.car.vel
                 share.cars[id].color = home.car.color
+                share.cars[id].roadIndex = home.car.roadIndex
                 share.cars[id].characterName = home.car.characterName
                 share.cars[id].accessoryName = home.car.accessoryName
                 share.cars[id].x = home.car.x
@@ -261,7 +265,6 @@ function server.update(dt)
         end
         shell.x = shell.x + dt * shell.velx
         shell.z = shell.z + dt * shell.velz
-        shell.y = heightAtPoint(shell.x, shell.z).height + 0.2
     end
 
     share.gameState = gameState

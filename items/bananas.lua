@@ -2,7 +2,7 @@
 function makeBanana()
     local x = Car.x + math.cos(Car.angle) * -0.7
     local z = Car.z + math.sin(Car.angle) * -0.7
-    local y = heightAtPoint(x, z).height + 0.2
+    local y = roadHeightAtPoint(x, z, Car.roadIndex).height + 0.2
     ServerAddBanana = {x = x, y = y, z = z, id = "banana" .. math.floor(math.random() * 1000000)}
 end
 

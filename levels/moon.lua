@@ -20,13 +20,16 @@ function loadMoonLevel()
     end
     math.randomseed(os.time())
 
+    updatePathPoints()
+    makeJump(10)
+    makeRoad(moonRoadImage)
+
     if CASTLE_SERVER then
         return
     end
 
     skybox(moonSkyboxImage)
     terrain(moonTerrainImage)
-    makeRoad(moonRoadImage)
     clearItems()
     makeItems(40)
     makeItems(140)

@@ -21,7 +21,7 @@ LocalShells = {}
 
 function loadItemImages()
     ItemTypes = {
-        {
+        --[[{
             name = "mushroom",
             image = love.graphics.newImage("assets/items/mushroom.png"),
             frequency = 10,
@@ -51,7 +51,7 @@ function loadItemImages()
             image = love.graphics.newImage("assets/items/banana.png"),
             frequency = 10,
             action = makeBanana
-        },
+        },]]--
         {
             name = "redshell",
             image = love.graphics.newImage("assets/items/redshell.png"),
@@ -134,7 +134,7 @@ function makeItem(roadIdx, dx, dy, id)
     local size = itemSize
     local x = (PATH_POINTS[roadIdx][1] * RoadScale - RoadScale / 2.0) + dx
     local z = (PATH_POINTS[roadIdx][2] * RoadScale - RoadScale / 2.0) + dy
-    local y = heightAtPoint(x, z).height + 0.3
+    local y = roadHeightAtPoint(x, z, roadIdx).height + 0.3
 
     item.x = x
     item.y = y

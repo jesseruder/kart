@@ -100,7 +100,7 @@ function client.load()
 
     --loadGrassLevel()
     -- CHOOSE CHARACTER STUFF
-    GameState = "choose_character"
+    GameState = ACTUAL_GAME and "choose_character" or "waiting_to_get_server_state"
     LocalLevel = nil
     ChooseCharacterState = "main"
     FontColor = {1, 1, 1, 1}
@@ -145,10 +145,6 @@ function client.load()
     Car.y = 0
     Car.z = 0
     Car.angle = 0
-
-    if ACTUAL_GAME == false then
-        makeItems(5)
-    end
 
     if PLAY_MUSIC then
         AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
@@ -342,6 +338,10 @@ function client.update(dt)
 
     if ServerLevel and ServerLevel ~= LocalLevel then
         Levels[ServerLevel].action()
+        if ACTUAL_GAME == false then
+            resetGame()
+            makeItems(5)
+        end
         LocalLevel = ServerLevel
     end
 
@@ -375,6 +375,10 @@ function client.update(dt)
         end
 
         GameState = ServerGameState
+    end
+
+    if LocalLevel == nil then
+        return
     end
 
     -- update everything
@@ -420,7 +424,7 @@ function client.update(dt)
 
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
-    local hap = heightAtPoint(Car.x, Car.z)
+    local hap = roadHeightAtPoint(Car.x, Car.z, Car.roadIndex)
     Car.y = hap.height + CAR_EXTRA_Y
     Car.normal = hap.normal
 
@@ -560,7 +564,7 @@ function client.update(dt)
         CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx-- / camt
         CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz-- / camt
     --end
-    CameraPos.y = 1 + math.max(Car.y, heightAtPoint(CameraPos.x, CameraPos.z).height)
+    CameraPos.y = 1 + math.max(Car.y, roadHeightAtPoint(CameraPos.x, CameraPos.z, Car.roadIndex - 5).height)
 
     if GameState == "postgame" then
         Camera.angle.x = math.pi-math.atan2(winnerCar.x - CameraPos.x, winnerCar.z - CameraPos.z)
@@ -577,8 +581,13 @@ function client.update(dt)
     sendMultiplayerUpdate()
     updateItems(dt)
 
-    GameCountdownTime = GameCountdownTime + dt
-    GameCountdownBright = GameCountdownBright - dt * 2
+    if GameCountdownTime then
+        GameCountdownTime = GameCountdownTime + dt
+    end
+
+    if GameCountdownBright then
+        GameCountdownBright = GameCountdownBright - dt * 2
+    end
 end
 
 function client.draw()

@@ -16,6 +16,7 @@ function sendMultiplayerUpdate()
         home.car.size = Car.size
         home.car.vel = Car.vel
         home.car.color = Car.color
+        home.car.roadIndex = Car.roadIndex
         home.car.characterName = Car.characterName
         home.car.accessoryName = Car.accessoryName
         home.car.x = Car.x
@@ -43,6 +44,7 @@ function updateCarFromRemote(dt, car, remote)
     car.size = remote.size
     car.vel = remote.vel
     car.color = remote.color
+    car.roadIndex = remote.roadIndex
     car.characterName = remote.characterName
     car.accessoryName = remote.accessoryName
     car.hitByShellTime = remote.hitByShellTime
@@ -60,7 +62,7 @@ function updateCarFromRemote(dt, car, remote)
     end
 
     -- need this for water level
-    car.y = heightAtPoint(car.x, car.z).height + CAR_EXTRA_Y
+    car.y = roadHeightAtPoint(car.x, car.z, car.roadIndex).height + CAR_EXTRA_Y
     car.angle = remote.angle
 end
 
