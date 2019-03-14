@@ -32,16 +32,29 @@ function sendMultiplayerUpdate()
         ServerAddBanana = nil
         home.removeBanana = ServerRemoveBanana
         ServerRemoveBanana = nil
+        home.addShell = ServerAddShell
+        ServerAddShell = nil
     end
 end
 
-function updateCarFromRemote(car, remote)
+function updateCarFromRemote(dt, car, remote)
     car.size = remote.size
     car.vel = remote.vel
     car.color = remote.color
-    car.x = remote.x
-    car.y = remote.y
-    car.z = remote.z
+    car.hitByShellTime = remote.hitByShellTime
+    if car.serverX == remote.x and car.serverY == remote.y and car.serverZ == remote.z then
+        car.x = car.x + remote.vel.x * dt
+        car.z = car.z + remote.vel.z * dt
+        car.y = heightAtPoint(car.x, car.z).height + CAR_EXTRA_Y
+    else
+        car.serverX = remote.x
+        car.serverY = remote.y
+        car.serverZ = remote.z
+
+        car.x = remote.x
+        car.y = remote.y
+        car.z = remote.z
+    end
     car.angle = remote.angle
 end
 
@@ -60,7 +73,7 @@ end
 
 otherCars = {}
 NumPlayers = 0
-function getMultiplayerUpdate()
+function getMultiplayerUpdate(dt)
     if client.connected then
         ServerGameState = share.gameState
         IsRequestingStart = share.isRequestingStart or false
@@ -70,6 +83,7 @@ function getMultiplayerUpdate()
         SwitchItemUsers = share.switchItemUsers
         DizzyItemUsers = share.dizzyItemUsers
         Bananas = share.bananas
+        Shells = share.shells
 
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false
@@ -92,8 +106,10 @@ function getMultiplayerUpdate()
                 end
 
                 otherCars[id].seenThisUpdate = true
-                updateCarFromRemote(otherCars[id], car)
+                updateCarFromRemote(dt, otherCars[id], car)
                 updateCarPosition(otherCars[id])
+            else
+                Car.hitByShellTime = car.hitByShellTime
             end
         end
 

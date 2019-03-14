@@ -89,7 +89,10 @@ end
 
 function heightAtPoint(x, y)
     if x < -WorldSize or x > WorldSize or y < -WorldSize or y > WorldSize then
-        return 0
+        return {
+            height = 0,
+            normal = {0,1,0}
+        }
     end
 
     local unfloorX = (x + WorldSize) / GridSize

@@ -83,23 +83,6 @@ function client.load()
     love.graphics.setLineStyle("rough")
     -- love.window.setMode(GraphicsWidth,GraphicsHeight, {vsync = -1, msaa = 8})
 
-    -- for capping game logic at 60 manually
-    LogicRate = 60
-    LogicAccumulator = 0
-    PhysicsStep = true
-    WorldSize = 30
-    GridSize = 0.5
-    SkyboxHeight = 30
-    MaxClosestRoadDistance = 2.5
-    RoadScale = 35
-    RoadRadius = 1.5
-    CAR_RANDOM_POS = 0.8
-    MotionBlurAmount = 0.0
-
-    IntroCameraRotation = math.pi
-    IntroCameraRotationDist = 5
-    IntroCameraRotationSpeed = 0.2
-
     BigFont = love.graphics.newFont(20)
     HugeFont = love.graphics.newFont(100)
     DefaultFont = love.graphics.getFont()
@@ -183,6 +166,10 @@ function client.load()
     makeItems(140)
     makeItems(230)
 
+    if ACTUAL_GAME == false then
+        makeItems(5)
+    end
+
     if PLAY_MUSIC then
         AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
         AmbientMusic:setLooping(true)
@@ -244,6 +231,8 @@ function love.keypressed(key)
 end
 
 function client.update(dt)
+    getMultiplayerUpdate(dt)
+
     if ServerGameState and ServerGameState ~= GameState then
         if ServerGameState == "countdown" then
             GameCountdownTime = 0
@@ -312,7 +301,7 @@ function client.update(dt)
     local carax = dt * accel * math.cos(turnAngle) * Car.accel
     local caraz = dt * accel * math.sin(turnAngle) * Car.accel
 
-    if isSlipping then
+    if isSlipping or Car.hitByShellTime then
         Car.angle = Car.angle + 5 * dt
         carax = 0
         caraz = 0
@@ -332,7 +321,7 @@ function client.update(dt)
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
     local hap = heightAtPoint(Car.x, Car.z)
-    Car.y = hap.height + 0.15
+    Car.y = hap.height + CAR_EXTRA_Y
     Car.normal = hap.normal
 
     local DIST_TO_CHECK = 10
@@ -488,8 +477,6 @@ function client.update(dt)
 end
 
 function client.draw()
-    getMultiplayerUpdate()
-
     -- draw 3d scene
     if client.connected then
         Scene:render(true)
