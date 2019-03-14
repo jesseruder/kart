@@ -223,7 +223,7 @@ function server.update(dt)
 
         local SHELL_SPEED
         if CASTLE_SERVER then
-            SHELL_SPEED = 0.5
+            SHELL_SPEED = 1
         else
             SHELL_SPEED = 8
         end
