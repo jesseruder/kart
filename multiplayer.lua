@@ -23,6 +23,8 @@ function sendMultiplayerUpdate()
         home.car.y = Car.y
         home.car.z = Car.z
         home.car.angle = Car.angle
+        home.car.angleUp = Car.angleUp
+        home.car.angleSide = Car.angleSide
 
         home.requestingStart = love.keyboard.isDown("space") and not GameResetTimer
         home.isFinished = IsFinished
@@ -64,6 +66,8 @@ function updateCarFromRemote(dt, car, remote)
     -- need this for water level
     car.y = roadHeightAtPoint(car.x, car.z, car.roadIndex).height + CAR_EXTRA_Y
     car.angle = remote.angle
+    car.angleUp = remote.angleUp
+    car.angleSide = remote.angleSide
 end
 
 function client.connect() -- Called on connect from server

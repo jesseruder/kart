@@ -21,7 +21,8 @@ function makeCar(characterName, accessoryName, color)
         accel = 500,
         turnAngle = math.pi*0.25,
         turnSpeed = 1.5,
-        vel = {x = 0, z = 0},
+        vel = {x = 0, y = 0, z = 0},
+        isTouchingGround = true,
         offRoadMaxSpeed = 1.5,
         normal = {x = 0, y = 0, z = 1},
         color = color
@@ -106,8 +107,16 @@ function makeCar(characterName, accessoryName, color)
 end
 
 function updateCarPosition(car)
+    if not Car.angleUp then
+        Car.angleUp = 0
+    end
+
+    if not Car.angleSide then
+        Car.angleSide = 0
+    end
+
     for k,v in pairs(car.models) do
-        v:setTransform({car.x, car.size / 2.0 + car.y, car.z}, {-car.angle, cpml.vec3.unit_y})
+        v:setTransform({car.x, car.size / 2.0 + car.y, car.z}, {-car.angle, cpml.vec3.unit_y, car.angleUp, cpml.vec3.unit_z, car.angleSide, cpml.vec3.unit_x})
     end
 end
 

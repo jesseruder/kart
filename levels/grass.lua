@@ -26,7 +26,6 @@ function loadGrassLevel()
     addMountainRelative(0.5, 0.30, 3, 0.07)
 
     updatePathPoints()
-    makeJump(10)
     makeRoad(grassRoadImage)
 
     if CASTLE_SERVER then
@@ -43,6 +42,7 @@ function loadGrassLevel()
     FogColor = {1,1,1,1}
     FogStartDist = 5
     FogDivide = 100
+    GRAVITY = 4
 end
 
 -- generate with createpath.html

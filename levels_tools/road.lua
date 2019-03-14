@@ -1,5 +1,6 @@
 local roadModels = nil
 local roadTriangles = {}
+local fakeRoadTriangles = {}
 local ROAD_EXTRA_ELEV = 0.1
 
 function ptInTriangle2d(p, p0, p1, p2)
@@ -17,7 +18,7 @@ function ptInTriangle2d(p, p0, p1, p2)
     return s > 0 and t > 0 and (s + t) < 2 * A * sign
 end
 
-function roadHeightAtPoint(x, z, indexHint)
+function roadHeightAtPoint(x, z, indexHint, useFakeHeight)
     local DIST_TO_CHECK = 10
     for idx = indexHint - DIST_TO_CHECK, indexHint + DIST_TO_CHECK do
         local realIdx = idx
@@ -28,43 +29,50 @@ function roadHeightAtPoint(x, z, indexHint)
             realIdx = realIdx - #PATH_POINTS
         end
 
-        for _,triangle in pairs(roadTriangles[realIdx]) do
-            local p = {
-                x = x,
-                z = z,
-            }
-            local t1 = {
-                x = triangle[1][1],
-                y = triangle[1][2],
-                z = triangle[1][3]
-            }
-            local t2 = {
-                x = triangle[2][1],
-                y = triangle[2][2],
-                z = triangle[2][3]
-            }
-            local t3 = {
-                x = triangle[3][1],
-                y = triangle[3][2],
-                z = triangle[3][3]
-            }
+        local tris = roadTriangles
+        if useFakeHeight then
+            tris = fakeRoadTriangles
+        end
 
-            if ptInTriangle2d(p, t1, t2, t3) then
-                local normal = normalizeVec(crossVec(minusVec(t2, t1), minusVec(t3, t1)))
-            
-                local intersection = lineIntersection(
-                    t1,
-                    normal,
-                    {x = x, y = 0, z = z},
-                    {x = 0, y = 1, z = 0}
-                )
+        if tris[realIdx] then
+            for _,triangle in pairs(tris[realIdx]) do
+                local p = {
+                    x = x,
+                    z = z,
+                }
+                local t1 = {
+                    x = triangle[1][1],
+                    y = triangle[1][2],
+                    z = triangle[1][3]
+                }
+                local t2 = {
+                    x = triangle[2][1],
+                    y = triangle[2][2],
+                    z = triangle[2][3]
+                }
+                local t3 = {
+                    x = triangle[3][1],
+                    y = triangle[3][2],
+                    z = triangle[3][3]
+                }
 
-                -- let heightAtPoint take care of this if not
-                if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
-                    return {
-                        height = intersection.y - ROAD_EXTRA_ELEV,
-                        normal = normal
-                    }
+                if ptInTriangle2d(p, t1, t2, t3) then
+                    local normal = normalizeVec(crossVec(minusVec(t2, t1), minusVec(t3, t1)))
+                
+                    local intersection = lineIntersection(
+                        t1,
+                        normal,
+                        {x = x, y = 0, z = z},
+                        {x = 0, y = 1, z = 0}
+                    )
+
+                    -- let heightAtPoint take care of this if not
+                    if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
+                        return {
+                            height = intersection.y - ROAD_EXTRA_ELEV,
+                            normal = normal
+                        }
+                    end
                 end
             end
         end
@@ -76,6 +84,8 @@ end
 function updatePathPoints()
     for k,v in pairs(PATH_POINTS) do
         v[4] = 0.0
+        -- 5 is "Fake height" used for shells and for car roadindex calculations
+        v[5] = 0.0
     end
 end
 
@@ -95,6 +105,59 @@ function makeJump(index, length, height)
         currHeight = currHeight + heightInc
 
         PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+    end
+
+    for idx = index + length - 1, index + length*2 - 1 do
+        currHeight = currHeight - heightInc
+
+        PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+    end
+end
+
+function makeEmptyJump(index, length, height, emptyLength, downAmt)
+    if not length then
+        length = 5.0
+    end
+
+    if not height then
+        height = 2.0
+    end
+
+    if not emptyLength then
+        emptyLength = 5.0
+    end
+
+    if not downAmt then
+        downAmt = -0.7
+    end
+
+    local currHeight = 0.0
+    local heightInc = height / length
+    local currIdx
+
+    for idx = index, index + length do
+        currHeight = currHeight + heightInc
+
+        PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+        currIdx = idx
+    end
+
+    for idx = currIdx, currIdx + emptyLength do
+        PATH_POINTS[idx][4] = -10000
+        PATH_POINTS[idx][5] = currHeight
+        currIdx = idx
+    end
+
+    currHeight = currHeight + downAmt
+    for idx = currIdx, currIdx + length do
+        currHeight = currHeight - heightInc
+
+        PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+        currIdx = idx
     end
 end
 
@@ -144,7 +207,6 @@ function makeRoad(imageRoad)
         local minHeightLast = math.min(h1, h4) + lastPoint[4]
         local minHeightCurrent = math.min(h2, h3) + v[4]
 
-        --elev = elev + 0.05
         local verts = {
             {lx - ldx, elev + math.max(h1, minHeightLast), ly - ldy,    0, texCoordBegin},
             {x - dx, elev + math.max(h2, minHeightCurrent), y - dy,   0,texCoordEnd},
@@ -152,7 +214,17 @@ function makeRoad(imageRoad)
             {lx + ldx, elev + math.max(h4, minHeightLast), ly + ldy,    1,texCoordBegin}
         }
 
-        if not CASTLE_SERVER then
+        local fakeMinHeightLast = math.min(h1, h4) + lastPoint[5]
+        local fakeMinHeightCurrent = math.min(h2, h3) + v[5]
+
+        local fakeVerts = {
+            {lx - ldx, elev + math.max(h1, fakeMinHeightLast), ly - ldy,    0, texCoordBegin},
+            {x - dx, elev + math.max(h2, fakeMinHeightCurrent), y - dy,   0,texCoordEnd},
+            {x + dx, elev + math.max(h3, fakeMinHeightCurrent), y + dy,     1,texCoordEnd},
+            {lx + ldx, elev + math.max(h4, fakeMinHeightLast), ly + ldy,    1,texCoordBegin}
+        }
+
+        if not CASTLE_SERVER and lastPoint[4] > -100 and v[4] > -100 then
             local model = rect(verts, i)
             table.insert(roadModels, model)
         end
@@ -160,6 +232,11 @@ function makeRoad(imageRoad)
         roadTriangles[k] = {
             {verts[1], verts[2], verts[4]},
             {verts[2], verts[3], verts[4]}
+        }
+
+        fakeRoadTriangles[k] = {
+            {fakeVerts[1], fakeVerts[2], fakeVerts[4]},
+            {fakeVerts[2], fakeVerts[3], fakeVerts[4]}
         }
 
         lastPoint = v

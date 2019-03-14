@@ -21,7 +21,7 @@ function loadMoonLevel()
     math.randomseed(os.time())
 
     updatePathPoints()
-    makeJump(10)
+    makeEmptyJump(181, 4, 2.7, 7, -1.3)
     makeRoad(moonRoadImage)
 
     if CASTLE_SERVER then
@@ -38,6 +38,8 @@ function loadMoonLevel()
     FogColor = {0,0,0,1}
     FogStartDist = 5
     FogDivide = 20
+    GRAVITY = 2.5
+    Engine.camera.pos.y = 5
 end
 
 -- generate with createpath.html

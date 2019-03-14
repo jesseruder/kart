@@ -134,7 +134,7 @@ function makeItem(roadIdx, dx, dy, id)
     local size = itemSize
     local x = (PATH_POINTS[roadIdx][1] * RoadScale - RoadScale / 2.0) + dx
     local z = (PATH_POINTS[roadIdx][2] * RoadScale - RoadScale / 2.0) + dy
-    local y = roadHeightAtPoint(x, z, roadIdx).height + 0.3
+    local y = roadHeightAtPoint(x, z, roadIdx, true).height + 0.3
 
     item.x = x
     item.y = y

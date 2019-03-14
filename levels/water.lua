@@ -43,6 +43,7 @@ function loadWaterLevel()
     FogColor = {1,1,1,1}
     FogStartDist = 5
     FogDivide = 20
+    GRAVITY = 4
 end
 
 -- generate with createpath.html

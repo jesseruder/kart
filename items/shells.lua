@@ -2,7 +2,7 @@
 function makeShell()
     local x = Car.x + math.cos(Car.angle) * 1
     local z = Car.z + math.sin(Car.angle) * 1
-    local y = roadHeightAtPoint(x, z, Car.roadIndex).height + 0.2
+    local y = Car.y + 0.2
     ServerAddShell = {x = x, y = y, z = z, roadIndex = Car.roadIndex, from = client.id, id = "shell" .. math.floor(math.random() * 1000000)}
 end
 
@@ -31,7 +31,7 @@ function updateShells(dt)
 
                 -- need this for water level
                 LocalShells[id].roadIndex = v.roadIndex
-                LocalShells[id].y = roadHeightAtPoint(LocalShells[id].x, LocalShells[id].z, v.roadIndex).height + 0.4
+                LocalShells[id].y = roadHeightAtPoint(LocalShells[id].x, LocalShells[id].z, v.roadIndex, true).height + 0.4
 
                 for k,model in pairs(LocalShells[id].models) do
                     model:setTransform({LocalShells[id].x, LocalShells[id].y, LocalShells[id].z}, {0, cpml.vec3.unit_y})

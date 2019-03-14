@@ -27,9 +27,11 @@ function resetGame()
     MyTakenItem = nil
 
     Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
-    Car.y = 0
     Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
+    Car.y = roadHeightAtPoint(Car.x, Car.y, 1).height + 0.3
     Car.angle = PATH_POINTS[1][3]
+    Car.angleUp = 0
+    Car.angleSide = 0
 end
 
 local time3 = 0.666
@@ -145,6 +147,8 @@ function client.load()
     Car.y = 0
     Car.z = 0
     Car.angle = 0
+    Car.angleUp = 0
+    Car.angleSide = 0
 
     if PLAY_MUSIC then
         AmbientMusic = love.audio.newSource("assets/intro.mp3", "stream")
@@ -273,6 +277,8 @@ function love.keypressed(key)
             Car.y = 0
             Car.z = 0
             Car.angle = 0
+            Car.angleUp = 0
+            Car.angleSide = 0
         end
 
         return
@@ -317,6 +323,8 @@ function client.update(dt)
         local Camera = Engine.camera
         IntroCameraRotation = IntroCameraRotation + dt * ChooseCharacterCameraRotationSpeed
         Car.angle = -IntroCameraRotation
+        Car.angleUp = 0
+        Car.angleSide = 0
 
         local dx = Car.x + ChooseCharacterCameraRotationDist - Camera.pos.x
         local dz = Car.z - Camera.pos.z
@@ -393,7 +401,7 @@ function client.update(dt)
     local isDrift = love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")
 
     local turnAngle
-    if isDrift then
+    if isDrift and Car.isTouchingGround then
         frictionConst = 150
         turnAngle = Car.angle + turnDirection * -math.pi / 4
     else
@@ -422,16 +430,67 @@ function client.update(dt)
     local carSpeed = math.sqrt(math.pow(Car.vel.x, 2) + math.pow(Car.vel.z, 2))
     MotionBlurAmount = carSpeed / 13.0
 
+    local oldCarX = Car.x
+    local oldCarZ = Car.z
     Car.x = Car.x + Car.vel.x * dt
     Car.z = Car.z + Car.vel.z * dt
-    local hap = roadHeightAtPoint(Car.x, Car.z, Car.roadIndex)
-    Car.y = hap.height + CAR_EXTRA_Y
-    Car.normal = hap.normal
 
-    local DIST_TO_CHECK = 10
+    local hap = roadHeightAtPoint(Car.x, Car.z, Car.roadIndex)
+    local heightFront = roadHeightAtPoint(Car.x + Car.size * math.cos(Car.angle), Car.z + Car.size * math.sin(Car.angle), Car.roadIndex).height
+    local heightSide = roadHeightAtPoint(Car.x + Car.size * math.cos(Car.angle - math.pi/2), Car.z + Car.size * math.sin(Car.angle - math.pi/2), Car.roadIndex).height
+    local desiredAngleUp = math.atan2(heightFront - hap.height, Car.size)
+    local desiredAngleSide = math.atan2(heightSide - hap.height, Car.size)
+    local dAngleUp = desiredAngleUp - Car.angleUp
+    local dAngleSide = desiredAngleSide - Car.angleSide
+    local angleSpeed = 10
+
+
+    --- HEIGHT CALCULATION
+    local roadHeight = hap.height + CAR_EXTRA_Y
+
+    if roadHeight > Car.y + 0.3 then
+        print("hey dummy")
+        Car.x = oldCarX
+        Car.z = oldCarZ
+        Car.y = roadHeightAtPoint(Car.x, Car.z, Car.roadIndex).height + CAR_EXTRA_Y
+        Car.vel.x = 0
+        Car.vel.z = 0
+    else
+        local firstOffGround = false
+        if Car.isTouchingGround then
+            if roadHeight < Car.y  then
+                Car.isTouchingGround = false
+                firstOffGround = true
+                Car.vel.y = 0.0
+            else
+                Car.y = roadHeight
+            end
+        end
+
+        if Car.isTouchingGround == false then
+            Car.y = Car.y + Car.vel.y * dt
+            Car.vel.y = Car.vel.y - GRAVITY * dt
+            if Car.y < roadHeight then
+                Car.y = roadHeight
+                Car.isTouchingGround = true
+            elseif firstOffGround then
+                Car.vel.y = math.sin(Car.angleUp) * carSpeed / 2
+            end
+        end
+    end
+    Car.normal = hap.normal
+    -- DONE HEIGHT CALC
+
+    if Car.isTouchingGround then
+        Car.angleUp = Car.angleUp + dt * dAngleUp * angleSpeed
+        Car.angleSide = Car.angleSide + dt * dAngleSide * angleSpeed
+    end
+
+    local DIST_TO_CHECK_BACK = 100
+    local DIST_TO_CHECK_FORWARD = 10
     local closestRoadIndex = 0
     local closestRoadDistance = 100000000000
-    for idx = Car.roadIndex - DIST_TO_CHECK, Car.roadIndex + DIST_TO_CHECK do
+    for idx = Car.roadIndex - DIST_TO_CHECK_BACK, Car.roadIndex + DIST_TO_CHECK_FORWARD do
         local realIdx = idx
         if realIdx <= 0 then
             realIdx = realIdx + #PATH_POINTS
@@ -441,8 +500,9 @@ function client.update(dt)
         end
 
         local rx = PATH_POINTS[realIdx][1] * RoadScale - RoadScale / 2.0
-        local ry = PATH_POINTS[realIdx][2] * RoadScale - RoadScale / 2.0
-        local distance = math.sqrt(math.pow(rx - Car.x, 2) + math.pow(ry - Car.z, 2))
+        local rz = PATH_POINTS[realIdx][2] * RoadScale - RoadScale / 2.0
+        local ry = PATH_POINTS[realIdx][5] + heightAtPoint(rx, rz).height
+        local distance = math.sqrt(math.pow(rx - Car.x, 2) + math.pow(ry - Car.y, 2) + math.pow(rz - Car.z, 2))
         if distance < closestRoadDistance then
             closestRoadDistance = distance
             closestRoadIndex = realIdx
@@ -463,7 +523,7 @@ function client.update(dt)
         recordLap()
     end
 
-    if closestRoadDistance > RoadRadius then
+    if closestRoadDistance > RoadRadius and Car.isTouchingGround then
         local speed = math.sqrt(math.pow(Car.vel.x, 2) + math.pow(Car.vel.z, 2))
         if speed > Car.offRoadMaxSpeed then
             Car.vel.x = Car.vel.x * Car.offRoadMaxSpeed / speed
@@ -545,15 +605,15 @@ function client.update(dt)
         desiredCamZ = Car.z + math.sin(IntroCameraRotation) * IntroCameraRotationDist
     end
 
-    local winnerCar = Car
-    if Winner and otherCars[Winner] then
-        winnerCar = otherCars[Winner]
+    local carToTrack = Car
+    if GameState == "postgame" and Winner and otherCars[Winner] then
+        carToTrack = otherCars[Winner]
     end
 
     if GameState == "postgame" then
         IntroCameraRotation = IntroCameraRotation + dt * IntroCameraRotationSpeed
-        desiredCamX = winnerCar.x + math.cos(IntroCameraRotation) * IntroCameraRotationDist
-        desiredCamZ = winnerCar.z + math.sin(IntroCameraRotation) * IntroCameraRotationDist
+        desiredCamX = carToTrack.x + math.cos(IntroCameraRotation) * IntroCameraRotationDist
+        desiredCamZ = carToTrack.z + math.sin(IntroCameraRotation) * IntroCameraRotationDist
     end
 
     local cdx = desiredCamX - CameraPos.x
@@ -564,13 +624,20 @@ function client.update(dt)
         CameraPos.x = CameraPos.x + dt * cameraSpeed * cdx-- / camt
         CameraPos.z = CameraPos.z + dt * cameraSpeed * cdz-- / camt
     --end
-    CameraPos.y = 1 + math.max(Car.y, roadHeightAtPoint(CameraPos.x, CameraPos.z, Car.roadIndex - 5).height)
+    desiredCamY = 1 + math.max(carToTrack.y,
+        roadHeightAtPoint(CameraPos.x, CameraPos.z, carToTrack.roadIndex - 5, true).height,
+        roadHeightAtPoint(CameraPos.x*0.25 + carToTrack.x*0.75, CameraPos.z*0.25 + carToTrack.z*0.75, carToTrack.roadIndex - 1, true).height,
+        roadHeightAtPoint(CameraPos.x*0.75 + carToTrack.x*0.25, CameraPos.z*0.75 + carToTrack.z*0.25, carToTrack.roadIndex - 3, true).height,
+        roadHeightAtPoint((CameraPos.x + carToTrack.x)/2.0, (CameraPos.z + carToTrack.z)/2.0, carToTrack.roadIndex - 2, true).height)
 
-    if GameState == "postgame" then
-        Camera.angle.x = math.pi-math.atan2(winnerCar.x - CameraPos.x, winnerCar.z - CameraPos.z)
+    if GameState == "running" then
+        local cdy = desiredCamY - CameraPos.y
+        CameraPos.y = CameraPos.y + dt * cameraSpeed * cdy
     else
-        Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
+        CameraPos.y = desiredCamY
     end
+
+    Camera.angle.x = math.pi-math.atan2(carToTrack.x - CameraPos.x, carToTrack.z - CameraPos.z)
 
     Camera.angle.y = 0.3
 

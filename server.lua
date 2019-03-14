@@ -55,7 +55,7 @@ function server.load()
     -- grass: 1
     -- moon: 2
     -- water: 3
-    SortedLevels = {1,1,2}
+    SortedLevels = {2,1,2}
     LevelIndex = 1
 
     share.level = SortedLevels[LevelIndex]
@@ -155,6 +155,8 @@ function server.update(dt)
                 share.cars[id].y = home.car.y
                 share.cars[id].z = home.car.z
                 share.cars[id].angle = home.car.angle
+                share.cars[id].angleUp = home.car.angleUp
+                share.cars[id].angleSide = home.car.angleSide
             end
         end
 
