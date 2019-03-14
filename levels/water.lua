@@ -18,6 +18,7 @@ function loadWaterLevel()
 
     makeHeightMap()
 
+    terrain(waterTerrainImage, true) --this has to be above makeroad for some reason
     updatePathPoints()
     makeRoad(waterRoadImage, nil)
 
@@ -26,7 +27,7 @@ function loadWaterLevel()
     end
 
     skybox(waterSkyboxImage)
-    terrain(waterTerrainImage, true)
+    --terrain(waterTerrainImage, true)
     clearItems()
     makeItems(40)
     makeItems(140)
