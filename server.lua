@@ -67,6 +67,7 @@ local floorTime = 0
 local frames = 0
 local ServerLogicAccumulator = 0.0
 local ServerLogicRate = 60
+local VERBOSE = false
 
 function server.update(dt)
     ServerLogicAccumulator = ServerLogicAccumulator+dt
@@ -83,7 +84,9 @@ function server.update(dt)
     local lastFrames = frames
     if math.floor(time) > floorTime then
         floorTime = math.floor(time)
-        print("time: " .. floorTime)
+        if VERBOSE then
+            print("time: " .. floorTime)
+        end
         printThisFrame = true
         frames = 0
     end
@@ -247,13 +250,13 @@ function server.update(dt)
         local dx = desiredX - shell.x
         local dz = desiredZ - shell.z
 
-        local SHELL_SPEED = 8
+        local SHELL_SPEED = 10
 
         local speed = math.sqrt(dx * dx + dz * dz)
 
         shell.velx = dx * SHELL_SPEED / speed
         shell.velz = dz * SHELL_SPEED / speed
-        if printThisFrame then
+        if VERBOSE and printThisFrame then
             print("velx:" .. shell.velx .. " velz:" .. shell.velz .. " speed:" .. speed .. "  dt:" .. dt .. "  frames:" .. lastFrames)
         end
         shell.x = shell.x + dt * shell.velx

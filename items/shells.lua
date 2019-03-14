@@ -30,7 +30,7 @@ function updateShells(dt)
                 end
 
                 -- need this for water level
-                LocalShells[id].y = heightAtPoint(LocalShells[id].x, LocalShells[id].z).height + 0.2
+                LocalShells[id].y = heightAtPoint(LocalShells[id].x, LocalShells[id].z).height + 0.4
 
                 for k,model in pairs(LocalShells[id].models) do
                     model:setTransform({LocalShells[id].x, LocalShells[id].y, LocalShells[id].z}, {0, cpml.vec3.unit_y})
