@@ -1,8 +1,5 @@
 local roadModels = nil
 
-local imageFinishLine = love.graphics.newImage("assets/finish-line.png")
-imageFinishLine:setWrap('repeat','repeat')
-
 function makeRoad(imageRoad)
     if roadModels then
         for k,v in pairs(roadModels) do

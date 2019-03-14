@@ -3,7 +3,7 @@ require "car"
 require "multiplayer"
 require "items.items"
 require "levels.levels"
-require "levels.assets"
+require "assets"
 require "characters.characters"
 require "characters.accessories"
 
