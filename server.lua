@@ -221,7 +221,13 @@ function server.update(dt)
         local dx = desiredX - shell.x
         local dz = desiredZ - shell.z
 
-        local SHELL_SPEED = 6
+        local SHELL_SPEED
+        if CASTLE_SERVER then
+            SHELL_SPEED = 2
+        else
+            SHELL_SPEED = 8
+        end
+
         local speed = math.sqrt(dx * dx + dz * dz)
 
         shell.velx = dx * SHELL_SPEED / speed
