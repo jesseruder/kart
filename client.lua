@@ -299,6 +299,8 @@ function client.update(dt)
     if LogicAccumulator >= 1/LogicRate then
         LogicAccumulator = LogicAccumulator - 1/LogicRate
         PhysicsStep = true
+    else
+        return
     end
 
     Scene:update()

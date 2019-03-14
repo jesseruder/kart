@@ -65,6 +65,8 @@ end
 local time = 0
 local floorTime = 0
 local frames = 0
+local ServerLogicAccumulator = 0.0
+local ServerLogicRate = 60
 
 function server.update(dt)
     time = time + dt
@@ -76,6 +78,13 @@ function server.update(dt)
         print("time: " .. floorTime)
         printThisFrame = true
         frames = 0
+    end
+
+    ServerLogicAccumulator = ServerLogicAccumulator+dt
+    if ServerLogicAccumulator >= 1/ServerLogicRate then
+        ServerLogicAccumulator = ServerLogicAccumulator - 1/LogicRate
+    else
+        return
     end
 
     for cark, car in pairs(share.cars) do
@@ -236,12 +245,7 @@ function server.update(dt)
         local dx = desiredX - shell.x
         local dz = desiredZ - shell.z
 
-        local SHELL_SPEED
-        if CASTLE_SERVER then
-            SHELL_SPEED = 1
-        else
-            SHELL_SPEED = 8
-        end
+        local SHELL_SPEED = 8
 
         local speed = math.sqrt(dx * dx + dz * dz)
 
