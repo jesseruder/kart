@@ -71,7 +71,7 @@ local ServerLogicRate = 60
 function server.update(dt)
     ServerLogicAccumulator = ServerLogicAccumulator+dt
     if ServerLogicAccumulator >= 1/ServerLogicRate then
-        dt = ServerLogicAccumulator
+        dt = 1/LogicRate
         ServerLogicAccumulator = ServerLogicAccumulator - 1/LogicRate
     else
         return
