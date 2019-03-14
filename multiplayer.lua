@@ -49,7 +49,6 @@ function updateCarFromRemote(dt, car, remote)
     if car.serverX == remote.x and car.serverY == remote.y and car.serverZ == remote.z then
         car.x = car.x + remote.vel.x * dt
         car.z = car.z + remote.vel.z * dt
-        car.y = heightAtPoint(car.x, car.z).height + CAR_EXTRA_Y
     else
         car.serverX = remote.x
         car.serverY = remote.y
@@ -59,6 +58,9 @@ function updateCarFromRemote(dt, car, remote)
         car.y = remote.y
         car.z = remote.z
     end
+
+    -- need this for water level
+    car.y = heightAtPoint(car.x, car.z).height + CAR_EXTRA_Y
     car.angle = remote.angle
 end
 
