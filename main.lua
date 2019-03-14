@@ -13,6 +13,9 @@ require "levels.water"
 
 require "characters.anime"
 require "characters.shonen"
+require "characters.colorado"
+require "characters.sponge"
+require "characters.blue"
 
 function resetGame()
     if ACTUAL_GAME then
@@ -102,10 +105,27 @@ function client.load()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
 
-    loadShonenCharacter()
-    Car = makeCar()
+    --loadGrassLevel()
+    -- CHOOSE CHARACTER STUFF
+    GameState = "choose_character"
+    ChooseCharacterState = "main"
+    FontColor = {1, 1, 1, 1}
+    FogColor = {1,1,1,1}
+    FogStartDist = 5
+    FogDivide = 100
 
-    loadGrassLevel()
+    Characters = {loadShonenCharacter, loadAnimeCharacter, loadColoradoCharacter, loadSpongeCharacter, loadBlueCharacter}
+    CharacterIndex = 1
+    for k,v in pairs(Characters) do
+        v()
+    end
+    Characters[CharacterIndex]()
+    
+    Car = makeCar()
+    Car.x = 0
+    Car.y = 0
+    Car.z = 0
+    Car.angle = 0
 
     if ACTUAL_GAME == false then
         makeItems(5)
@@ -125,8 +145,6 @@ function client.load()
         BooSound = love.audio.newSource("assets/boo.mp3", "stream")
         BooSound:setLooping(true)
     end
-
-    resetGame()
 end
 
 function recordLap()
@@ -165,13 +183,53 @@ function triColor(coords, color, scale)
 end
 
 function love.keypressed(key)
-    if MyItem and key == "return" then
+    if GameState == "choose_character" then
+        local loadCharacter = false
+        if key == "left" then
+            CharacterIndex = CharacterIndex - 1
+            if CharacterIndex <= 0 then
+                CharacterIndex = #Characters
+            end
+            loadCharacter = true
+        elseif key == "right" then
+            CharacterIndex = CharacterIndex + 1
+            if CharacterIndex > #Characters then
+                CharacterIndex = 1
+            end
+            loadCharacter = true
+        end
+
+        if loadCharacter then
+            IntroCameraRotation = -math.pi/4
+            Characters[CharacterIndex]()
+            Car = makeCar()
+            Car.x = 0
+            Car.y = 0
+            Car.z = 0
+            Car.angle = 0
+        end
+
+        return
+    end
+
+    if GameState == "running" and MyItem and key == "return" then
         MyItem.action()
         MyItem = nil
     end
 end
 
 function client.update(dt)
+    if GameState == "choose_character" then
+        local Camera = Engine.camera
+        IntroCameraRotation = IntroCameraRotation + dt * ChooseCharacterCameraRotationSpeed
+        Camera.pos.x = Car.x + math.cos(IntroCameraRotation) * ChooseCharacterCameraRotationDist
+        Camera.pos.z = Car.z + math.sin(IntroCameraRotation) * ChooseCharacterCameraRotationDist
+        Camera.pos.y = 0.3
+        Camera.angle.x = math.pi-math.atan2(Car.x - Camera.pos.x, Car.z - Camera.pos.z)
+        Camera.angle.y = 0.3
+        return
+    end
+
     TimeElapsed = TimeElapsed + dt
     getMultiplayerUpdate(dt)
 
@@ -404,7 +462,12 @@ function client.update(dt)
     --end
     CameraPos.y = 1 + math.max(Car.y, heightAtPoint(CameraPos.x, CameraPos.z).height)
 
-    Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
+    if GameState == "postgame" then
+        Camera.angle.x = math.pi-math.atan2(winnerCar.x - CameraPos.x, winnerCar.z - CameraPos.z)
+    else
+        Camera.angle.x = math.pi-math.atan2(Car.x - CameraPos.x, Car.z - CameraPos.z)
+    end
+
     Camera.angle.y = 0.3
 
     if not USE_REMOTE_CAR then
@@ -502,6 +565,13 @@ function client.draw()
                         love.graphics.setColor(1, 1, 1, 0.9)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
+                end
+
+                if GameState == "choose_character" then
+                    love.graphics.setFont(BigFont)
+                    love.graphics.print("CHOOSE YOUR CHARACTER", GraphicsWidth / 2 - 160, 100)
+                    love.graphics.print("<- -> [ENTER]", GraphicsWidth / 2 - 100, GraphicsHeight - 100)
+                    love.graphics.setFont(DefaultFont)
                 end
             else
                 love.graphics.print("Connecting...", GraphicsWidth / 2 - 50, GraphicsHeight / 2 - 20)

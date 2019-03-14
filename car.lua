@@ -1,4 +1,11 @@
 
+function loadCarAssets(assets)
+    carFront = assets["front"]
+    carSide = assets["side"]
+    carBack = assets["back"]
+    carTop = assets["top"]
+end
+
 function makeCar(color)
     if not color then
         color = {math.random(), math.random(), math.random()}

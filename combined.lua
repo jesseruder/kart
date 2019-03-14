@@ -16,9 +16,11 @@ CAR_RANDOM_POS = 0.8
 MotionBlurAmount = 0.0
 CAR_EXTRA_Y = 0.15
 
-IntroCameraRotation = math.pi
+IntroCameraRotation = -math.pi/4
 IntroCameraRotationDist = 5
 IntroCameraRotationSpeed = 0.2
+ChooseCharacterCameraRotationDist = 1.0
+ChooseCharacterCameraRotationSpeed = 0.6
 
 if CASTLE_SERVER or not USE_CASTLE_CONFIG then
     require 'server'

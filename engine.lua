@@ -376,6 +376,7 @@ function engine.newScene(renderWidth,renderHeight)
             end
         end
         self.postProcessingShader:send("overlayOpacity", opacity)
+        love.graphics.clear(0,0,0,0)
         love.graphics.draw(self.threeCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,-1, self.renderWidth/2, self.renderHeight/2)
 
         -- motion blur
@@ -394,10 +395,13 @@ function engine.newScene(renderWidth,renderHeight)
 
         self.motionBlurShader:send("amount", MotionBlurAmount)
 
+        love.graphics.clear(0,0,0,0)
         love.graphics.draw(self.postProcessingCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
 
         -- copy motionBlurCanvas into motionBlurCanvasOld for next frame
         love.graphics.setCanvas({self.motionBlurCanvasOld})
+
+        love.graphics.clear(0,0,0,0)
         love.graphics.draw(self.motionBlurCanvas, self.renderWidth/2,self.renderHeight/2, 0, 1,1, self.renderWidth/2, self.renderHeight/2)
 
         love.graphics.setCanvas()

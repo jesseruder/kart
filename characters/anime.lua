@@ -1,6 +1,13 @@
+local carAssets = nil
+
 function loadAnimeCharacter()
-    carFront = love.graphics.newImage("assets/characters/anime/front.png")
-    carSide = love.graphics.newImage("assets/characters/anime/side.png")
-    carBack = love.graphics.newImage("assets/characters/anime/back.png")
-    carTop = carSide
+    if not carAssets then
+        carAssets = {}
+        carAssets["front"] = love.graphics.newImage("assets/characters/anime/front.png")
+        carAssets["side"] = love.graphics.newImage("assets/characters/anime/side.png")
+        carAssets["back"] = love.graphics.newImage("assets/characters/anime/back.png")
+        carAssets["top"] = carAssets["side"]
+    end
+
+    loadCarAssets(carAssets)
 end
