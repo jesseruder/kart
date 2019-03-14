@@ -63,10 +63,6 @@ function server.load()
 end
 
 function server.update(dt)
-    if CASTLE_SERVER then
-        dt = dt * 0.1
-    end
-
     for cark, car in pairs(share.cars) do
         if car.hitByShellTime then
             car.hitByShellTime = car.hitByShellTime - dt

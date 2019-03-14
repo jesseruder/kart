@@ -168,10 +168,6 @@ do
     end
 
     function server.postupdate(dt)
-        if CASTLE_SERVER then
-            dt = dt * 0.1
-        end
-
         accumTime = accumTime + dt
         if accumTime < 1.0 / 30.0 then
             return
