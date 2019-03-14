@@ -64,13 +64,18 @@ end
 
 local time = 0
 local floorTime = 0
+local frames = 0
+
 function server.update(dt)
     time = time + dt
+    frames = frames + 1
     local printThisFrame = false
+    local lastFrames = frames
     if math.floor(time) > floorTime then
         floorTime = math.floor(time)
         print("time: " .. floorTime)
         printThisFrame = true
+        frames = 0
     end
 
     for cark, car in pairs(share.cars) do
@@ -243,7 +248,7 @@ function server.update(dt)
         shell.velx = dx * SHELL_SPEED / speed
         shell.velz = dz * SHELL_SPEED / speed
         if printThisFrame then
-            print("velx " .. shell.velx .. " velz " .. shell.velz .. " speed " .. speed)
+            print("velx:" .. shell.velx .. " velz:" .. shell.velz .. " speed:" .. speed .. "  dt:" .. dt .. "  frames:" .. lastFrames)
         end
         shell.x = shell.x + dt * shell.velx
         shell.z = shell.z + dt * shell.velz
