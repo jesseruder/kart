@@ -1,8 +1,4 @@
-require "levels.moon"
-require "levels_tools.road"
-require "levels_tools.skybox"
-require "levels_tools.terrain"
-require "levels_tools.heightmap"
+require "levels.levels"
 
 local cs = require 'share.cs'
 local server = cs.server
@@ -38,11 +34,29 @@ end
 -- Server only gets `.load`, `.update`, `.quit` Love events (also `.lowmemory` and `.threaderror`
 -- which are less commonly used)
 
+function shuffle(tbl)
+    local size = #tbl
+    for i = size, 1, -1 do
+        local rand = math.random(i)
+        tbl[i], tbl[rand] = tbl[rand], tbl[i]
+    end
+    return tbl
+  end
+
 function server.load()
     share.cars = {}
 
+    SortedLevels = {}
+    for i=1, #Levels do
+        SortedLevels[i] = i
+    end
+    SortedLevels = shuffle(SortedLevels)
+    LevelIndex = 1
+
+    share.level = SortedLevels[LevelIndex]
+
     if CASTLE_SERVER then
-        loadMoonLevel()
+        Levels[1].action()
     end
 end
 
@@ -59,6 +73,8 @@ function server.update(dt)
     if gameState == "intro" and startTime and os.time() >= startTime then
         gameState = "countdown"
         startTime = os.time() + 4
+        bananas = {}
+        shells = {}
     end
 
     if gameState == "countdown" and startTime and os.time() >= startTime then
@@ -71,6 +87,13 @@ function server.update(dt)
     if gameState == "postgame" and startTime and os.time() >= startTime then
         gameState = "intro"
         startTime = nil
+        LevelIndex = LevelIndex + 1
+        if LevelIndex > #Levels then
+            LevelIndex = 1
+        end
+        share.level = SortedLevels[LevelIndex]
+        bananas = {}
+        shells = {}
     end
 
     local isRequestingStart = false
@@ -87,6 +110,8 @@ function server.update(dt)
                 share.cars[id].size = home.car.size
                 share.cars[id].vel = home.car.vel
                 share.cars[id].color = home.car.color
+                share.cars[id].characterName = home.car.characterName
+                share.cars[id].accessoryName = home.car.accessoryName
                 share.cars[id].x = home.car.x
                 share.cars[id].y = home.car.y
                 share.cars[id].z = home.car.z

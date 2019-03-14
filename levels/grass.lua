@@ -1,14 +1,4 @@
 
-local skyboxImage
-local terrainImage
-local roadImage
-
-function preloadGrassLevel()
-    skyboxImage = love.graphics.newImage("assets/levels/skybox.png")
-    terrainImage = love.graphics.newImage("assets/levels/grass/ground.png")
-    roadImage = love.graphics.newImage("assets/levels/road.png")
-end
-
 function loadGrassLevel()
     PATH_POINTS = GRASS_PATH_POINTS
 
@@ -35,9 +25,14 @@ function loadGrassLevel()
 
     addMountainRelative(0.5, 0.30, 3, 0.07)
 
-    skybox(skyboxImage)
-    terrain(terrainImage)
-    makeRoad(roadImage)
+    if CASTLE_SERVER then
+        return
+    end
+
+    skybox(grassSkyboxImage)
+    terrain(grassTerrainImage)
+    makeRoad(grassRoadImage)
+    clearItems()
     makeItems(40)
     makeItems(140)
     makeItems(230)

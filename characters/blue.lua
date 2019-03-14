@@ -1,6 +1,6 @@
 local carAssets = nil
 
-function loadSpongeCharacter()
+function loadBlueCharacter()
     if not carAssets then
         carAssets = {}
         carAssets["front"] = love.graphics.newImage("assets/characters/blue/front.png")

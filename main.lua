@@ -2,24 +2,14 @@ Engine = require "engine"
 require "car"
 require "multiplayer"
 require "items.items"
-require "levels_tools.road"
-require "levels_tools.skybox"
-require "levels_tools.terrain"
-require "levels_tools.heightmap"
-
-require "levels.moon"
-require "levels.grass"
-require "levels.water"
-
-require "characters.anime"
-require "characters.shonen"
-require "characters.colorado"
-require "characters.sponge"
-require "characters.blue"
+require "levels.levels"
+require "levels.assets"
+require "characters.characters"
+require "characters.accessories"
 
 function resetGame()
     if ACTUAL_GAME then
-        Laps = 3
+        Laps = 1
     else
         Laps = 1
     end
@@ -100,9 +90,7 @@ function client.load()
     HugeFont = love.graphics.newFont(100)
     DefaultFont = love.graphics.getFont()
     loadItemImages()
-    preloadGrassLevel()
-    preloadWaterLevel()
-    preloadMoonLevel()
+    preloadLevels()
 
     love.graphics.setCanvas()
 
@@ -111,23 +99,46 @@ function client.load()
     --loadGrassLevel()
     -- CHOOSE CHARACTER STUFF
     GameState = "choose_character"
+    LocalLevel = nil
     ChooseCharacterState = "main"
     FontColor = {1, 1, 1, 1}
     FogColor = {1,1,1,1}
     FogStartDist = 5
     FogDivide = 100
 
-    Characters = {loadShonenCharacter, loadAnimeCharacter, loadColoradoCharacter, loadSpongeCharacter, loadBlueCharacter}
     CharacterIndex = 1
     for k,v in pairs(Characters) do
-        v()
+        --preload
+        v.action()
     end
-    Characters[CharacterIndex]()
-
-    Accessories = {accessoryNone, accessoryHat}
     AccessoryIndex = 1
+    ColorIndex = 1
+    Colors = {
+        {128,0,0},
+        {170,110,40},
+        {128,128,0},
+        {0,128,128},
+        {0,0,128},
+        {0,0,0},
+        {230,25,75},
+        {245,130,48},
+        {225,225,25},
+        {210,245,60},
+        {60,180,75},
+        {70,240,240},
+        {0,130,200},
+        {145,30,180},
+        {240,50,230},
+        {128,128,128},
+        {250,190,190},
+        {255,215,180},
+        {255,250,200},
+        {170,255,195},
+        {230,190,255},
+        {255,255,255}
+    }
     
-    Car = makeCar()
+    Car = makeCar(Characters[CharacterIndex].name, "none")
     Car.x = 0
     Car.y = 0
     Car.z = 0
@@ -151,8 +162,6 @@ function client.load()
         BooSound = love.audio.newSource("assets/boo.mp3", "stream")
         BooSound:setLooping(true)
     end
-
-
 
 
     --loadGrassLevel()
@@ -197,6 +206,7 @@ end
 function love.keypressed(key)
     if GameState == "choose_character" then
         local loadCharacter = false
+        local dontResetRotation = false
 
         if ChooseCharacterState == "accessory" then
             if key == "left" then
@@ -211,6 +221,20 @@ function love.keypressed(key)
                     AccessoryIndex = 1
                 end
                 loadCharacter = true
+            elseif key == "up" then
+                ColorIndex = ColorIndex - 1
+                if ColorIndex <= 0 then
+                    ColorIndex = #Colors
+                end
+                loadCharacter = true
+                dontResetRotation = true
+            elseif key == "down" then
+                ColorIndex = ColorIndex + 1
+                if ColorIndex > #Colors then
+                    ColorIndex = 1
+                end
+                loadCharacter = true
+                dontResetRotation = true
             elseif key == "return" then
                 GameState = "waiting_to_get_server_state"
             end
@@ -237,15 +261,20 @@ function love.keypressed(key)
         end
 
         if loadCharacter then
-            IntroCameraRotation = -math.pi/4
+            if dontResetRotation == false then
+                IntroCameraRotation = -math.pi/4
+            end
             removeCar(Car)
-            Characters[CharacterIndex]()
-            Car = makeCar()
+            local color = Colors[ColorIndex]
+            local newColor = {}
+            newColor[1] = color[1] / 256.0
+            newColor[2] = color[2] / 256.0
+            newColor[3] = color[3] / 256.0
+            Car = makeCar(Characters[CharacterIndex].name, Accessories[AccessoryIndex].name, newColor)
             Car.x = 0
             Car.y = 0
             Car.z = 0
             Car.angle = 0
-            Accessories[AccessoryIndex](Car)
         end
 
         return
@@ -306,6 +335,11 @@ function client.update(dt)
         return
     end
 
+    if ServerLevel and ServerLevel ~= LocalLevel then
+        Levels[ServerLevel].action()
+        LocalLevel = ServerLevel
+    end
+
     if ServerGameState and ServerGameState ~= GameState then
         if ServerGameState == "countdown" then
             GameCountdownTime = 0
@@ -321,7 +355,6 @@ function client.update(dt)
                 Car.vel.z = math.sin(Car.angle) * 5
             end
         elseif ServerGameState == "intro" then
-            loadWaterLevel()
             resetGame()
             switchToAmbient()
             stopCheering()
@@ -634,9 +667,11 @@ function client.draw()
                     local text = "CHOOSE YOUR CHARACTER"
                     if ChooseCharacterState == "accessory" then
                         text = "CHOOSE YOUR ACCESSORY"
+                        love.graphics.print("[LEFT] [RIGHT] to choose [UP] [DOWN] for color [ENTER] to select", GraphicsWidth / 2 - 350, GraphicsHeight - 80)
+                    else
+                        love.graphics.print("[LEFT] [RIGHT] to choose [ENTER] to select", GraphicsWidth / 2 - 235, GraphicsHeight - 80)
                     end
                     love.graphics.print(text, GraphicsWidth / 2 - 160, 100)
-                    love.graphics.print("<- -> [ENTER]", GraphicsWidth / 2 - 100, GraphicsHeight - 80)
                     love.graphics.setFont(DefaultFont)
                 end
             else

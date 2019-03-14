@@ -1,13 +1,4 @@
 
-local skyboxImage
-local terrainImage
-local roadImage
-
-function preloadWaterLevel()
-    skyboxImage = love.graphics.newImage("assets/levels/skybox.png")
-    terrainImage = love.graphics.newImage("assets/levels/water/ground.png")
-    roadImage = love.graphics.newImage("assets/levels/water/road.png")
-end
 
 function loadWaterLevel()
     PATH_POINTS = WATER_PATH_POINTS
@@ -26,9 +17,14 @@ function loadWaterLevel()
     MaxClosestRoadDistance = RoadRadius + 1
 
     makeHeightMap()
-    skybox(skyboxImage)
-    terrain(terrainImage, true)
-    makeRoad(roadImage)
+
+    if CASTLE_SERVER then
+        return
+    end
+
+    skybox(waterSkyboxImage)
+    terrain(waterTerrainImage, true)
+    makeRoad(waterRoadImage)
     clearItems()
     makeItems(40)
     makeItems(140)

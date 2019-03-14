@@ -6,52 +6,16 @@ function loadCarAssets(assets)
     carTop = assets["top"]
 end
 
-function accessoryNone(car)
-
-end
-
-function accessoryHat(car)
-    local hatTopHeight = 1.8
-    local hatBottomHeight = 0.9
-    local hatBrimSize = 1.2
-    local color = car.color
-
-    local hatFront = triColor({
-        {-hatBrimSize, hatBottomHeight, hatBrimSize},
-        {hatBrimSize, hatBottomHeight, hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    local hatBack = triColor({
-        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    local hatLeft = triColor({
-        {-hatBrimSize, hatBottomHeight, hatBrimSize},
-        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    local hatRight = triColor({
-        {hatBrimSize, hatBottomHeight, hatBrimSize},
-        {hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    table.insert(car.models, hatFront)
-    table.insert(car.models, hatBack)
-    table.insert(car.models, hatLeft)
-    table.insert(car.models, hatRight)
-end
-
-function makeCar(color)
+function makeCar(characterName, accessoryName, color)
     if not color then
         color = {math.random(), math.random(), math.random()}
     end
 
+    nameToCharacter(characterName).action()
+
     local Car = {
+        characterName = characterName,
+        accessoryName = accessoryName,
         size = 0.2,
         roadIndex = 0,
         accel = 500,
@@ -136,6 +100,7 @@ function makeCar(color)
     }, {0,0,0,1}, Car.size)]]--
 
     Car.models = {front, back, left, right, top}--, hatFront, hatBack, hatLeft, hatRight}--, eye1, eyePupil1, eye2, eyePupil2}
+    nameToAccessory(accessoryName).action(Car)
 
     return Car
 end

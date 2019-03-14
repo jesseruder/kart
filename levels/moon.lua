@@ -1,15 +1,4 @@
 
-local skyboxImage
-local terrainImage
-local roadImage
-
-function preloadMoonLevel()
-    skyboxImage = love.graphics.newImage("assets/levels/moon/skybox.png")
-    terrainImage = love.graphics.newImage("assets/levels/moon/ground.png")
-    roadImage = love.graphics.newImage("assets/levels/road.png")
-end
-
-
 function loadMoonLevel()
     PATH_POINTS = MOON_PATH_POINTS
 
@@ -31,9 +20,14 @@ function loadMoonLevel()
     end
     math.randomseed(os.time())
 
-    skybox(skyboxImage)
-    terrain(terrainImage)
-    makeRoad(roadImage)
+    if CASTLE_SERVER then
+        return
+    end
+
+    skybox(moonSkyboxImage)
+    terrain(moonTerrainImage)
+    makeRoad(moonRoadImage)
+    clearItems()
     makeItems(40)
     makeItems(140)
     makeItems(230)

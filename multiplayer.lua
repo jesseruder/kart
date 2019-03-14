@@ -16,6 +16,8 @@ function sendMultiplayerUpdate()
         home.car.size = Car.size
         home.car.vel = Car.vel
         home.car.color = Car.color
+        home.car.characterName = Car.characterName
+        home.car.accessoryName = Car.accessoryName
         home.car.x = Car.x
         home.car.y = Car.y
         home.car.z = Car.z
@@ -41,6 +43,8 @@ function updateCarFromRemote(dt, car, remote)
     car.size = remote.size
     car.vel = remote.vel
     car.color = remote.color
+    car.characterName = remote.characterName
+    car.accessoryName = remote.accessoryName
     car.hitByShellTime = remote.hitByShellTime
     if car.serverX == remote.x and car.serverY == remote.y and car.serverZ == remote.z then
         car.x = car.x + remote.vel.x * dt
@@ -76,6 +80,7 @@ NumPlayers = 0
 function getMultiplayerUpdate(dt)
     if client.connected then
         ServerGameState = share.gameState
+        ServerLevel = share.level
         IsRequestingStart = share.isRequestingStart or false
         AllTakenItems = share.takenItems or {}
         Winner = share.winner
@@ -102,7 +107,7 @@ function getMultiplayerUpdate(dt)
 
                 if not otherCars[id] then
                     print("make car " .. id)
-                    otherCars[id] = makeCar(car.color)
+                    otherCars[id] = makeCar(car.characterName, car.accessoryName, car.color)
                 end
 
                 otherCars[id].seenThisUpdate = true
