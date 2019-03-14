@@ -62,7 +62,17 @@ function server.load()
     end
 end
 
+local time = 0
+local floorTime = 0
 function server.update(dt)
+    time = time + dt
+    local printThisFrame = false
+    if math.floor(time) > floorTime then
+        floorTime = math.floor(time)
+        print("time: " .. floorTime)
+        printThisFrame = true
+    end
+
     for cark, car in pairs(share.cars) do
         if car.hitByShellTime then
             car.hitByShellTime = car.hitByShellTime - dt
@@ -232,6 +242,9 @@ function server.update(dt)
 
         shell.velx = dx * SHELL_SPEED / speed
         shell.velz = dz * SHELL_SPEED / speed
+        if printThisFrame then
+            print("velx " .. shell.velx .. " velz " .. shell.velz .. " speed " .. speed)
+        end
         shell.x = shell.x + dt * shell.velx
         shell.z = shell.z + dt * shell.velz
         shell.y = heightAtPoint(shell.x, shell.z).height + 0.2
