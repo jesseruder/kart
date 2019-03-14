@@ -21,7 +21,7 @@ LocalShells = {}
 
 function loadItemImages()
     ItemTypes = {
-        --[[{
+        {
             name = "mushroom",
             image = love.graphics.newImage("assets/items/mushroom.png"),
             action = function() 
@@ -47,7 +47,7 @@ function loadItemImages()
             name = "banana",
             image = love.graphics.newImage("assets/items/banana.png"),
             action = makeBanana
-        },]]--
+        },
         {
             name = "redshell",
             image = love.graphics.newImage("assets/items/redshell.png"),
