@@ -1,6 +1,9 @@
 local roadModels = nil
 
-function makeRoad(imagePath)
+local imageFinishLine = love.graphics.newImage("assets/finish-line.png")
+imageFinishLine:setWrap('repeat','repeat')
+
+function makeRoad(imageRoad)
     if roadModels then
         for k,v in pairs(roadModels) do
             v.dead = true
@@ -10,10 +13,6 @@ function makeRoad(imagePath)
     roadModels = {}
 
     local elev = 0.1
-
-    local imageRoad = love.graphics.newImage(imagePath)
-    local imageFinishLine = love.graphics.newImage("assets/finish-line.png")
-    imageFinishLine:setWrap('repeat','repeat')
 
     local lastPoint = PATH_POINTS[#PATH_POINTS]
     local finishLineTexY = 0

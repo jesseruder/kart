@@ -100,6 +100,9 @@ function client.load()
     HugeFont = love.graphics.newFont(100)
     DefaultFont = love.graphics.getFont()
     loadItemImages()
+    preloadGrassLevel()
+    preloadWaterLevel()
+    preloadMoonLevel()
 
     love.graphics.setCanvas()
 
@@ -120,6 +123,9 @@ function client.load()
         v()
     end
     Characters[CharacterIndex]()
+
+    Accessories = {accessoryNone, accessoryHat}
+    AccessoryIndex = 1
     
     Car = makeCar()
     Car.x = 0
@@ -191,28 +197,55 @@ end
 function love.keypressed(key)
     if GameState == "choose_character" then
         local loadCharacter = false
-        if key == "left" then
-            CharacterIndex = CharacterIndex - 1
-            if CharacterIndex <= 0 then
-                CharacterIndex = #Characters
+
+        if ChooseCharacterState == "accessory" then
+            if key == "left" then
+                AccessoryIndex = AccessoryIndex - 1
+                if AccessoryIndex <= 0 then
+                    AccessoryIndex = #Accessories
+                end
+                loadCharacter = true
+            elseif key == "right" then
+                AccessoryIndex = AccessoryIndex + 1
+                if AccessoryIndex > #Accessories then
+                    AccessoryIndex = 1
+                end
+                loadCharacter = true
+            elseif key == "return" then
+                GameState = "waiting_to_get_server_state"
             end
-            loadCharacter = true
-        elseif key == "right" then
-            CharacterIndex = CharacterIndex + 1
-            if CharacterIndex > #Characters then
-                CharacterIndex = 1
+        end
+
+        if ChooseCharacterState == "main" then
+            if key == "left" then
+                CharacterIndex = CharacterIndex - 1
+                if CharacterIndex <= 0 then
+                    CharacterIndex = #Characters
+                end
+                loadCharacter = true
+            elseif key == "right" then
+                CharacterIndex = CharacterIndex + 1
+                if CharacterIndex > #Characters then
+                    CharacterIndex = 1
+                end
+                loadCharacter = true
+            elseif key == "return" then
+                ChooseCharacterState = "accessory"
+                AccessoryIndex = 2
+                loadCharacter = true
             end
-            loadCharacter = true
         end
 
         if loadCharacter then
-            IntroCameraRotation = -math.pi/4
+            IntroCameraRotation = -math.pi/3
+            removeCar(Car)
             Characters[CharacterIndex]()
             Car = makeCar()
             Car.x = 0
             Car.y = 0
             Car.z = 0
             Car.angle = 0
+            Accessories[AccessoryIndex](Car)
         end
 
         return
@@ -225,18 +258,48 @@ function love.keypressed(key)
 end
 
 function client.update(dt)
+    TimeElapsed = TimeElapsed + dt
+    -- Scene:basicCamera(dt)
+    
+    LogicAccumulator = LogicAccumulator+dt
+
+    -- update 3d scene
+    PhysicsStep = false
+    if LogicAccumulator >= 1/LogicRate then
+        LogicAccumulator = LogicAccumulator - 1/LogicRate
+        PhysicsStep = true
+    end
+
+    Scene:update()
+    
     if GameState == "choose_character" then
+        ChooseCharacterCameraRotationDist = 1.0
+        ChooseCharacterCameraRotationSpeed = 0.6
+        local height = 0.3
+        local speed = 0.9
+
+        if ChooseCharacterState == "accessory" then
+            ChooseCharacterCameraRotationDist = 1.5
+            height = 0.5
+        end
+
         local Camera = Engine.camera
         IntroCameraRotation = IntroCameraRotation + dt * ChooseCharacterCameraRotationSpeed
-        Camera.pos.x = Car.x + math.cos(IntroCameraRotation) * ChooseCharacterCameraRotationDist
-        Camera.pos.z = Car.z + math.sin(IntroCameraRotation) * ChooseCharacterCameraRotationDist
-        Camera.pos.y = 0.3
+        local dx = Car.x + math.cos(IntroCameraRotation) * ChooseCharacterCameraRotationDist - Camera.pos.x
+        local dz = Car.z + math.sin(IntroCameraRotation) * ChooseCharacterCameraRotationDist - Camera.pos.z
+        local dy = height - Camera.pos.y
+
+        local s = 1.0--math.sqrt(dx*dx + dy*dy + dz*dz)
+
+        Camera.pos.x = Camera.pos.x + speed * dx * dt / s
+        Camera.pos.y = Camera.pos.y + speed * dy * dt / s
+        Camera.pos.z = Camera.pos.z + speed * dz * dt / s
+
         Camera.angle.x = math.pi-math.atan2(Car.x - Camera.pos.x, Car.z - Camera.pos.z)
         Camera.angle.y = 0.3
         return
     end
 
-    TimeElapsed = TimeElapsed + dt
     getMultiplayerUpdate(dt)
 
     if ServerGameState and ServerGameState ~= GameState then
@@ -254,6 +317,7 @@ function client.update(dt)
                 Car.vel.z = math.sin(Car.angle) * 5
             end
         elseif ServerGameState == "intro" then
+            loadWaterLevel()
             resetGame()
             switchToAmbient()
             stopCheering()
@@ -269,18 +333,6 @@ function client.update(dt)
         end
 
         GameState = ServerGameState
-    end
-
-    -- Scene:basicCamera(dt)
-    
-    LogicAccumulator = LogicAccumulator+dt
-
-    -- update 3d scene
-    Scene:update()
-    PhysicsStep = false
-    if LogicAccumulator >= 1/LogicRate then
-        LogicAccumulator = LogicAccumulator - 1/LogicRate
-        PhysicsStep = true
     end
 
     -- update everything
@@ -575,8 +627,12 @@ function client.draw()
 
                 if GameState == "choose_character" then
                     love.graphics.setFont(BigFont)
-                    love.graphics.print("CHOOSE YOUR CHARACTER", GraphicsWidth / 2 - 160, 100)
-                    love.graphics.print("<- -> [ENTER]", GraphicsWidth / 2 - 100, GraphicsHeight - 100)
+                    local text = "CHOOSE YOUR CHARACTER"
+                    if ChooseCharacterState == "accessory" then
+                        text = "CHOOSE YOUR ACCESSORY"
+                    end
+                    love.graphics.print(text, GraphicsWidth / 2 - 160, 100)
+                    love.graphics.print("<- -> [ENTER]", GraphicsWidth / 2 - 100, GraphicsHeight - 50)
                     love.graphics.setFont(DefaultFont)
                 end
             else

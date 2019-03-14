@@ -1,11 +1,10 @@
 local terrainModel = nil
 
-function terrain(path, wave)
+function terrain(imageDirt, wave)
     if terrainModel then
         terrainModel.dead = true
     end
 
-    imageDirt = love.graphics.newImage(path)
     imageDirt:setWrap('repeat','repeat')
 
     local groundVerts = {}

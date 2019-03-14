@@ -1,6 +1,6 @@
 local skyboxModels = nil
 
-function skybox(path)
+function skybox(imageSkybox)
     if skyboxModels then
         for k,v in pairs(skyboxModels) do
             v.dead = true
@@ -8,7 +8,6 @@ function skybox(path)
     end
 
     local lowY = -1
-    imageSkybox = love.graphics.newImage(path)
     -- front
     local front = rect({
         {-WorldSize, lowY, -WorldSize,                 0.25, 0.5},

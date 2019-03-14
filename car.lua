@@ -6,6 +6,46 @@ function loadCarAssets(assets)
     carTop = assets["top"]
 end
 
+function accessoryNone(car)
+
+end
+
+function accessoryHat(car)
+    local hatTopHeight = 1.8
+    local hatBottomHeight = 0.9
+    local hatBrimSize = 1.2
+    local color = car.color
+
+    local hatFront = triColor({
+        {-hatBrimSize, hatBottomHeight, hatBrimSize},
+        {hatBrimSize, hatBottomHeight, hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    local hatBack = triColor({
+        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    local hatLeft = triColor({
+        {-hatBrimSize, hatBottomHeight, hatBrimSize},
+        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    local hatRight = triColor({
+        {hatBrimSize, hatBottomHeight, hatBrimSize},
+        {hatBrimSize, hatBottomHeight, -hatBrimSize},
+        {0, hatTopHeight, 0}
+    }, color, Car.size)
+
+    table.insert(car.models, hatFront)
+    table.insert(car.models, hatBack)
+    table.insert(car.models, hatLeft)
+    table.insert(car.models, hatRight)
+end
+
 function makeCar(color)
     if not color then
         color = {math.random(), math.random(), math.random()}
@@ -57,34 +97,6 @@ function makeCar(color)
         {1, 1, -1,    0,1},
         {-1, 1, -1,   1,1}
     }, carTop, Car.size)
-
-    local hatTopHeight = 1.8
-    local hatBottomHeight = 0.9
-    local hatBrimSize = 1.2
---[[
-    local hatFront = triColor({
-        {-hatBrimSize, hatBottomHeight, hatBrimSize},
-        {hatBrimSize, hatBottomHeight, hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    local hatBack = triColor({
-        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    local hatLeft = triColor({
-        {-hatBrimSize, hatBottomHeight, hatBrimSize},
-        {-hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)
-
-    local hatRight = triColor({
-        {hatBrimSize, hatBottomHeight, hatBrimSize},
-        {hatBrimSize, hatBottomHeight, -hatBrimSize},
-        {0, hatTopHeight, 0}
-    }, color, Car.size)]]--
 
     --[[
     local eyeSize = 0.4

@@ -1,3 +1,14 @@
+
+local skyboxImage
+local terrainImage
+local roadImage
+
+function preloadWaterLevel()
+    skyboxImage = love.graphics.newImage("assets/levels/skybox.png")
+    terrainImage = love.graphics.newImage("assets/levels/water/ground.png")
+    roadImage = love.graphics.newImage("assets/levels/water/road.png")
+end
+
 function loadWaterLevel()
     PATH_POINTS = WATER_PATH_POINTS
 
@@ -15,9 +26,9 @@ function loadWaterLevel()
     MaxClosestRoadDistance = RoadRadius + 1
 
     makeHeightMap()
-    skybox("assets/levels/skybox.png")
-    terrain("assets/levels/water/ground.png", true)
-    makeRoad("assets/levels/water/road.png")
+    skybox(skyboxImage)
+    terrain(terrainImage, true)
+    makeRoad(roadImage)
     makeItems(40)
     makeItems(140)
     makeItems(200)
@@ -25,7 +36,7 @@ function loadWaterLevel()
     heightAtPoint = function(x, y)
         -- same as shader
         return {
-            height = 0.1 * math.sin(TimeElapsed * 0.2 + y * 0.3) + 0.1 * math.sin(TimeElapsed * 0.25 + 1.0 + x * 1.2),
+            height = -0.2 + 0.1 * math.sin(TimeElapsed * 0.2 + y * 0.3) + 0.1 * math.sin(TimeElapsed * 0.25 + 1.0 + x * 1.2),
             normal = {0,1,0}
         }
     end
