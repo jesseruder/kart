@@ -56,7 +56,7 @@ function server.load()
     share.level = SortedLevels[LevelIndex]
 
     if CASTLE_SERVER then
-        Levels[1].action()
+        Levels[share.level].action()
     end
 end
 
@@ -96,6 +96,10 @@ function server.update(dt)
             LevelIndex = 1
         end
         share.level = SortedLevels[LevelIndex]
+
+        if CASTLE_SERVER then
+            Levels[share.level].action()
+        end
         bananas = {}
         shells = {}
     end
