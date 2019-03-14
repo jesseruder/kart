@@ -2,6 +2,8 @@
 function preloadLevels()
     defaultSkybox = love.graphics.newImage("assets/levels/skybox.png")
     defaultRoad = love.graphics.newImage("assets/levels/road.png")
+    defaultWall = love.graphics.newImage("assets/levels/wall.png")
+    defaultWall:setWrap('repeat','repeat')
 
     imageFinishLine = love.graphics.newImage("assets/finish-line.png")
     imageFinishLine:setWrap('repeat','repeat')
@@ -9,10 +11,12 @@ function preloadLevels()
     grassSkyboxImage = defaultSkybox
     grassTerrainImage = love.graphics.newImage("assets/levels/grass/ground.png")
     grassRoadImage = defaultRoad
+    grassWallImage = defaultWall
 
     moonSkyboxImage = love.graphics.newImage("assets/levels/moon/skybox.png")
     moonTerrainImage = love.graphics.newImage("assets/levels/moon/ground.png")
     moonRoadImage = defaultRoad
+    moonWallImage = defaultWall
 
     waterSkyboxImage = defaultSkybox
     waterTerrainImage = love.graphics.newImage("assets/levels/water/ground.png")

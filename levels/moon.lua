@@ -10,7 +10,7 @@ function loadMoonLevel()
     WorldSize = 30
     RoadScale = 35
     RoadRadius = 1.5
-    MaxClosestRoadDistance = RoadRadius + 1
+    MaxClosestRoadDistance = RoadRadius + 2
 
     makeHeightMap()
     math.randomseed(128310)
@@ -22,7 +22,8 @@ function loadMoonLevel()
 
     updatePathPoints()
     makeEmptyJump(181, 4, 2.7, 7, -1.3)
-    makeRoad(moonRoadImage)
+    makeJump(250)
+    makeRoad(moonRoadImage, moonWallImage)
 
     if CASTLE_SERVER then
         return

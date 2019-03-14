@@ -10,7 +10,7 @@ function loadGrassLevel()
     WorldSize = 50
     RoadScale = 35
     RoadRadius = 1.7
-    MaxClosestRoadDistance = RoadRadius + 1
+    MaxClosestRoadDistance = RoadRadius + 2
 
     makeHeightMap()
     addMountainRelative(0, 0, 6, 0.1)
@@ -26,7 +26,7 @@ function loadGrassLevel()
     addMountainRelative(0.5, 0.30, 3, 0.07)
 
     updatePathPoints()
-    makeRoad(grassRoadImage)
+    makeRoad(grassRoadImage, grassWallImage)
 
     if CASTLE_SERVER then
         return

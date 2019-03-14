@@ -19,7 +19,7 @@ function loadWaterLevel()
     makeHeightMap()
 
     updatePathPoints()
-    makeRoad(waterRoadImage)
+    makeRoad(waterRoadImage, nil)
 
     if CASTLE_SERVER then
         return

@@ -178,6 +178,11 @@ function recordLap()
     end
 end
 
+function showAlert(text)
+    AlertTime = 1.0
+    AlertText = text
+end
+
 --[[
 1     2
 
@@ -513,6 +518,7 @@ function client.update(dt)
     if RESET_CAR and closestRoadDistance > MaxClosestRoadDistance then
         Car.x = PATH_POINTS[closestRoadIndex][1] * RoadScale - RoadScale / 2.0
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
+        showAlert("Out of bounds!")
     end
 
     if Car.roadIndex > #PATH_POINTS * 0.4 and Car.roadIndex < #PATH_POINTS * 0.6 then
@@ -655,6 +661,13 @@ function client.update(dt)
     if GameCountdownBright then
         GameCountdownBright = GameCountdownBright - dt * 2
     end
+
+    if AlertTime then
+        AlertTime = AlertTime - dt
+        if AlertTime < 0.0 then
+            AlertTime = nil
+        end
+    end
 end
 
 function client.draw()
@@ -682,6 +695,12 @@ function client.draw()
                     else
                         love.graphics.print("hold [space] when ready", GraphicsWidth / 2 - 130, GraphicsHeight - 80)
                     end
+                    love.graphics.setFont(DefaultFont)
+                end
+
+                if AlertTime then
+                    love.graphics.setFont(HugeFont)
+                    love.graphics.print(AlertText, GraphicsWidth / 2 - 350, GraphicsHeight / 2 - 50)
                     love.graphics.setFont(DefaultFont)
                 end
 
