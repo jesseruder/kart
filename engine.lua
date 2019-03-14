@@ -150,11 +150,19 @@ function engine.newScene(renderWidth,renderHeight)
         uniform mat4 view;
         uniform mat4 model_matrix;
         uniform float fog_amt;
+        uniform float wave;
+        uniform float time;
+        uniform vec4 fogColor;
         varying float fogDistance;
 
         #ifdef VERTEX
         vec4 position(mat4 transform_projection, vec4 vertex_position) {
-            vec4 result = view * model_matrix * vertex_position;
+            vec4 p = vertex_position;
+            if (wave > 0.0) {
+                p.y = p.y + 0.1 * sin(time * 0.2 + p.z * 0.3) + 0.1 * sin(time * 0.25 + 1.0 + p.x * 1.2);
+            }
+
+            vec4 result = view * model_matrix * p;
             fogDistance = length(result.xyz);
             return result;
         }
@@ -162,7 +170,12 @@ function engine.newScene(renderWidth,renderHeight)
 
         #ifdef PIXEL
         vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-            vec4 texturecolor = Texel(texture, texture_coords);
+            vec2 coords = texture_coords;
+            if (wave > 0.0) {
+                coords = coords + vec2(0.1 * sin(time + coords.y), 0.1 * sin(time * 0.3 + 1.0 + coords.x * 2.0));
+            }
+
+            vec4 texturecolor = Texel(texture, coords);
             //if the alpha here is close to zero just don't draw anything here
             if (texturecolor.a == 0.0)
             {
@@ -179,7 +192,7 @@ function engine.newScene(renderWidth,renderHeight)
                 fogAmount = fogAmount * fog_amt;
             }
 
-            return (color*texturecolor*(1.0 - fogAmount)) + (vec4(0.0, 0.0, 0.0, 1.0) * fogAmount);
+            return (color*texturecolor*(1.0 - fogAmount)) + (fogColor * fogAmount);
         }
         #endif
     ]]
@@ -289,7 +302,7 @@ function engine.newScene(renderWidth,renderHeight)
 
     -- renders the models in the scene to the threeCanvas
     -- will draw threeCanvas if drawArg is not given or is true (use if you want to scale the game canvas to window)
-    scene.render = function (self, drawArg)
+    scene.render = function (self, drawArg, timeElapsed)
         love.graphics.clear(0,0,0,0)
         love.graphics.setColor(1,1,1)
         love.graphics.setCanvas({self.threeCanvas, depth=true})
@@ -322,6 +335,13 @@ function engine.newScene(renderWidth,renderHeight)
                     fogAmount = model.fogAmount
                 end
                 self.threeShader:send("fog_amt", fogAmount)
+                self.threeShader:send("fogColor", FogColor)
+                local wave = 0.0
+                if model.wave then
+                    wave = 1.0
+                end
+                self.threeShader:send("wave", wave)
+                self.threeShader:send("time", timeElapsed)
                 -- need the inverse to compute normals when model is rotated
                 --self.threeShader:send("model_matrix_inverse", TransposeMatrix(InvertMatrix(model.transform)))
                 love.graphics.setWireframe(model.wireframe)

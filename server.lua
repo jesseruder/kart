@@ -1,5 +1,8 @@
-require "path"
-require "heightmap"
+require "levels.moon"
+require "levels_tools.road"
+require "levels_tools.skybox"
+require "levels_tools.terrain"
+require "levels_tools.heightmap"
 
 local cs = require 'share.cs'
 local server = cs.server
@@ -37,7 +40,10 @@ end
 
 function server.load()
     share.cars = {}
-    makeHeightMap()
+
+    if CASTLE_SERVER then
+        loadMoonLevel()
+    end
 end
 
 function server.update(dt)

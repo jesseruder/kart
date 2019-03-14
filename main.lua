@@ -1,9 +1,18 @@
 Engine = require "engine"
-require "path"
-require "heightmap"
 require "car"
 require "multiplayer"
-require "items"
+require "items.items"
+require "levels_tools.road"
+require "levels_tools.skybox"
+require "levels_tools.terrain"
+require "levels_tools.heightmap"
+
+require "levels.moon"
+require "levels.grass"
+require "levels.water"
+
+require "characters.anime"
+require "characters.shonen"
 
 function resetGame()
     if ACTUAL_GAME then
@@ -78,6 +87,7 @@ function client.load()
     InterfaceWidth, InterfaceHeight = GraphicsWidth, GraphicsHeight
     OffsetX = 0
     OffsetY = 0
+    TimeElapsed = 0.0
     love.graphics.setBackgroundColor(0,0.7,0.95)
     love.graphics.setDefaultFilter("linear", "linear")
     love.graphics.setLineStyle("rough")
@@ -92,79 +102,10 @@ function client.load()
 
     Scene = Engine.newScene(GraphicsWidth, GraphicsHeight)
 
-    imageCheese = love.graphics.newImage("assets/cheese.png")
+    loadShonenCharacter()
     Car = makeCar()
 
-    makeHeightMap()
-    imageDirt = love.graphics.newImage("assets/grass.png")
-    imageDirt:setWrap('repeat','repeat')
-
-    local groundVerts = {}
-    for x = 1, #HEIGHTS-1 do
-        for y = 1, #HEIGHTS[x]-1 do
-            local worldX = x * GridSize - WorldSize
-            local worldY = y * GridSize - WorldSize
-
-            table.insert(groundVerts, {worldX, HEIGHTS[x][y], worldY,    worldX/4, worldY/4})
-            table.insert(groundVerts, {worldX+GridSize, HEIGHTS[x+1][y], worldY,    (worldX + GridSize)/4, worldY/4})
-            table.insert(groundVerts, {worldX, HEIGHTS[x][y+1], worldY+GridSize,    worldX/4, (worldY + GridSize)/4})
-
-
-            table.insert(groundVerts, {worldX+GridSize, HEIGHTS[x+1][y], worldY,    (worldX + GridSize)/4, worldY/4})
-            table.insert(groundVerts, {worldX+GridSize, HEIGHTS[x+1][y+1], worldY+GridSize,    (worldX + GridSize)/4, (worldY + GridSize)/4})
-            table.insert(groundVerts, {worldX, HEIGHTS[x][y+1], worldY+GridSize,    worldX/4, (worldY + GridSize)/4})
-        end
-    end
-    local groundModel = Engine.newModel(groundVerts, imageDirt)
-    table.insert(Scene.modelList, groundModel)
-
-
-    imageSkybox = love.graphics.newImage("assets/skybox.png")
-    -- front
-    rect({
-        {-WorldSize, 0, -WorldSize,                 0.25, 0.5},
-        {-WorldSize, SkyboxHeight, -WorldSize,      0.25, 0.3333},
-        {WorldSize, SkyboxHeight, -WorldSize,       0.5, 0.3333},
-        {WorldSize, 0, -WorldSize,                  0.5, 0.5}
-    }, imageSkybox, nil, 0.0)
-
-    -- right
-    rect({
-        {WorldSize, 0, -WorldSize,                 0.5, 0.5},
-        {WorldSize, SkyboxHeight, -WorldSize,      0.5, 0.3333},
-        {WorldSize, SkyboxHeight, WorldSize,       0.75, 0.3333},
-        {WorldSize, 0, WorldSize,                  0.75, 0.5}
-    }, imageSkybox, nil, 0.0)
-
-    -- back
-    rect({
-        {WorldSize, 0, WorldSize,                 0.75, 0.5},
-        {WorldSize, SkyboxHeight, WorldSize,      0.75, 0.3333},
-        {-WorldSize, SkyboxHeight, WorldSize,       1, 0.3333},
-        {-WorldSize, 0, WorldSize,                  1, 0.5}
-    }, imageSkybox, nil, 0.0)
-
-    -- left
-    rect({
-        {-WorldSize, 0, WorldSize,                 0, 0.5},
-        {-WorldSize, SkyboxHeight, WorldSize,      0, 0.3333},
-        {-WorldSize, SkyboxHeight, -WorldSize,       0.25, 0.3333},
-        {-WorldSize, 0, -WorldSize,                  0.25, 0.5}
-    }, imageSkybox, nil, 0.0)
-
-    -- top
-    rect({
-        {-WorldSize, SkyboxHeight, -WorldSize,     0.25, 0.3333},
-        {WorldSize, SkyboxHeight, -WorldSize,      0.5, 0.3333},
-        {WorldSize, SkyboxHeight, WorldSize,       0.5, 0},
-        {-WorldSize, SkyboxHeight, WorldSize,      0.25, 0}
-    }, imageSkybox, nil, 0.0)
-
-
-    makeRoad()
-    makeItems(40)
-    makeItems(140)
-    makeItems(230)
+    loadWaterLevel()
 
     if ACTUAL_GAME == false then
         makeItems(5)
@@ -231,6 +172,7 @@ function love.keypressed(key)
 end
 
 function client.update(dt)
+    TimeElapsed = TimeElapsed + dt
     getMultiplayerUpdate(dt)
 
     if ServerGameState and ServerGameState ~= GameState then
@@ -479,7 +421,7 @@ end
 function client.draw()
     -- draw 3d scene
     if client.connected then
-        Scene:render(true)
+        Scene:render(true, TimeElapsed)
     else
         love.graphics.clear(0,0,0,0)
     end
@@ -573,50 +515,4 @@ end
 function love.mousemoved(x,y, dx,dy)
     -- forward mouselook to Scene object for first person camera control
     -- Scene:mouseLook(x,y, dx,dy)
-end
-
-function makeRoad()
-    local elev = 0.1
-
-    local imageRoad = love.graphics.newImage("assets/road.png")
-    local imageFinishLine = love.graphics.newImage("assets/finish-line.png")
-    imageFinishLine:setWrap('repeat','repeat')
-
-    local lastPoint = PATH_POINTS[#PATH_POINTS]
-    local finishLineTexY = 0
-    local finishLineTexInc = 1
-
-    for k,v in pairs(PATH_POINTS) do
-        local lx = lastPoint[1] * RoadScale - RoadScale / 2.0
-        local ly = lastPoint[2] * RoadScale - RoadScale / 2.0
-        local la = lastPoint[3]
-        local ldx = math.cos(la + math.pi/2) * RoadRadius
-        local ldy = math.sin(la + math.pi/2) * RoadRadius
-
-        local x = v[1] * RoadScale - RoadScale / 2.0
-        local y = v[2] * RoadScale - RoadScale / 2.0
-        local a = v[3]
-        local dx = math.cos(a + math.pi/2) * RoadRadius
-        local dy = math.sin(a + math.pi/2) * RoadRadius
-
-        local i = imageRoad
-        local texCoordBegin = 0
-        local texCoordEnd = 1
-        if k > 1 and k < 4 then
-            i = imageFinishLine
-            texCoordBegin = finishLineTexY
-            texCoordEnd = finishLineTexY + finishLineTexInc
-            finishLineTexY = finishLineTexY + finishLineTexInc
-        end
-
-        --elev = elev + 0.05
-        rect({
-            {lx - ldx, elev + heightAtPoint(lx - ldx, ly - ldy).height, ly - ldy,    0, texCoordBegin},
-            {x - dx, elev + heightAtPoint(x - dx, y - dy).height, y - dy,   0,texCoordEnd},
-            {x + dx, elev + heightAtPoint(x + dx, y + dy).height, y + dy,     1,texCoordEnd},
-            {lx + ldx, elev + heightAtPoint(lx + ldx, ly + ldy).height, ly + ldy,    1,texCoordBegin}
-        }, i)
-
-        lastPoint = v
-    end
 end

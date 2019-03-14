@@ -1,5 +1,5 @@
-require "bananas"
-require "shells"
+require "items.bananas"
+require "items.shells"
 
 local items = {}
 local itemSize = 0.1

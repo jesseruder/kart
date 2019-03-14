@@ -1,6 +1,36 @@
+function loadMoonLevel()
+    PATH_POINTS = MOON_PATH_POINTS
+
+    heightAtPoint = function(x, y)
+        return _heightAtPoint(x, y)
+    end
+
+    WorldSize = 30
+    RoadScale = 35
+    RoadRadius = 1.5
+    MaxClosestRoadDistance = RoadRadius + 1
+
+    makeHeightMap()
+    math.randomseed(128310)
+    local numRows = 2 * WorldSize / GridSize
+    for i = 0, 10 do
+        addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 7), math.random() * 0.2 + 0.05)
+    end
+    math.randomseed(os.time())
+
+    skybox("assets/levels/moon/skybox.png")
+    terrain("assets/levels/moon/ground.png")
+    makeRoad("assets/levels/road.png")
+    makeItems(40)
+    makeItems(140)
+    makeItems(230)
+
+    FogColor = {0,0,0,1}
+end
+
 -- generate with createpath.html
 -- format is x,y,angle
-PATH_POINTS = {{0.05714285714285714, 0.29411764705882354, -0.718829999621625},
+MOON_PATH_POINTS = {{0.05714285714285714, 0.29411764705882354, -0.718829999621625},
 {0.07006908232431157, 0.28467944840100784, -0.47335144450944666},
 {0.08327719544845202, 0.27903704886090697, -0.2472280670397633},
 {0.09877399452496549, 0.27649256234871283, -0.019853885151829287},

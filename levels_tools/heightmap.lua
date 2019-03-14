@@ -17,14 +17,6 @@ function makeHeightMap()
         x = x + GridSize
         xi = xi + 1
     end
-
-    math.randomseed(128310)
-    local numRows = 2 * WorldSize / GridSize
-    for i = 0, 10 do
-        addMountain(math.floor(math.random() * numRows), math.floor(math.random() * numRows), math.floor(math.random() * 7), math.random() * 0.2 + 0.05)
-    end
-
-    math.randomseed(os.time())
 end
 
 function addMountain(centerX, centerY, height, slope)
@@ -87,7 +79,7 @@ function lineIntersection(planePoint, planeNormal, linePoint, lineDirection)
     }
 end
 
-function heightAtPoint(x, y)
+function _heightAtPoint(x, y)
     if x < -WorldSize or x > WorldSize or y < -WorldSize or y > WorldSize then
         return {
             height = 0,
@@ -101,6 +93,13 @@ function heightAtPoint(x, y)
     local gridY = math.floor(unfloorY)
     local percentX = unfloorX - gridX
     local percentY = unfloorY - gridY
+
+    if not HEIGHTS[gridX][gridY] then
+        return {
+            height = 0,
+            normal = {0,1,0}
+        }
+    end
 
     local baseVec = {
         x = gridX * GridSize - WorldSize,

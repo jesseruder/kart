@@ -17,37 +17,51 @@ function makeCar(color)
     }
 
     local front = rect({
-        {-1, -1, 1,   0,0},
-        {-1, 1, 1,    0,1},
-        {1, 1, 1,     1,1},
-        {1, -1, 1,    1,0}
-    }, imageCheese, Car.size)
+        {-1, -1, 1,   1,0},
+        {-1, 1, 1,    1,1},
+        {1, 1, 1,     0,1},
+        {1, -1, 1,    0,0}
+    }, carSide, Car.size)
 
     local back = rect({
-        {-1, -1, -1,  0,0},
-        {-1, 1, -1,   0,1},
-        {1, 1, -1,    1,1},
-        {1, -1, -1,   1,0}
-    }, imageCheese, Car.size)
+        {-1, -1, -1,  1,0},
+        {-1, 1, -1,   1,1},
+        {1, 1, -1,    0,1},
+        {1, -1, -1,   0,0}
+    }, carSide, Car.size)
 
     local left = rect({
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {-1, 1, -1,   1,1},
         {-1, -1, -1,   1,0}
-    }, imageCheese, Car.size)
+    }, carBack, Car.size)
 
     local right = rect({
-        {1, -1, 1,    0,0},
-        {1, 1, 1,     0,1},
-        {1, 1, -1,    1, 1},
-        {1, -1, -1,   1,0}
-    }, imageCheese, Car.size)
+        {1, -1, 1,    0,1},
+        {1, 1, 1,     0,0},
+        {1, 1, -1,    1,0},
+        {1, -1, -1,   1,1}
+    }, carFront, Car.size)
+
+    local right = rect({
+        {1, -1, 1,    0,1},
+        {1, 1, 1,     0,0},
+        {1, 1, -1,    1,0},
+        {1, -1, -1,   1,1}
+    }, carFront, Car.size)
+
+    local top = rect({
+        {-1, 1, 1,    1,0},
+        {1, 1, 1,     0,0},
+        {1, 1, -1,    0,1},
+        {-1, 1, -1,   1,1}
+    }, carTop, Car.size)
 
     local hatTopHeight = 1.8
     local hatBottomHeight = 0.9
     local hatBrimSize = 1.2
-
+--[[
     local hatFront = triColor({
         {-hatBrimSize, hatBottomHeight, hatBrimSize},
         {hatBrimSize, hatBottomHeight, hatBrimSize},
@@ -70,8 +84,9 @@ function makeCar(color)
         {hatBrimSize, hatBottomHeight, hatBrimSize},
         {hatBrimSize, hatBottomHeight, -hatBrimSize},
         {0, hatTopHeight, 0}
-    }, color, Car.size)
+    }, color, Car.size)]]--
 
+    --[[
     local eyeSize = 0.4
     local eyeDistFromSide = 0.3
     local eyeDistFromTop = 0.3
@@ -106,9 +121,9 @@ function makeCar(color)
         {1.04, 1 - pupilDistFromTop, -1 + pupilDistFromSide},
         {1.04, 1 - pupilDistFromTop, -1 + pupilDistFromSide + pupilSize},
         {1.04, 1 - pupilDistFromTop - pupilSize, -1 + pupilDistFromSide + pupilSize}
-    }, {0,0,0,1}, Car.size)
+    }, {0,0,0,1}, Car.size)]]--
 
-    Car.models = {front, back, left, right, hatFront, hatBack, hatLeft, hatRight, eye1, eyePupil1, eye2, eyePupil2}
+    Car.models = {front, back, left, right, top}--, hatFront, hatBack, hatLeft, hatRight}--, eye1, eyePupil1, eye2, eyePupil2}
 
     return Car
 end
