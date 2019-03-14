@@ -1,5 +1,6 @@
-main: combined.lua
+main: client.lua
 multiplayer:
-  - enabled: true
+  enabled: true
+  serverMain: multiplayer/server.lua
 owner: jesse
 title: Kart

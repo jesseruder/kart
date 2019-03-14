@@ -1,3 +1,4 @@
+require "constants"
 require "levels.levels"
 
 local cs = require 'share.cs'
