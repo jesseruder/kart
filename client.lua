@@ -22,7 +22,8 @@ function resetGame()
     Lap = 1
     IsFinished = false
     EligibleForNextLap = false
-    IsRequestingStart = false
+    IsRequestingLevel = false
+    MyRequestedLevel = nil
     MyItem = nil
     MyTakenItem = nil
 
@@ -223,7 +224,18 @@ function triColor(coords, color, scale)
     return model
 end
 
+
+function love.keyreleased(key)
+    if tonumber(key) then
+        MyRequestedLevel = nil
+    end
+end
+
 function love.keypressed(key)
+    if tonumber(key) then
+        MyRequestedLevel = tonumber(key)
+    end
+
     if GameState == "choose_character" then
         local loadCharacter = false
         local dontResetRotation = false
@@ -327,7 +339,7 @@ function client.update(dt)
     Scene:update()
     getMultiplayerUpdate(dt)
     
-    if GameState == "choose_character" then
+    if GameState == "choose_character" or (GameState == "level_select" and not LocalLevel) then
         ChooseCharacterCameraRotationDist = 1.0
         ChooseCharacterCameraRotationSpeed = 0.6
         local height = 0.4
@@ -359,7 +371,11 @@ function client.update(dt)
 
 
         updateCarPosition(Car)
-        return
+
+        if GameState == "choose_character" then
+            -- don't want to get server game state if we're still choosing character
+            return
+        end
     end
 
     if ServerLevel and ServerLevel ~= LocalLevel then
@@ -402,6 +418,8 @@ function client.update(dt)
 
         GameState = ServerGameState
     end
+
+    sendMultiplayerUpdate()
 
     if LocalLevel == nil then
         return
@@ -649,6 +667,10 @@ function client.update(dt)
         roadHeightAtPoint(CameraPos.x*0.75 + carToTrack.x*0.25, CameraPos.z*0.75 + carToTrack.z*0.25, carToTrack.roadIndex - 3, true).height,
         roadHeightAtPoint((CameraPos.x + carToTrack.x)/2.0, (CameraPos.z + carToTrack.z)/2.0, carToTrack.roadIndex - 2, true).height)
 
+    if GameState == "intro" then
+        desiredCamY = desiredCamY + 3
+    end
+
     if GameState == "running" then
         local cdy = desiredCamY - CameraPos.y
         CameraPos.y = CameraPos.y + dt * cameraSpeed * cdy
@@ -664,7 +686,6 @@ function client.update(dt)
         updateCarPosition(Car)
     end
 
-    sendMultiplayerUpdate()
     updateItems(dt)
 
     if GameCountdownTime then
@@ -701,12 +722,31 @@ function client.draw()
                 love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 100, 20)
                 love.graphics.setColor(1,1,1,1)
 
-                if GameState == "intro" then
+                if GameState == "level_select" then
+                    love.graphics.setFont(HugeFont)
+                    love.graphics.print("Select Level", GraphicsWidth / 2 - 320, 60)
+
                     love.graphics.setFont(BigFont)
-                    if IsRequestingStart == true then
+
+                    local size = 200
+                    local padding = 50
+                    local totalWidth = #Levels * size + (#Levels - 1) * padding
+                    local startX = GraphicsWidth / 2.0 - totalWidth / 2.0
+                    local top = GraphicsHeight / 2.0 - size / 2.0
+                    local textPadding = 10
+
+                    for id, level in pairs(Levels) do
+                        love.graphics.setColor(1, 1, 1, 0.9)
+                        love.graphics.draw(level.icon, startX, top, 0, size / level.icon:getWidth(), size / level.icon:getHeight(), 0, 0)
+                        love.graphics.setColor(1, 1, 1, 1)
+                        love.graphics.print(id .. ". " .. level.name, startX + textPadding, top + textPadding)
+                        startX = startX + size + padding
+                    end
+
+                    if IsRequestingLevel then
                         love.graphics.print("getting ready...", GraphicsWidth / 2 - 80, GraphicsHeight - 80)
                     else
-                        love.graphics.print("hold [space] when ready", GraphicsWidth / 2 - 130, GraphicsHeight - 80)
+                        love.graphics.print("hold [1 - " .. #Levels .. "] to vote", GraphicsWidth / 2 - 130, GraphicsHeight - 80)
                     end
                     love.graphics.setFont(DefaultFont)
                 end

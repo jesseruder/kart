@@ -26,7 +26,7 @@ function sendMultiplayerUpdate()
         home.car.angleUp = Car.angleUp
         home.car.angleSide = Car.angleSide
 
-        home.requestingStart = love.keyboard.isDown("space") and not GameResetTimer
+        home.requestingLevel = MyRequestedLevel
         home.isFinished = IsFinished
 
         home.takenItem = MyTakenItem
@@ -89,7 +89,7 @@ function getMultiplayerUpdate(dt)
     if client.connected then
         ServerGameState = share.gameState
         ServerLevel = share.level
-        IsRequestingStart = share.isRequestingStart or false
+        IsRequestingLevel = share.isRequestingLevel or false
         AllTakenItems = share.takenItems or {}
         Winner = share.winner
         AmIWinner = Winner == client.id

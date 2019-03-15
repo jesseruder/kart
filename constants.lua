@@ -16,5 +16,5 @@ MotionBlurAmount = 0.0
 CAR_EXTRA_Y = 0.15
 
 IntroCameraRotation = -math.pi/4
-IntroCameraRotationDist = 5
-IntroCameraRotationSpeed = 0.2
+IntroCameraRotationDist = 8
+IntroCameraRotationSpeed = 0.8

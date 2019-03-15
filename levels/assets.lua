@@ -26,4 +26,8 @@ function preloadLevels()
     waterSkyboxImage = defaultSkybox
     waterTerrainImage = love.graphics.newImage("assets/levels/water/ground.png")
     waterRoadImage = love.graphics.newImage("assets/levels/water/road.png")
+
+    Levels[1].icon = love.graphics.newImage("assets/levels/grass/icon.png")
+    Levels[2].icon = love.graphics.newImage("assets/levels/moon/icon.png")
+    Levels[3].icon = love.graphics.newImage("assets/levels/water/icon.png")
 end

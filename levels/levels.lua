@@ -9,8 +9,8 @@ require "levels.water"
 require "levels.rainbow"
 
 Levels = {
-    {name = "grass", action = loadGrassLevel},
-    {name = "moon", action = loadMoonLevel},
-    {name = "water", action = loadWaterLevel}
-    {name = "rainbow", action = loadRainbowLevel}
+    {name = "XP", action = loadGrassLevel},
+    {name = "Moon", action = loadMoonLevel},
+    {name = "Surf", action = loadWaterLevel},
+    --{name = "Rainbow", action = loadRainbowLevel}
 }

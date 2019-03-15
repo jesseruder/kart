@@ -14,7 +14,7 @@ end
 local share = server.share -- Maps to `client.share` -- can write
 local homes = server.homes -- `homes[id]` maps to `client.home` for that `id` -- can read
 
-local gameState = ACTUAL_GAME and "intro" or "running"
+local gameState = ACTUAL_GAME and "level_select" or "running"
 local startTime = nil
 local winner = nil
 local bananas = {}
@@ -35,33 +35,13 @@ end
 -- Server only gets `.load`, `.update`, `.quit` Love events (also `.lowmemory` and `.threaderror`
 -- which are less commonly used)
 
-function shuffle(tbl)
-    local size = #tbl
-    for i = size, 1, -1 do
-        local rand = math.random(i)
-        tbl[i], tbl[rand] = tbl[rand], tbl[i]
-    end
-    return tbl
-  end
-
 function server.load()
     share.cars = {}
 
-    SortedLevels = {}
-    for i=1, #Levels do
-        SortedLevels[i] = i
-    end
-    --SortedLevels = shuffle(SortedLevels)
-    -- grass: 1
-    -- moon: 2
-    -- water: 3
-    -- rainbow: 4
-    SortedLevels = {4}
-    LevelIndex = 1
-
-    share.level = SortedLevels[LevelIndex]
-
-    if CASTLE_SERVER then
+    if ACTUAL_GAME then
+        share.level = nil
+    else
+        share.level = 1
         Levels[share.level].action()
     end
 end
@@ -72,6 +52,33 @@ local frames = 0
 local ServerLogicAccumulator = 0.0
 local ServerLogicRate = 60
 local VERBOSE = false
+
+function getVotedLevel()
+    local levelVotes = {}
+    for id, level in pairs(Levels) do
+        levelVotes[id] = 0
+    end
+
+    for id, home in pairs(server.homes) do
+        local l = home.requestingLevel
+        if l >= 1 and l <= #Levels then
+            levelVotes[l] = levelVotes[l] + 1
+        end
+    end
+
+    local max = -1
+    local maxIdx = 1
+    for id, level in pairs(Levels) do
+        if levelVotes[id] > max then
+            max = levelVotes[id]
+            maxIdx = id
+        elseif levelVotes[id] == max and math.random() > 0.5 then
+            maxIdx = id
+        end
+    end
+
+    return maxIdx
+end
 
 function server.update(dt)
     ServerLogicAccumulator = ServerLogicAccumulator+dt
@@ -105,6 +112,18 @@ function server.update(dt)
         end
     end
 
+    if gameState == "level_select" and startTime and os.time() >= startTime then
+        gameState = "intro"
+        startTime = os.time() + 4
+        bananas = {}
+        shells = {}
+
+        share.level = getVotedLevel()
+        if CASTLE_SERVER then
+            Levels[share.level].action()
+        end
+    end
+
     if gameState == "intro" and startTime and os.time() >= startTime then
         gameState = "countdown"
         startTime = os.time() + 4
@@ -120,22 +139,13 @@ function server.update(dt)
     end
 
     if gameState == "postgame" and startTime and os.time() >= startTime then
-        gameState = "intro"
+        gameState = "level_select"
         startTime = nil
-        LevelIndex = LevelIndex + 1
-        if LevelIndex > #Levels then
-            LevelIndex = 1
-        end
-        share.level = SortedLevels[LevelIndex]
-
-        if CASTLE_SERVER then
-            Levels[share.level].action()
-        end
         bananas = {}
         shells = {}
     end
 
-    local isRequestingStart = false
+    local isRequestingLevel = false
     local takenItems = {}
     local switchItemUsers = {}
     local dizzyItemUsers = {}
@@ -161,8 +171,8 @@ function server.update(dt)
             end
         end
 
-        if home.requestingStart then
-            isRequestingStart = true
+        if home.requestingLevel then
+            isRequestingLevel = true
         end
 
         if home.takenItem then
@@ -271,7 +281,7 @@ function server.update(dt)
     end
 
     share.gameState = gameState
-    share.isRequestingStart = startTime and isRequestingStart
+    share.isRequestingLevel = startTime and isRequestingLevel
     share.takenItems = takenItems
     share.winner = winner
     share.switchItemUsers = switchItemUsers
@@ -279,12 +289,12 @@ function server.update(dt)
     share.bananas = bananas
     share.shells = shells
 
-    if isRequestingStart == true and gameState == "intro" and not startTime then
+    if isRequestingLevel == true and gameState == "level_select" and not startTime then
         -- wait 3 seconds
         startTime = os.time() + 2
     end
 
-    if isRequestingStart == false and gameState == "intro" then
+    if isRequestingLevel == false and gameState == "level_select" then
         startTime = nil
     end
 end
