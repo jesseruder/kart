@@ -60,7 +60,7 @@ function getVotedLevel()
 
     for id, home in pairs(server.homes) do
         local l = home.requestingLevel
-        if l >= 1 and l <= #Levels then
+        if l and l >= 1 and l <= #Levels then
             levelVotes[l] = levelVotes[l] + 1
         end
     end
