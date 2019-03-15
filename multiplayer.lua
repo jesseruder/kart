@@ -70,8 +70,6 @@ function updateCarFromRemote(dt, car, remote)
 end
 
 function client.connect() -- Called on connect from server
-    home.car = {}
-    sendMultiplayerUpdate()
     print("connected!")
 end
 
