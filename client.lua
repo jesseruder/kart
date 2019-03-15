@@ -510,6 +510,7 @@ function client.update(dt)
         if Car.isTouchingGround == false then
             Car.y = Car.y + Car.vel.y * dt
             Car.vel.y = Car.vel.y - GRAVITY * dt
+
             if Car.y < roadHeight then
                 Car.y = roadHeight
                 Car.isTouchingGround = true

@@ -126,7 +126,7 @@ function makeJump(index, length, height)
     end
 end
 
-function makeEmptyJump(index, length, height, emptyLength, downAmt)
+function makeEmptyJump(index, length, height, emptyLength, downAmt, ignoreEnd)
     if not length then
         length = 5.0
     end
@@ -161,13 +161,15 @@ function makeEmptyJump(index, length, height, emptyLength, downAmt)
         currIdx = idx
     end
 
-    currHeight = currHeight + downAmt
-    for idx = currIdx, currIdx + length do
-        currHeight = currHeight - heightInc
+    if not ignoreEnd then
+        currHeight = currHeight + downAmt
+        for idx = currIdx, currIdx + length do
+            currHeight = currHeight - heightInc
 
-        PATH_POINTS[idx][4] = currHeight
-        PATH_POINTS[idx][5] = currHeight
-        currIdx = idx
+            PATH_POINTS[idx][4] = currHeight
+            PATH_POINTS[idx][5] = currHeight
+            currIdx = idx
+        end
     end
 end
 

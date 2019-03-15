@@ -344,7 +344,7 @@ function animate(t2,whenDone){
     },3000);
 }
 
-var arr = []
+var arr = [];
 function main(t){
     var e=document.getElementById("canvas1");
 
@@ -375,6 +375,12 @@ function main(t){
     
     //   Update the passive display of tension t.
     document.getElementById("t").value=Math.round(1000*t)/1000;
+
+/*
+    var ctx=e.getContext('2d');
+        if(!ctx){return}
+        ctx.clearRect(0,0,e.width,e.height);
+    drawSpline(ctx,arr,t,true);*/
 }
 
 

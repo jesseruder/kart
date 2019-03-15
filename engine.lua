@@ -145,6 +145,18 @@ function engine.newScene(renderWidth,renderHeight)
 	love.graphics.setDepthMode("lequal", true)
     local scene = {}
 
+    local particleVerts = {}
+    for i = 0, 100000 do
+        table.insert(particleVerts, {
+            math.random() * 100 - 50,
+            math.random() * 1 - 100,
+            math.random() * 100 - 50,
+        })
+    end
+    scene.particles = love.graphics.newMesh({
+        {"VertexPosition", "float", 3},
+    }, particleVerts, "points")
+
     -- define the shaders used in rendering the scene
     scene.threeShader = love.graphics.newShader[[
         uniform mat4 view;
@@ -195,6 +207,40 @@ function engine.newScene(renderWidth,renderHeight)
             }
 
             return (color*texturecolor*(1.0 - fogAmount)) + (fogColor * fogAmount);
+        }
+        #endif
+    ]]
+
+    scene.particleShader = love.graphics.newShader[[
+        uniform mat4 view;
+        uniform float time;
+        varying float dist;
+
+        #ifdef VERTEX
+        vec4 position(mat4 transform_projection, vec4 vertex_position) {
+            vec4 p = vertex_position;
+            p.y = p.y - time * 0.015;
+            p.y = mod(p.y, 1.0);
+            p.y = p.y * 100 - 50;
+            vec4 result = view * p;
+            dist = length(result.xyz);
+            return result;
+        }
+        #endif
+
+        #ifdef PIXEL
+        vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+            vec2 coord = gl_PointCoord - vec2(0.5);
+            float radius = 0.5;
+            radius = 10 * radius / dist;
+
+            if (radius > 0.5) {
+                radius = 0.5;
+            }
+
+            if(length(coord) > radius)
+                discard;
+            return vec4(1.0,1.0,1.0,0.8);
         }
         #endif
     ]]
@@ -356,6 +402,14 @@ function engine.newScene(renderWidth,renderHeight)
                 love.graphics.setMeshCullMode("none")
                 love.graphics.setWireframe(false)
             end
+        end
+
+        if self.particles and PARTICLES_ENABLED then
+            love.graphics.setShader(self.particleShader)
+            self.particleShader:send("time", timeElapsed)
+            self.particleShader:send("view", Camera.perspective * TransposeMatrix(Camera.transform))
+            love.graphics.setPointSize(20)
+            love.graphics.draw(self.particles, -self.renderWidth/2, -self.renderHeight/2)
         end
 
         -- anti alias and overlay

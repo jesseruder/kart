@@ -46,6 +46,7 @@ function loadWaterLevel()
     FogDivide = 20
     GRAVITY = 4
     PREFER_GROUND_HEIGHT = true
+    PARTICLES_ENABLED = false
 end
 
 -- generate with createpath.html

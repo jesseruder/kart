@@ -42,6 +42,7 @@ function loadMoonLevel()
     GRAVITY = 2.5
     Engine.camera.pos.y = 5
     PREFER_GROUND_HEIGHT = false
+    PARTICLES_ENABLED = false
 end
 
 -- generate with createpath.html

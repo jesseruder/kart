@@ -342,7 +342,7 @@ do
     function client.postupdate(dt)
         accumTime = accumTime + dt
         if accumTime < 1.0 / 10.0 then
-            --return
+            return
         end
         accumTime = 0.0
 
