@@ -824,7 +824,7 @@ function client.draw()
 
                         love.graphics.setFont(HugeFont)
                         love.graphics.setColor(1, 1, 1, 1)
-                        love.graphics.print(text, GraphicsWidth - 180, 60)
+                        love.graphics.print(text, GraphicsWidth - 190, 60)
                         love.graphics.setColor(FontColor[1], FontColor[2], FontColor[3], 1)
                         love.graphics.setFont(DefaultFont)
                     end
