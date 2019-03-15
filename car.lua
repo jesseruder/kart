@@ -63,43 +63,6 @@ function makeCar(characterName, accessoryName, color)
         {-1, 1, -1,   1,1}
     }, carTop, Car.size)
 
-    --[[
-    local eyeSize = 0.4
-    local eyeDistFromSide = 0.3
-    local eyeDistFromTop = 0.3
-
-    local pupilSize = 0.25
-    local pupilDistFromSide = eyeDistFromSide + (eyeSize - pupilSize) * 0.5
-    local pupilDistFromTop = eyeDistFromTop + (eyeSize - pupilSize) * 0.5
-
-    local eye1 = rectColor({
-        {1.02, 1 - eyeDistFromTop - eyeSize, 1 - eyeDistFromSide},
-        {1.02, 1 - eyeDistFromTop, 1 - eyeDistFromSide},
-        {1.02, 1 - eyeDistFromTop, 1 - eyeDistFromSide - eyeSize},
-        {1.02, 1 - eyeDistFromTop - eyeSize, 1 - eyeDistFromSide - eyeSize}
-    }, {1,1,1,1}, Car.size)
-
-    local eyePupil1 = rectColor({
-        {1.04, 1 - pupilDistFromTop - pupilSize, 1 - pupilDistFromSide},
-        {1.04, 1 - pupilDistFromTop, 1 - pupilDistFromSide},
-        {1.04, 1 - pupilDistFromTop, 1 - pupilDistFromSide - pupilSize},
-        {1.04, 1 - pupilDistFromTop - pupilSize, 1 - pupilDistFromSide - pupilSize}
-    }, {0,0,0,1}, Car.size)
-
-    local eye2 = rectColor({
-        {1.02, 1 - eyeDistFromTop - eyeSize, -1 + eyeDistFromSide},
-        {1.02, 1 - eyeDistFromTop, -1 + eyeDistFromSide},
-        {1.02, 1 - eyeDistFromTop, -1 + eyeDistFromSide + eyeSize},
-        {1.02, 1 - eyeDistFromTop - eyeSize, -1 + eyeDistFromSide + eyeSize}
-    }, {1,1,1,1}, Car.size)
-
-    local eyePupil2 = rectColor({
-        {1.04, 1 - pupilDistFromTop - pupilSize, -1 + pupilDistFromSide},
-        {1.04, 1 - pupilDistFromTop, -1 + pupilDistFromSide},
-        {1.04, 1 - pupilDistFromTop, -1 + pupilDistFromSide + pupilSize},
-        {1.04, 1 - pupilDistFromTop - pupilSize, -1 + pupilDistFromSide + pupilSize}
-    }, {0,0,0,1}, Car.size)]]--
-
     Car.models = {front, back, left, right, top}--, hatFront, hatBack, hatLeft, hatRight}--, eye1, eyePupil1, eye2, eyePupil2}
     nameToAccessory(accessoryName).action(Car)
 

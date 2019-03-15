@@ -204,6 +204,14 @@ function modelFromCoords(coords, texture, scale, fogAmount)
     table.insert(Scene.modelList, model)
     return model
 end
+
+function modelFromCoordsColor(coords, color, scale, fogAmount)
+    local model = Engine.newModel(coords, nil, nil, color, { 
+        {"VertexPosition", "float", 3}, 
+    }, scale)
+    table.insert(Scene.modelList, model)
+    return model
+end
 function addRectVerts(obj, coords)
     table.insert(obj, coords[1])
     table.insert(obj, coords[2])
@@ -264,14 +272,12 @@ function love.keypressed(key)
                     ColorIndex = #Colors
                 end
                 loadCharacter = true
-                dontResetRotation = true
             elseif key == "down" then
                 ColorIndex = ColorIndex + 1
                 if ColorIndex > #Colors then
                     ColorIndex = 1
                 end
                 loadCharacter = true
-                dontResetRotation = true
             elseif key == "return" then
                 GameState = "waiting_to_get_server_state"
             end
