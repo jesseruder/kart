@@ -1,6 +1,6 @@
 USE_CASTLE_CONFIG = false
 USE_REMOTE_CAR = false
-ACTUAL_GAME = false
+ACTUAL_GAME = true
 TEST_LEVEL = 4
 
 RESET_CAR = true
@@ -17,5 +17,5 @@ MotionBlurAmount = 0.0
 CAR_EXTRA_Y = 0.15
 
 IntroCameraRotation = -math.pi/4
-IntroCameraRotationDist = 8
-IntroCameraRotationSpeed = 0.8
+IntroCameraRotationDist = 4
+IntroCameraRotationSpeed = 0.5

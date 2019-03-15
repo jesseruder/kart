@@ -56,22 +56,31 @@ function roadHeightAtPoint(x, z, indexHint, useFakeHeight)
                     z = triangle[3][3]
                 }
 
-                if ptInTriangle2d(p, t1, t2, t3) then
-                    local normal = normalizeVec(crossVec(minusVec(t2, t1), minusVec(t3, t1)))
-                
-                    local intersection = lineIntersection(
-                        t1,
-                        normal,
-                        {x = x, y = 0, z = z},
-                        {x = 0, y = 1, z = 0}
-                    )
-
-                    -- let heightAtPoint take care of this if not
-                    if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
-                        return {
-                            height = intersection.y - ROAD_EXTRA_ELEV,
-                            normal = normal
+                for dx = 1,3 do
+                    for dz = 1,3 do
+                        local p2 = {
+                            x = p.x + (dx - 2)*0.02,
+                            z = p.z + (dz - 2)*0.02
                         }
+
+                        if ptInTriangle2d(p2, t1, t2, t3) then
+                            local normal = normalizeVec(crossVec(minusVec(t2, t1), minusVec(t3, t1)))
+                        
+                            local intersection = lineIntersection(
+                                t1,
+                                normal,
+                                {x = x, y = 0, z = z},
+                                {x = 0, y = 1, z = 0}
+                            )
+
+                            -- let heightAtPoint take care of this if not
+                            if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
+                                return {
+                                    height = intersection.y - ROAD_EXTRA_ELEV,
+                                    normal = normal
+                                }
+                            end
+                        end
                     end
                 end
             end
@@ -158,6 +167,18 @@ function makeEmptyJump(index, length, height, emptyLength, downAmt)
         PATH_POINTS[idx][4] = currHeight
         PATH_POINTS[idx][5] = currHeight
         currIdx = idx
+    end
+end
+
+function makeSinHill(index, length, height)
+    local inc = math.pi / length
+    local acc = 0
+
+    for idx = index, index + length do
+        PATH_POINTS[idx][4] = math.sin(acc) * height
+        PATH_POINTS[idx][5] = math.sin(acc) * height
+
+        acc = acc + inc
     end
 end
 

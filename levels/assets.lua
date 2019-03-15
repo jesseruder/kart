@@ -27,7 +27,10 @@ function preloadLevels()
     waterTerrainImage = love.graphics.newImage("assets/levels/water/ground.png")
     waterRoadImage = love.graphics.newImage("assets/levels/water/road.png")
 
+    rainbowRoadImage = love.graphics.newImage("assets/levels/rainbow/road.png")
+
     Levels[1].icon = love.graphics.newImage("assets/levels/grass/icon.png")
     Levels[2].icon = love.graphics.newImage("assets/levels/moon/icon.png")
     Levels[3].icon = love.graphics.newImage("assets/levels/water/icon.png")
+    Levels[4].icon = love.graphics.newImage("assets/levels/rainbow/icon.png")
 end

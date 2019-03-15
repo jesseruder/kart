@@ -29,7 +29,7 @@ function resetGame()
 
     Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
-    Car.y = roadHeightAtPoint(Car.x, Car.y, 1).height + 0.3
+    Car.y = roadHeightAtPoint(PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0, PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0, 1).height + 0.3
     Car.angle = PATH_POINTS[1][3]
     Car.angleUp = 0
     Car.angleSide = 0
@@ -488,14 +488,11 @@ function client.update(dt)
 
     --- HEIGHT CALCULATION
     local roadHeight = hap.height + CAR_EXTRA_Y
+    local resetCarPos = false
 
     if roadHeight > Car.y + 0.3 then
         print("hey dummy")
-        Car.x = oldCarX
-        Car.z = oldCarZ
-        Car.y = roadHeightAtPoint(Car.x, Car.z, Car.roadIndex).height + CAR_EXTRA_Y
-        Car.vel.x = 0
-        Car.vel.z = 0
+        resetCarPos = true
     else
         local firstOffGround = false
         if Car.isTouchingGround then
@@ -542,7 +539,7 @@ function client.update(dt)
 
         local rx = PATH_POINTS[realIdx][1] * RoadScale - RoadScale / 2.0
         local rz = PATH_POINTS[realIdx][2] * RoadScale - RoadScale / 2.0
-        local ry = PATH_POINTS[realIdx][5] + heightAtPoint(rx, rz).height
+        local ry = roadHeightAtPoint(rx, rz, realIdx, true).height
         local distance = math.sqrt(math.pow(rx - Car.x, 2) + math.pow(ry - Car.y, 2) + math.pow(rz - Car.z, 2))
         if distance < closestRoadDistance then
             closestRoadDistance = distance
@@ -551,10 +548,14 @@ function client.update(dt)
     end
     Car.roadIndex = closestRoadIndex
     -- reset car
-    if RESET_CAR and closestRoadDistance > MaxClosestRoadDistance then
+    if (RESET_CAR and closestRoadDistance > MaxClosestRoadDistance) or resetCarPos then
         Car.x = PATH_POINTS[closestRoadIndex][1] * RoadScale - RoadScale / 2.0
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
+        Car.y = roadHeightAtPoint(Car.x, Car.z, closestRoadIndex, true).height + 0.3
+        Car.vel.x = 0
+        Car.vel.z = 0
         showAlert("Out of bounds!", GraphicsWidth / 2 - 350)
+        return
     end
 
     if Car.roadIndex > #PATH_POINTS * 0.4 and Car.roadIndex < #PATH_POINTS * 0.6 then
@@ -756,12 +757,6 @@ function client.draw()
                     love.graphics.setFont(DefaultFont)
                 end
 
-                if AlertTime then
-                    love.graphics.setFont(HugeFont)
-                    love.graphics.print(AlertText, AlertX, GraphicsHeight / 2 - 50)
-                    love.graphics.setFont(DefaultFont)
-                end
-
                 if GameState == "postgame" then
                     local text = "You lost"
                     if AmIWinner and AmIWinner == true then
@@ -770,6 +765,10 @@ function client.draw()
 
                     love.graphics.setFont(HugeFont)
                     love.graphics.print(text, GraphicsWidth / 2 - 200, GraphicsHeight / 2 - 50)
+                    love.graphics.setFont(DefaultFont)
+                elseif AlertTime then
+                    love.graphics.setFont(HugeFont)
+                    love.graphics.print(AlertText, AlertX, GraphicsHeight / 2 - 50)
                     love.graphics.setFont(DefaultFont)
                 end
 
