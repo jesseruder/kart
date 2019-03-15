@@ -130,7 +130,7 @@ function makeItem(roadIdx, dx, dy, id)
         rotation = 0,
     }
 
-    local color = {1.0, 0.0, 0.0, 0.5}
+    local color = {0.0, 0.0, 1.0, 0.5}
     local size = itemSize
     local x = (PATH_POINTS[roadIdx][1] * RoadScale - RoadScale / 2.0) + dx
     local z = (PATH_POINTS[roadIdx][2] * RoadScale - RoadScale / 2.0) + dy
@@ -140,35 +140,38 @@ function makeItem(roadIdx, dx, dy, id)
     item.y = y
     item.z = z
 
-    local front = rectColor({
+    local verts= {}
+
+    addRectVerts(verts, {
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {1, 1, 1,     1,1},
         {1, -1, 1,    1,0}
-    }, color, size)
+    })
 
-    local back = rectColor({
+    addRectVerts(verts, {
         {-1, -1, -1,  0,0},
         {-1, 1, -1,   0,1},
         {1, 1, -1,    1,1},
         {1, -1, -1,   1,0}
-    }, color, size)
+    })
 
-    local left = rectColor({
+    addRectVerts(verts, {
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {-1, 1, -1,   1,1},
         {-1, -1, -1,   1,0}
-    }, color, size)
+    })
 
-    local right = rectColor({
+    addRectVerts(verts, {
         {1, -1, 1,    0,0},
         {1, 1, 1,     0,1},
         {1, 1, -1,    1, 1},
         {1, -1, -1,   1,0}
-    }, color, size)
+    })
 
-    item.models = {front, back, left, right}
+    local model = modelFromCoordsColor(verts, color, size)
+    item.models = {model}
 
     for k,v in pairs(item.models) do
         v:setTransform({x, y, z}, {0, cpml.vec3.unit_y})

@@ -57,35 +57,38 @@ function addShell(serverShell)
     local color = {1.0, 0.0, 0.0, 1.0}
     local size = 0.1
 
-    local front = rectColor({
+    local verts= {}
+
+    addRectVerts(verts, {
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {1, 1, 1,     1,1},
         {1, -1, 1,    1,0}
-    }, color, size)
+    })
 
-    local back = rectColor({
+    addRectVerts(verts, {
         {-1, -1, -1,  0,0},
         {-1, 1, -1,   0,1},
         {1, 1, -1,    1,1},
         {1, -1, -1,   1,0}
-    }, color, size)
+    })
 
-    local left = rectColor({
+    addRectVerts(verts, {
         {-1, -1, 1,   0,0},
         {-1, 1, 1,    0,1},
         {-1, 1, -1,   1,1},
         {-1, -1, -1,   1,0}
-    }, color, size)
+    })
 
-    local right = rectColor({
+    addRectVerts(verts, {
         {1, -1, 1,    0,0},
         {1, 1, 1,     0,1},
         {1, 1, -1,    1, 1},
         {1, -1, -1,   1,0}
-    }, color, size)
+    })
 
-    local models = {front, back, left, right}
+    local model = modelFromCoordsColor(verts, color, size)
+    local models = {model}
 
     for k,v in pairs(models) do
         v:setTransform({serverShell.x, serverShell.y, serverShell.z}, {0, cpml.vec3.unit_y})
