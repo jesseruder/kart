@@ -50,6 +50,8 @@ function loadDesertLevel()
     makeItems(40)
     makeItems(140)
     makeItems(230)
+    makeItems(320)
+    makeItems(415)
 
     FogColor = {1,1,1,1}
     FogStartDist = 5
