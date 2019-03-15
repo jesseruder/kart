@@ -395,11 +395,11 @@ function client.update(dt)
 
     if ServerGameState and ServerGameState ~= GameState then
         if ServerGameState == "countdown" then
+            resetGame()
             GameCountdownTime = 0
             GameCountdownBright = 0.0
             restartMusic()
             stopCheering()
-            resetGame()
         elseif ServerGameState == "running" then
             switchToMusic()
             stopCheering()
