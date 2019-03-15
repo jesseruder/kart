@@ -174,14 +174,19 @@ end
 function recordLap()
     Lap = Lap + 1
     EligibleForNextLap = false
+    if Lap == Laps then
+        showAlert("Last Lap!", GraphicsWidth / 2 - 220)
+    end
+
     if Lap > Laps then
         IsFinished = true
     end
 end
 
-function showAlert(text)
+function showAlert(text, x)
     AlertTime = 1.0
     AlertText = text
+    AlertX = x
 end
 
 --[[
@@ -549,7 +554,7 @@ function client.update(dt)
     if RESET_CAR and closestRoadDistance > MaxClosestRoadDistance then
         Car.x = PATH_POINTS[closestRoadIndex][1] * RoadScale - RoadScale / 2.0
         Car.z = PATH_POINTS[closestRoadIndex][2] * RoadScale - RoadScale / 2.0
-        showAlert("Out of bounds!")
+        showAlert("Out of bounds!", GraphicsWidth / 2 - 350)
     end
 
     if Car.roadIndex > #PATH_POINTS * 0.4 and Car.roadIndex < #PATH_POINTS * 0.6 then
@@ -753,7 +758,7 @@ function client.draw()
 
                 if AlertTime then
                     love.graphics.setFont(HugeFont)
-                    love.graphics.print(AlertText, GraphicsWidth / 2 - 350, GraphicsHeight / 2 - 50)
+                    love.graphics.print(AlertText, AlertX, GraphicsHeight / 2 - 50)
                     love.graphics.setFont(DefaultFont)
                 end
 
@@ -806,6 +811,25 @@ function client.draw()
                     love.graphics.setColor(FontColor[1], FontColor[2], FontColor[3], 1)
                     love.graphics.print("Lap: " .. printLap, GraphicsWidth - 100, 40)
 
+                    if MyPlace then
+                        local text
+                        if MyPlace == 1 then
+                            text = "1st"
+                        elseif MyPlace == 2 then
+                            text = "2nd"
+                        elseif MyPlace == 3 then
+                            text = "3rd"
+                        else
+                            text = MyPlace .. "th"
+                        end
+
+                        love.graphics.setFont(HugeFont)
+                        love.graphics.setColor(1, 1, 1, 1)
+                        love.graphics.print(text, GraphicsWidth - 180, 60)
+                        love.graphics.setColor(FontColor[1], FontColor[2], FontColor[3], 1)
+                        love.graphics.setFont(DefaultFont)
+                    end
+
                     if MyItem then
                         local size = 100
                         local padding = 20
@@ -830,6 +854,8 @@ function client.draw()
             else
                 love.graphics.print("Connecting...", GraphicsWidth / 2 - 50, GraphicsHeight / 2 - 20)
             end
+
+            love.graphics.setColor(1, 1, 1, 1)
         end, true
     )
 

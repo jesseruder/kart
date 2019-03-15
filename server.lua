@@ -168,6 +168,7 @@ function server.update(dt)
                 share.cars[id].angle = home.car.angle
                 share.cars[id].angleUp = home.car.angleUp
                 share.cars[id].angleSide = home.car.angleSide
+                share.cars[id].lap = home.lap
             end
         end
 

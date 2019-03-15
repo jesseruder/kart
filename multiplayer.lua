@@ -25,6 +25,7 @@ function sendMultiplayerUpdate()
         home.car.angle = Car.angle
         home.car.angleUp = Car.angleUp
         home.car.angleSide = Car.angleSide
+        home.car.lap = Lap
 
         home.requestingLevel = MyRequestedLevel
         home.isFinished = IsFinished
@@ -68,6 +69,7 @@ function updateCarFromRemote(dt, car, remote)
     car.angle = remote.angle
     car.angleUp = remote.angleUp
     car.angleSide = remote.angleSide
+    car.lap = remote.lap
 end
 
 function client.connect() -- Called on connect from server
@@ -103,6 +105,8 @@ function getMultiplayerUpdate(dt)
         end
 
         NumPlayers = 0
+        local carsAheadOfMe = 0
+
         for id, car in pairs(share.cars) do
             NumPlayers = NumPlayers + 1
             if id ~= client.id or USE_REMOTE_CAR then -- Not me
@@ -121,10 +125,18 @@ function getMultiplayerUpdate(dt)
                 otherCars[id].seenThisUpdate = true
                 updateCarFromRemote(dt, otherCars[id], car)
                 updateCarPosition(otherCars[id])
+
+                if car.lap > Lap then
+                    carsAheadOfMe = carsAheadOfMe + 1
+                elseif car.roadIndex > Car.roadIndex then
+                    carsAheadOfMe = carsAheadOfMe + 1
+                end
             else
                 Car.hitByShellTime = car.hitByShellTime
             end
         end
+
+        MyPlace = carsAheadOfMe + 1
 
         for k,v in pairs(otherCars) do
             if v.seenThisUpdate == false then
