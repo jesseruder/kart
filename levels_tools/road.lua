@@ -208,8 +208,6 @@ function makeRoad(imageRoad, imageWall)
 
         local minHeightLast = math.min(h1, h4) + lastPoint[4]
         local minHeightCurrent = math.min(h2, h3) + v[4]
-        minHeightLast = -1
-        minHeightCurrent = -1
 
         local verts = {
             {lx - ldx, elev + math.max(h1, minHeightLast), ly - ldy,    0, texCoordBegin},
