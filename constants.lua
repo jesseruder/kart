@@ -1,6 +1,6 @@
-USE_CASTLE_CONFIG = false
+USE_CASTLE_CONFIG = true
 USE_REMOTE_CAR = false
-ACTUAL_GAME = false
+ACTUAL_GAME = true
 TEST_LEVEL = 3
 
 RESET_CAR = true
