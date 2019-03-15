@@ -109,40 +109,44 @@ function getMultiplayerUpdate(dt)
 
         for id, car in pairs(share.cars) do
             NumPlayers = NumPlayers + 1
-            if id ~= client.id or USE_REMOTE_CAR then -- Not me
-                if not car and otherCard[id] then
-                    removeCar(otherCars[id])
-                    print("remove car!")
-                    otherCards[id] = nil
-                    break
-                end
+            if GameState == "running" then
+                if id ~= client.id or USE_REMOTE_CAR then -- Not me
+                    if not car and otherCard[id] then
+                        removeCar(otherCars[id])
+                        print("remove car!")
+                        otherCards[id] = nil
+                        break
+                    end
 
-                if not otherCars[id] then
-                    print("make car " .. id)
-                    otherCars[id] = makeCar(car.characterName, car.accessoryName, car.color)
-                end
+                    if not otherCars[id] then
+                        print("make car " .. id)
+                        otherCars[id] = makeCar(car.characterName, car.accessoryName, car.color)
+                    end
 
-                otherCars[id].seenThisUpdate = true
-                updateCarFromRemote(dt, otherCars[id], car)
-                updateCarPosition(otherCars[id])
+                    otherCars[id].seenThisUpdate = true
+                    updateCarFromRemote(dt, otherCars[id], car)
+                    updateCarPosition(otherCars[id])
 
-                if car.lap > Lap then
-                    carsAheadOfMe = carsAheadOfMe + 1
-                elseif car.roadIndex > Car.roadIndex then
-                    carsAheadOfMe = carsAheadOfMe + 1
+                    if car.lap > Lap then
+                        carsAheadOfMe = carsAheadOfMe + 1
+                    elseif car.roadIndex > Car.roadIndex then
+                        carsAheadOfMe = carsAheadOfMe + 1
+                    end
+                else
+                    Car.hitByShellTime = car.hitByShellTime
                 end
-            else
-                Car.hitByShellTime = car.hitByShellTime
             end
         end
 
         MyPlace = carsAheadOfMe + 1
 
-        for k,v in pairs(otherCars) do
-            if v.seenThisUpdate == false then
-                print("remove car!")
-                removeCar(otherCars[k])
-                otherCars[k] = nil
+        if GameState == "running" then
+            for k,v in pairs(otherCars) do
+                if v.seenThisUpdate == false then
+                    print("remove car!")
+                    removeCar(otherCars[k])
+                    otherCars[k] = nil
+                end
             end
         end
     end
