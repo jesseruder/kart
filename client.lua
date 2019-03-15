@@ -384,6 +384,7 @@ function client.update(dt)
     end
 
     if ServerLevel and ServerLevel ~= LocalLevel then
+        print("setting level to serverlevel: ".. ServerLevel)
         Levels[ServerLevel].action()
         resetGame()
         if ACTUAL_GAME == false then

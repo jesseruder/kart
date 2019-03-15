@@ -76,6 +76,7 @@ function getVotedLevel()
         end
     end
 
+    print("voted level is " .. maxIdx)
     return maxIdx
 end
 
