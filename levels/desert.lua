@@ -55,6 +55,7 @@ function loadDesertLevel()
     FogStartDist = 5
     FogDivide = 100
     GRAVITY = 4
+    PREFER_GROUND_HEIGHT = false
 end
 
 -- generate with createpath.html

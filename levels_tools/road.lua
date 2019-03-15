@@ -19,6 +19,10 @@ function ptInTriangle2d(p, p0, p1, p2)
 end
 
 function roadHeightAtPoint(x, z, indexHint, useFakeHeight)
+    if PREFER_GROUND_HEIGHT then
+        return heightAtPoint(x, z)
+    end
+
     local DIST_TO_CHECK = 10
     for idx = indexHint - DIST_TO_CHECK, indexHint + DIST_TO_CHECK do
         local realIdx = idx
@@ -73,13 +77,10 @@ function roadHeightAtPoint(x, z, indexHint, useFakeHeight)
                                 {x = 0, y = 1, z = 0}
                             )
 
-                            -- let heightAtPoint take care of this if not
-                            --if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
-                                return {
-                                    height = intersection.y - ROAD_EXTRA_ELEV,
-                                    normal = normal
-                                }
-                            --end
+                            return {
+                                height = intersection.y - ROAD_EXTRA_ELEV,
+                                normal = normal
+                            }
                         end
                     end
                 end

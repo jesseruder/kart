@@ -41,6 +41,7 @@ function loadMoonLevel()
     FogDivide = 20
     GRAVITY = 2.5
     Engine.camera.pos.y = 5
+    PREFER_GROUND_HEIGHT = false
 end
 
 -- generate with createpath.html
