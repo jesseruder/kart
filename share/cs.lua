@@ -169,7 +169,7 @@ do
 
     function server.postupdate(dt)
         accumTime = accumTime + dt
-        if accumTime < 1.0 / 30.0 then
+        if accumTime < 1.0 / 10.0 then
             return
         end
         accumTime = 0.0
@@ -341,7 +341,7 @@ do
 
     function client.postupdate(dt)
         accumTime = accumTime + dt
-        if accumTime < 1.0 / 30.0 then
+        if accumTime < 1.0 / 10.0 then
             --return
         end
         accumTime = 0.0
