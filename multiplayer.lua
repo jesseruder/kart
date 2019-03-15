@@ -13,6 +13,9 @@ local home = client.home -- Maps to `server.homes[id]` with our `id` -- can writ
 
 function sendMultiplayerUpdate()
     if client.connected then
+        if not home.car then
+            home.car = {}
+        end
         home.car.size = Car.size
         home.car.vel = Car.vel
         home.car.color = Car.color
