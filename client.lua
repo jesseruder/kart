@@ -5,7 +5,7 @@ require "car"
 require "multiplayer"
 require "items.items"
 require "levels.levels"
-require "assets"
+require "levels.assets"
 require "characters.characters"
 require "characters.accessories"
 
@@ -192,6 +192,19 @@ function rect(coords, texture, scale, fogAmount)
     local model = Engine.newModel({ coords[1], coords[2], coords[4], coords[2], coords[3], coords[4] }, texture, nil, nil, nil, scale, fogAmount)
     table.insert(Scene.modelList, model)
     return model
+end
+function modelFromCoords(coords, texture, scale, fogAmount)
+    local model = Engine.newModel(coords, texture, nil, nil, nil, scale, fogAmount)
+    table.insert(Scene.modelList, model)
+    return model
+end
+function addRectVerts(obj, coords)
+    table.insert(obj, coords[1])
+    table.insert(obj, coords[2])
+    table.insert(obj, coords[4])
+    table.insert(obj, coords[2])
+    table.insert(obj, coords[3])
+    table.insert(obj, coords[4])
 end
 
 function rectColor(coords, color, scale)

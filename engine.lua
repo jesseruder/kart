@@ -47,21 +47,21 @@ function engine.newModel(verts, texture, coords, color, format, scale, fogAmount
 
     -- translate verts by given coords
     for i=1, #verts do
-        local newVert = {}
-        newVert[1] = (verts[i][1] + coords[1]) * scale
-        newVert[2] = (verts[i][2] + coords[2]) * scale
-        newVert[3] = (verts[i][3] + coords[3]) * scale
+        if coords[1] ~= 0.0 or coords[2] ~= 0.0 or coords[3] ~= 0.0 or scale ~= 1.0 then
+            local newVert = {}
+            newVert[1] = (verts[i][1] + coords[1]) * scale
+            newVert[2] = (verts[i][2] + coords[2]) * scale
+            newVert[3] = (verts[i][3] + coords[3]) * scale
+            newVert[4] = verts[i][4]
+            newVert[5] = verts[i][5]
+            verts[i] = newVert
+        end
 
         -- if not given uv coordinates, put in random ones
         if #verts[i] < 5 then
-            newVert[4] = love.math.random()
-            newVert[5] = love.math.random()
-        else
-            newVert[4] = verts[i][4]
-            newVert[5] = verts[i][5]
+            verts[i][4] = love.math.random()
+            verts[i][5] = love.math.random()
         end
-
-        verts[i] = newVert;
     end
 
     -- define the Model object's properties

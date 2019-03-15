@@ -26,6 +26,8 @@ function loadGrassLevel()
     addMountainRelative(0.5, 0.30, 3, 0.07)
 
     updatePathPoints()
+    makeJump(100)
+    makeTabletopJump(230)
     makeRoad(grassRoadImage, grassWallImage)
 
     if CASTLE_SERVER then

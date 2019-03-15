@@ -16,7 +16,8 @@ function preloadLevels()
     moonSkyboxImage = love.graphics.newImage("assets/levels/moon/skybox.png")
     moonTerrainImage = love.graphics.newImage("assets/levels/moon/ground.png")
     moonRoadImage = defaultRoad
-    moonWallImage = defaultWall
+    moonWallImage = love.graphics.newImage("assets/levels/moon/wall.png")
+    moonWallImage:setWrap('repeat','repeat')
 
     waterSkyboxImage = defaultSkybox
     waterTerrainImage = love.graphics.newImage("assets/levels/water/ground.png")

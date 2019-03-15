@@ -161,6 +161,46 @@ function makeEmptyJump(index, length, height, emptyLength, downAmt)
     end
 end
 
+function makeTabletopJump(index, length, height, topLength)
+    if not length then
+        length = 5.0
+    end
+
+    if not height then
+        height = 2.0
+    end
+
+    if not topLength then
+        topLength = 5.0
+    end
+
+    local currHeight = 0.0
+    local heightInc = height / length
+    local currIdx
+
+    for idx = index, index + length do
+        currHeight = currHeight + heightInc
+
+        PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+        currIdx = idx
+    end
+
+    for idx = currIdx, currIdx + topLength do
+        PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+        currIdx = idx
+    end
+
+    for idx = currIdx, currIdx + length do
+        currHeight = currHeight - heightInc
+
+        PATH_POINTS[idx][4] = currHeight
+        PATH_POINTS[idx][5] = currHeight
+        currIdx = idx
+    end
+end
+
 function makeRoad(imageRoad, imageWall)
     if roadModels then
         for k,v in pairs(roadModels) do
@@ -178,6 +218,9 @@ function makeRoad(imageRoad, imageWall)
     local currTexCoord = 0.0
     local texCoordInc = 0.1
 
+    local allRoadVerts = {}
+    local allWallVerts = {}
+
     for k,v in pairs(PATH_POINTS) do
         local lx = lastPoint[1] * RoadScale - RoadScale / 2.0
         local ly = lastPoint[2] * RoadScale - RoadScale / 2.0
@@ -191,11 +234,11 @@ function makeRoad(imageRoad, imageWall)
         local dx = math.cos(a + math.pi/2) * RoadRadius
         local dy = math.sin(a + math.pi/2) * RoadRadius
 
-        local i = imageRoad
         local texCoordBegin = 0
         local texCoordEnd = 1
+        local isFinishLine = false
         if k > 1 and k < 4 then
-            i = imageFinishLine
+            isFinishLine = true
             texCoordBegin = finishLineTexY
             texCoordEnd = finishLineTexY + finishLineTexInc
             finishLineTexY = finishLineTexY + finishLineTexInc
@@ -227,45 +270,41 @@ function makeRoad(imageRoad, imageWall)
         }
 
         if not CASTLE_SERVER and lastPoint[4] > -100 and v[4] > -100 then
-            local model = rect(verts, i)
-            table.insert(roadModels, model)
+            if isFinishLine then
+                local model = rect(verts, imageFinishLine)
+                table.insert(roadModels, model)
+            else
+                addRectVerts(allRoadVerts, verts)
+            end
 
             if imageWall then
-                local wallVerts = {
+                addRectVerts(allWallVerts, {
                     {verts[1][1], verts[1][2], verts[1][3], currTexCoord, verts[1][2] + 5},-- last
                     {verts[2][1], verts[2][2], verts[2][3], currTexCoord + texCoordInc, verts[2][2] + 5},
                     {verts[2][1], -5, verts[2][3],   currTexCoord + texCoordInc, 0},
                     {verts[1][1], -5, verts[1][3],   currTexCoord, 0},-- last
-                }
-                model = rect(wallVerts, imageWall)
-                table.insert(roadModels, model)
+                })
 
-                wallVerts = {
+                addRectVerts(allWallVerts, {
                     {verts[3][1], verts[3][2], verts[3][3], currTexCoord, verts[3][2] + 5},-- last
                     {verts[4][1], verts[4][2], verts[4][3], currTexCoord + texCoordInc, verts[4][2] + 5},
                     {verts[4][1], -5, verts[4][3],   currTexCoord + texCoordInc, 0},
                     {verts[3][1], -5, verts[3][3],   currTexCoord, 0},-- last
-                }
-                model = rect(wallVerts, imageWall)
-                table.insert(roadModels, model)
+                })
 
-                wallVerts = {
+                addRectVerts(allWallVerts, {
                     {verts[1][1], verts[1][2], verts[1][3], 0, verts[1][2] + 5},-- last
                     {verts[4][1], verts[4][2], verts[4][3], RoadRadius * 2, verts[4][2] + 5},
                     {verts[4][1], -5, verts[4][3],   RoadRadius * 2, 0},
                     {verts[1][1], -5, verts[1][3],   0, 0},-- last
-                }
-                model = rect(wallVerts, imageWall)
-                table.insert(roadModels, model)
+                })
 
-                wallVerts = {
+                addRectVerts(allWallVerts, {
                     {verts[3][1], verts[3][2], verts[3][3], 0, verts[3][2] + 5},-- last
                     {verts[2][1], verts[2][2], verts[2][3], RoadRadius * 2, verts[2][2] + 5},
                     {verts[2][1], -5, verts[2][3],   RoadRadius * 2, 0},
                     {verts[3][1], -5, verts[3][3],   0, 0},-- last
-                }
-                model = rect(wallVerts, imageWall)
-                table.insert(roadModels, model)
+                })
             end
         end
 
@@ -281,5 +320,15 @@ function makeRoad(imageRoad, imageWall)
 
         lastPoint = v
         currTexCoord = currTexCoord + texCoordInc
+    end
+
+    if not CASTLE_SERVER then
+        local model = modelFromCoords(allRoadVerts, imageRoad)
+        table.insert(roadModels, model)
+
+        if imageWall then
+            model = modelFromCoords(allWallVerts, imageWall)
+            table.insert(roadModels, model)
+        end
     end
 end
