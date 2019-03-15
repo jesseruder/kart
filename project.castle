@@ -4,3 +4,5 @@ multiplayer:
   serverMain: server.lua
 owner: jesse
 title: Kart
+coverImage: https://raw.githubusercontent.com/jesseruder/kart/master/assets/levels/grass/icon.png
+primaryColor: 89CFF0
