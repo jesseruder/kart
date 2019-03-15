@@ -20,7 +20,7 @@ function loadWaterLevel()
 
     terrain(waterTerrainImage, true) --this has to be above makeroad for some reason
     updatePathPoints()
-    makeRoad(waterRoadImage, nil)
+    makeRoad(waterRoadImage, nil, 0.2)
 
     if CASTLE_SERVER then
         return

@@ -734,12 +734,13 @@ function client.draw()
 
                     love.graphics.setFont(BigFont)
 
-                    local size = 200
-                    local padding = 50
-                    local totalWidth = #Levels * size + (#Levels - 1) * padding
+                    local size = 150
+                    local padding = 30
+                    local totalWidth = 3 * size + (3 - 1) * padding
                     local startX = GraphicsWidth / 2.0 - totalWidth / 2.0
-                    local top = GraphicsHeight / 2.0 - size / 2.0
+                    local top = GraphicsHeight / 2.0 - size
                     local textPadding = 10
+                    local lCount = 0
 
                     for id, level in pairs(Levels) do
                         love.graphics.setColor(1, 1, 1, 0.9)
@@ -747,6 +748,12 @@ function client.draw()
                         love.graphics.setColor(1, 1, 1, 1)
                         love.graphics.print(id .. ". " .. level.name, startX + textPadding, top + textPadding)
                         startX = startX + size + padding
+                        lCount = lCount + 1
+                        if lCount == 3 then
+                            lCount = 0
+                            startX = GraphicsWidth / 2.0 - totalWidth / 2.0
+                            top = top + size + padding
+                        end
                     end
 
                     if IsRequestingLevel then

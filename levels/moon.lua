@@ -23,7 +23,7 @@ function loadMoonLevel()
     updatePathPoints()
     makeEmptyJump(181, 4, 2.7, 7, -1.3)
     makeJump(250)
-    makeRoad(moonRoadImage, moonWallImage)
+    makeRoad(moonRoadImage, moonWallImage, 0.2)
 
     if CASTLE_SERVER then
         return

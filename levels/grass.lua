@@ -28,7 +28,7 @@ function loadGrassLevel()
     updatePathPoints()
     makeJump(100)
     makeTabletopJump(230)
-    makeRoad(grassRoadImage, grassWallImage)
+    makeRoad(grassRoadImage, grassWallImage, 0.2)
 
     if CASTLE_SERVER then
         return

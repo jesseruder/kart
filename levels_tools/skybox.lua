@@ -2,6 +2,10 @@ local skyboxModels = nil
 
 SkyboxHeight = 15
 function skybox(imageSkybox, lowY, top)
+    if CASTLE_SERVER then
+        return
+    end
+
     if not top then
         top = SkyboxHeight
     end

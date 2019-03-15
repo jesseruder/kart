@@ -41,7 +41,7 @@ function loadRainbowLevel()
     makeSinHill(70, 80, 3)
     makeSinHill(200, 100, 4)
     makeSinHill(430, 60, 1)
-    makeRoad(rainbowRoadImage, nil)
+    makeRoad(rainbowRoadImage, nil, 0.2)
 
     if CASTLE_SERVER then
         return

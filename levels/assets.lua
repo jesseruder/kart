@@ -29,8 +29,14 @@ function preloadLevels()
 
     rainbowRoadImage = love.graphics.newImage("assets/levels/rainbow/road.png")
 
+    desertTerrainImage = love.graphics.newImage("assets/levels/desert/ground.png")
+    desertRoadImage = love.graphics.newImage("assets/levels/desert/railroad.png")
+    desertWallImage = love.graphics.newImage("assets/levels/desert/wall.png")
+    desertWallImage:setWrap('repeat','repeat')
+
     Levels[1].icon = love.graphics.newImage("assets/levels/grass/icon.png")
     Levels[2].icon = love.graphics.newImage("assets/levels/moon/icon.png")
     Levels[3].icon = love.graphics.newImage("assets/levels/water/icon.png")
     Levels[4].icon = love.graphics.newImage("assets/levels/rainbow/icon.png")
+    Levels[5].icon = love.graphics.newImage("assets/levels/desert/icon.png")
 end

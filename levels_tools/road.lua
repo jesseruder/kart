@@ -74,12 +74,12 @@ function roadHeightAtPoint(x, z, indexHint, useFakeHeight)
                             )
 
                             -- let heightAtPoint take care of this if not
-                            if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
+                            --if intersection.y - ROAD_EXTRA_ELEV ~= 0.0 then
                                 return {
                                     height = intersection.y - ROAD_EXTRA_ELEV,
                                     normal = normal
                                 }
-                            end
+                            --end
                         end
                     end
                 end
@@ -222,7 +222,7 @@ function makeTabletopJump(index, length, height, topLength)
     end
 end
 
-function makeRoad(imageRoad, imageWall)
+function makeRoad(imageRoad, imageWall, roadTexCoordInc, texCoordInc, onlyShowEveryNWall, wallSizePerc)
     if roadModels then
         for k,v in pairs(roadModels) do
             v.dead = true
@@ -236,6 +236,7 @@ function makeRoad(imageRoad, imageWall)
         MinimapCanvas = love.graphics.newCanvas(MinimapSize, MinimapSize)
         love.graphics.setCanvas(MinimapCanvas)
         love.graphics.setLineWidth(4)
+        imageRoad:setWrap('repeat','repeat')
     end
 
     roadModels = {}
@@ -246,10 +247,26 @@ function makeRoad(imageRoad, imageWall)
     local finishLineTexY = 0
     local finishLineTexInc = 1
     local currTexCoord = 0.0
-    local texCoordInc = 0.1
+    local currRoadTexCoord = 0.0
+
+    if not texCoordInc then
+        texCoordInc = 0.1
+    end
+    
+    if not roadTexCoordInc then
+        roadTexCoordInc = 1.0
+    end
+
+    if not wallSizePerc then
+        wallSizePerc = 0.0
+    end
+
+    local numWall = 0
 
     local allRoadVerts = {}
     local allWallVerts = {}
+    local isLastFake = false
+    local isLastLastFake = false
 
     for k,v in pairs(PATH_POINTS) do
         if not CASTLE_SERVER then
@@ -277,8 +294,8 @@ function makeRoad(imageRoad, imageWall)
         local dx = math.cos(a + math.pi/2) * RoadRadius
         local dy = math.sin(a + math.pi/2) * RoadRadius
 
-        local texCoordBegin = 0
-        local texCoordEnd = 1
+        local texCoordBegin = currRoadTexCoord
+        local texCoordEnd = currRoadTexCoord + roadTexCoordInc
         local isFinishLine = false
         if k > 1 and k < 4 then
             isFinishLine = true
@@ -320,34 +337,48 @@ function makeRoad(imageRoad, imageWall)
                 addRectVerts(allRoadVerts, verts)
             end
 
-            if imageWall then
+            if imageWall and not v[6] then
+                local subtract = 0.0
+                if wallSizePerc > 0.0 then
+                    subtract = 0.05
+                end
+                local heightLeftOld = (1 - wallSizePerc / RoadRadius) * verts[1][2] + (wallSizePerc / RoadRadius) * verts[4][2] - subtract
+                local heightRightOld = (wallSizePerc / RoadRadius) * verts[1][2] + (1 - wallSizePerc / RoadRadius) * verts[4][2] - subtract
+                local heightLeftNew = (1 - wallSizePerc / RoadRadius) * verts[2][2] + (wallSizePerc / RoadRadius) * verts[3][2] - subtract
+                local heightRightNew = (wallSizePerc / RoadRadius) * verts[2][2] + (1 - wallSizePerc / RoadRadius) * verts[3][2] - subtract
                 addRectVerts(allWallVerts, {
-                    {verts[1][1], verts[1][2], verts[1][3], currTexCoord, verts[1][2] + 5},-- last
-                    {verts[2][1], verts[2][2], verts[2][3], currTexCoord + texCoordInc, verts[2][2] + 5},
-                    {verts[2][1], -5, verts[2][3],   currTexCoord + texCoordInc, 0},
-                    {verts[1][1], -5, verts[1][3],   currTexCoord, 0},-- last
+                    {verts[1][1] + ldx * wallSizePerc, heightLeftOld, verts[1][3]+ ldy * wallSizePerc, currTexCoord, verts[1][2] + 5},-- last
+                    {verts[2][1] + dx * wallSizePerc, heightLeftNew, verts[2][3] + dy * wallSizePerc, currTexCoord + texCoordInc, verts[2][2] + 5},
+                    {verts[2][1] + dx * wallSizePerc, -5, verts[2][3] - dy * wallSizePerc,   currTexCoord + texCoordInc, 0},
+                    {verts[1][1] + ldx * wallSizePerc, -5, verts[1][3] - ldy * wallSizePerc,   currTexCoord, 0},-- last
                 })
 
                 addRectVerts(allWallVerts, {
-                    {verts[3][1], verts[3][2], verts[3][3], currTexCoord, verts[3][2] + 5},-- last
-                    {verts[4][1], verts[4][2], verts[4][3], currTexCoord + texCoordInc, verts[4][2] + 5},
-                    {verts[4][1], -5, verts[4][3],   currTexCoord + texCoordInc, 0},
-                    {verts[3][1], -5, verts[3][3],   currTexCoord, 0},-- last
+                    {verts[3][1] - dx * wallSizePerc, heightRightNew, verts[3][3] - dy * wallSizePerc, currTexCoord, verts[3][2] + 5},-- last
+                    {verts[4][1] - ldx * wallSizePerc, heightRightOld, verts[4][3] - ldy * wallSizePerc, currTexCoord + texCoordInc, verts[4][2] + 5},
+                    {verts[4][1] - ldx * wallSizePerc, -5, verts[4][3] - ldy * wallSizePerc,   currTexCoord + texCoordInc, 0},
+                    {verts[3][1] - dx * wallSizePerc, -5, verts[3][3] - dy * wallSizePerc,   currTexCoord, 0},-- last
                 })
 
-                addRectVerts(allWallVerts, {
-                    {verts[1][1], verts[1][2], verts[1][3], 0, verts[1][2] + 5},-- last
-                    {verts[4][1], verts[4][2], verts[4][3], RoadRadius * 2, verts[4][2] + 5},
-                    {verts[4][1], -5, verts[4][3],   RoadRadius * 2, 0},
-                    {verts[1][1], -5, verts[1][3],   0, 0},-- last
-                })
+                if onlyShowEveryNWall == nil or onlyShowEveryNWall == numWall then
+                    numWall = 0
+                    -- for empty jump
+                    if isLastLastFake then
+                        addRectVerts(allWallVerts, {
+                            {verts[1][1], verts[1][2], verts[1][3], 0, verts[1][2] + 5},-- last
+                            {verts[4][1], verts[4][2], verts[4][3], RoadRadius * 2, verts[4][2] + 5},
+                            {verts[4][1], -5, verts[4][3],   RoadRadius * 2, 0},
+                            {verts[1][1], -5, verts[1][3],   0, 0},-- last
+                        })
+                    end
 
-                addRectVerts(allWallVerts, {
-                    {verts[3][1], verts[3][2], verts[3][3], 0, verts[3][2] + 5},-- last
-                    {verts[2][1], verts[2][2], verts[2][3], RoadRadius * 2, verts[2][2] + 5},
-                    {verts[2][1], -5, verts[2][3],   RoadRadius * 2, 0},
-                    {verts[3][1], -5, verts[3][3],   0, 0},-- last
-                })
+                    addRectVerts(allWallVerts, {
+                        {verts[3][1], verts[3][2], verts[3][3], 0, verts[3][2] + 5},-- last
+                        {verts[2][1], verts[2][2], verts[2][3], RoadRadius * 2, verts[2][2] + 5},
+                        {verts[2][1], -5, verts[2][3],   RoadRadius * 2, 0},
+                        {verts[3][1], -5, verts[3][3],   0, 0},-- last
+                    })
+                end
             end
         end
 
@@ -361,8 +392,12 @@ function makeRoad(imageRoad, imageWall)
             {fakeVerts[2], fakeVerts[3], fakeVerts[4]}
         }
 
+        isLastLastFake = isLastFake
+        isLastFake = v[4] ~= v[5]
         lastPoint = v
         currTexCoord = currTexCoord + texCoordInc
+        currRoadTexCoord = currRoadTexCoord + roadTexCoordInc
+        numWall = numWall + 1
     end
 
     if not CASTLE_SERVER then

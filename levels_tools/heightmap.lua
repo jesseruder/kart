@@ -38,6 +38,25 @@ function addMountain(centerX, centerY, height, slope)
     end
 end
 
+function addCraterRelative(px, py, depth, slope)
+    addCrater(math.floor((WorldSize * 2 * px) / GridSize), math.floor((WorldSize * 2 * py) / GridSize), depth, slope)
+end
+
+function addCrater(centerX, centerY, depth, slope)
+    local dist = math.ceil(depth / slope)
+    for x = centerX - dist, centerX + dist do
+        for y = centerY - dist, centerY + dist do
+            local percentage = math.sqrt(math.pow(centerX - x, 2) + math.pow(centerY - y, 2)) / dist
+            if percentage <= 1.0 then
+                local thisHeight = (math.cos(percentage * math.pi) + 1)/2.0 * -depth
+                if HEIGHTS[x] and HEIGHTS[x][y] and thisHeight < HEIGHTS[x][y] then
+                    HEIGHTS[x][y] = thisHeight
+                end
+            end
+        end
+    end
+end
+
 --[[
  * Determines the point of intersection between a plane defined by a point and a normal vector and a line defined by a point and a direction vector.
  *
