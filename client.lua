@@ -849,8 +849,7 @@ function client.draw()
                             mmx + ((Car.x + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding,
                             mmy + ((Car.z + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding)
 
-                        love.graphics.setColor(0, 0, 1, 1)
-                        love.graphics.setPointSize(6)
+                        love.graphics.setColor(0, 1, 0, 1)
                         for k,v in pairs(otherCars) do
                             love.graphics.points(
                                 mmx + ((v.x + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding,

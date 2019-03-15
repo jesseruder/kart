@@ -35,11 +35,8 @@ function sendMultiplayerUpdate()
         home.switchItemEnabled = SwitchItemEnabledTime and true or false
         home.dizzyItemEnabled = DizzyItemEnabledTime and true or false
         home.addBanana = ServerAddBanana
-        ServerAddBanana = nil
         home.removeBanana = ServerRemoveBanana
-        ServerRemoveBanana = nil
         home.addShell = ServerAddShell
-        ServerAddShell = nil
     end
 end
 
@@ -99,6 +96,19 @@ function getMultiplayerUpdate(dt)
         DizzyItemUsers = share.dizzyItemUsers
         Bananas = share.bananas
         Shells = share.shells
+        ServerAcks = share.acks
+
+        if ServerAddBanana and ServerAcks[ServerAddBanana.id] then
+            ServerAddBanana = nil
+        end
+
+        if ServerRemoveBanana and ServerAcks[ServerRemoveBanana.id] then
+            ServerRemoveBanana = nil
+        end
+
+        if ServerAddShell and ServerAcks[ServerAddShell.id] then
+            ServerAddShell = nil
+        end
 
         for k,v in pairs(otherCars) do
             v.seenThisUpdate = false

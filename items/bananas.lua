@@ -35,7 +35,10 @@ function updateBananas()
             local dist = math.sqrt(math.pow(v.x - Car.x, 2) + math.pow(v.z - Car.z, 2) + math.pow(v.y - Car.y, 2))
             if dist < bananaRadius then
                 slipBanana()
-                ServerRemoveBanana = id
+                ServerRemoveBanana = {
+                    id = id .. "remove",
+                    originalId = id
+                }
             end
         end
     end

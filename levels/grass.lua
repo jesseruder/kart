@@ -34,7 +34,7 @@ function loadGrassLevel()
         return
     end
 
-    skybox(grassSkyboxImage, -15, 15)
+    skybox(grassSkyboxImage)
     terrain(grassTerrainImage)
     clearItems()
     makeItems(40)

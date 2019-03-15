@@ -1,5 +1,6 @@
 local skyboxModels = nil
 
+SkyboxHeight = 15
 function skybox(imageSkybox, lowY, top)
     if not top then
         top = SkyboxHeight
@@ -12,7 +13,7 @@ function skybox(imageSkybox, lowY, top)
     end
 
     if not lowY then
-        lowY = -1
+        lowY = -15
     end
 
     -- front

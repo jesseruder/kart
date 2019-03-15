@@ -19,6 +19,7 @@ local startTime = nil
 local winner = nil
 local bananas = {}
 local shells = {}
+local acks = {}
 
 function server.connect(id) -- Called on connect from client with `id`
     print('client ' .. id .. ' connected')
@@ -80,6 +81,12 @@ function getVotedLevel()
     return maxIdx
 end
 
+function resetServerState()
+    bananas = {}
+    shells = {}
+    acks = {}
+end
+
 function server.update(dt)
     ServerLogicAccumulator = ServerLogicAccumulator+dt
     if ServerLogicAccumulator >= 1/ServerLogicRate then
@@ -115,8 +122,7 @@ function server.update(dt)
     if gameState == "level_select" and startTime and os.time() >= startTime then
         gameState = "intro"
         startTime = os.time() + 4
-        bananas = {}
-        shells = {}
+        resetServerState()
 
         share.level = getVotedLevel()
         if CASTLE_SERVER then
@@ -127,22 +133,19 @@ function server.update(dt)
     if gameState == "intro" and startTime and os.time() >= startTime then
         gameState = "countdown"
         startTime = os.time() + 4
-        bananas = {}
-        shells = {}
+        resetServerState()
     end
 
     if gameState == "countdown" and startTime and os.time() >= startTime then
         gameState = "running"
         startTime = nil
-        bananas = {}
-        shells = {}
+        resetServerState()
     end
 
     if gameState == "postgame" and startTime and os.time() >= startTime then
         gameState = "level_select"
         startTime = nil
-        bananas = {}
-        shells = {}
+        resetServerState()
     end
 
     local isRequestingLevel = false
@@ -195,20 +198,31 @@ function server.update(dt)
         end
 
         if home.addBanana then
-            table.insert(bananas, home.addBanana)
+            if not acks[home.addBanana.id] then
+                print("add banana")
+                table.insert(bananas, home.addBanana)
+                acks[home.addBanana.id] = true
+            end
         end
 
         if home.removeBanana then
-            for k,v in pairs(bananas) do
-                if v.id == home.removeBanana then
-                    table.remove(bananas, k)
-                    break
+            if not acks[home.removeBanana.id] then
+                for k,v in pairs(bananas) do
+                    if v.id == home.removeBanana.originalId then
+                        print("remove banana")
+                        table.remove(bananas, k)
+                        acks[home.removeBanana.id] = true
+                        break
+                    end
                 end
             end
         end
 
         if home.addShell then
-            table.insert(shells, home.addShell)
+            if not acks[home.addShell.id] then
+                table.insert(shells, home.addShell)
+                acks[home.addShell.id] = true
+            end
         end
     end
 
@@ -289,6 +303,7 @@ function server.update(dt)
     share.dizzyItemUsers = dizzyItemUsers
     share.bananas = bananas
     share.shells = shells
+    share.acks = acks
 
     if isRequestingLevel == true and gameState == "level_select" and not startTime then
         -- wait 3 seconds

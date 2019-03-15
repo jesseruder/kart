@@ -11,7 +11,6 @@ LogicRate = 60
 LogicAccumulator = 0
 PhysicsStep = true
 GridSize = 0.5
-SkyboxHeight = 30
 CAR_RANDOM_POS = 0.8
 MotionBlurAmount = 0.0
 CAR_EXTRA_Y = 0.15
