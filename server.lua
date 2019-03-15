@@ -41,8 +41,7 @@ function server.load()
     if ACTUAL_GAME then
         share.level = nil
     else
-        share.level = 1
-        Levels[share.level].action()
+        share.level = TEST_LEVEL
     end
 end
 
