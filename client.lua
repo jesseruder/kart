@@ -836,6 +836,27 @@ function client.draw()
                         love.graphics.setColor(1, 1, 1, 0.9)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
+
+                    if MinimapCanvas then
+                        local mmx = 30
+                        local mmy = GraphicsHeight - 230
+                        love.graphics.setColor(1, 1, 1, 0.9)
+                        love.graphics.draw(MinimapCanvas, mmx, mmy, 0, 1, 1, 0, 0)
+                        --  * RoadScale - RoadScale / 2.0
+                        love.graphics.setColor(1, 0, 0, 1)
+                        love.graphics.setPointSize(10)
+                        love.graphics.points(
+                            mmx + ((Car.x + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding,
+                            mmy + ((Car.z + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding)
+
+                        love.graphics.setColor(0, 0, 1, 1)
+                        love.graphics.setPointSize(6)
+                        for k,v in pairs(otherCars) do
+                            love.graphics.points(
+                                mmx + ((v.x + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding,
+                                mmy + ((v.z + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding)
+                        end
+                    end
                 end
 
                 if GameState == "choose_character" then

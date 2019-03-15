@@ -229,6 +229,15 @@ function makeRoad(imageRoad, imageWall)
         end
     end
 
+    if not CASTLE_SERVER then
+        MinimapSize = 200
+        MinimapPadding = 10
+        MinimapInnerSize = MinimapSize - MinimapPadding * 2.0
+        MinimapCanvas = love.graphics.newCanvas(MinimapSize, MinimapSize)
+        love.graphics.setCanvas(MinimapCanvas)
+        love.graphics.setLineWidth(4)
+    end
+
     roadModels = {}
 
     local elev = ROAD_EXTRA_ELEV
@@ -243,6 +252,19 @@ function makeRoad(imageRoad, imageWall)
     local allWallVerts = {}
 
     for k,v in pairs(PATH_POINTS) do
+        if not CASTLE_SERVER then
+            if k > 1 and k < 4 then
+                love.graphics.setColor(0,0,0,1)
+            else
+                love.graphics.setColor(0.8,0.8,0.8,1)
+            end
+
+            love.graphics.line(lastPoint[1] * MinimapInnerSize + MinimapPadding,
+                lastPoint[2] * MinimapInnerSize + MinimapPadding,
+                v[1] * MinimapInnerSize + MinimapPadding,
+                v[2] * MinimapInnerSize + MinimapPadding)
+        end
+
         local lx = lastPoint[1] * RoadScale - RoadScale / 2.0
         local ly = lastPoint[2] * RoadScale - RoadScale / 2.0
         local la = lastPoint[3]
@@ -344,6 +366,8 @@ function makeRoad(imageRoad, imageWall)
     end
 
     if not CASTLE_SERVER then
+        love.graphics.setCanvas()
+
         local model = modelFromCoords(allRoadVerts, imageRoad)
         table.insert(roadModels, model)
 
