@@ -127,10 +127,12 @@ function getMultiplayerUpdate(dt)
                     updateCarFromRemote(dt, otherCars[id], car)
                     updateCarPosition(otherCars[id])
 
-                    if car.lap > Lap then
-                        carsAheadOfMe = carsAheadOfMe + 1
-                    elseif car.roadIndex > Car.roadIndex then
-                        carsAheadOfMe = carsAheadOfMe + 1
+                    if car.lap and Lap and car.roadIndex and Car.roadIndex then
+                        if car.lap > Lap then
+                            carsAheadOfMe = carsAheadOfMe + 1
+                        elseif car.roadIndex > Car.roadIndex then
+                            carsAheadOfMe = carsAheadOfMe + 1
+                        end
                     end
                 else
                     Car.hitByShellTime = car.hitByShellTime
