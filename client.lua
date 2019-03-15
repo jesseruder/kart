@@ -399,6 +399,7 @@ function client.update(dt)
             GameCountdownBright = 0.0
             restartMusic()
             stopCheering()
+            resetGame()
         elseif ServerGameState == "running" then
             switchToMusic()
             stopCheering()
@@ -410,6 +411,7 @@ function client.update(dt)
         elseif ServerGameState == "intro" then
             switchToAmbient()
             stopCheering()
+            resetGame()
         elseif ServerGameState == "postgame" then
             if PLAY_MUSIC then
                 Music:setVolume(0.5)

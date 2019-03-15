@@ -1,5 +1,11 @@
 local terrainModel = nil
 
+function clearTerrain()
+    if terrainModel then
+        terrainModel.dead = true
+    end
+end
+
 function terrain(imageDirt, wave)
     if CASTLE_SERVER then
         return

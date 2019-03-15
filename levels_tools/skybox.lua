@@ -68,5 +68,5 @@ function skybox(imageSkybox, lowY, top)
         {WorldSize, lowY + 0.1, -WorldSize - 0.1,                  0.5, 0.6666}
     }, imageSkybox, nil, 0.0)
 
-    skyboxModels = {front, right, back, left, op}
+    skyboxModels = {front, right, back, left, top, bottom}
 end

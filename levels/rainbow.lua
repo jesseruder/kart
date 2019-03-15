@@ -54,6 +54,7 @@ function loadRainbowLevel()
     makeItems(300)
     makeItems(400)
     makeItems(480)
+    clearTerrain()
 
     heightAtPoint = function(x, y)
         return {
