@@ -261,7 +261,7 @@ function engine.newScene(renderWidth,renderHeight)
     scene.modelList = {}
 
     engine.camera = {
-        pos = cpml.vec3(0, 0.3, 0),
+        pos = cpml.vec3(0, 0.3, -1),
         angle = cpml.vec3(1, 0, 0),
         perspective = TransposeMatrix(cpml.mat4.from_perspective(60, renderWidth/renderHeight, 0.1, 10000)),
         transform = cpml.mat4(),
