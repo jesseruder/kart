@@ -385,8 +385,8 @@ function client.update(dt)
 
     if ServerLevel and ServerLevel ~= LocalLevel then
         Levels[ServerLevel].action()
+        resetGame()
         if ACTUAL_GAME == false then
-            resetGame()
             makeItems(5)
         end
         LocalLevel = ServerLevel
@@ -407,7 +407,6 @@ function client.update(dt)
                 Car.vel.z = math.sin(Car.angle) * 5
             end
         elseif ServerGameState == "intro" then
-            resetGame()
             switchToAmbient()
             stopCheering()
         elseif ServerGameState == "postgame" then
