@@ -1,5 +1,18 @@
 function accessoryNone(car)
+    --[[local coords = {}
 
+    for k1,face in pairs(hatObject.f) do
+        if #face == 3 then
+            local v1 = hatObject.v[face[1][1] ]
+            local v2 = hatObject.v[face[2][1] ]
+        elseif #face == 4 then
+
+        end
+    end
+
+    local model = Engine.newModel(coords, texture, nil, nil, nil, scale, fogAmount)
+    table.insert(Scene.modelList, model)
+    table.insert(car.models, model)]]--
 end
 
 function accessoryHat(car)

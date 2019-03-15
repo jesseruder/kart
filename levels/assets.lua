@@ -1,5 +1,9 @@
+local obj_loader = require "obj.obj_loader"
+local hat = require "assets.accessories.hat"
 
 function preloadLevels()
+    hatObject = obj_loader.load(hat)
+
     defaultSkybox = love.graphics.newImage("assets/levels/skybox.png")
     defaultRoad = love.graphics.newImage("assets/levels/road.png")
     defaultWall = love.graphics.newImage("assets/levels/wall.png")

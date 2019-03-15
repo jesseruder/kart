@@ -31,23 +31,11 @@ local loader = {}
 loader.version = "0.0.2"
 
 function loader.load(file)
-	assert(file_exists(file), "File not found: " .. file)
-
-	local get_lines
-
-	if love then
-		get_lines = love.filesystem.lines
-	else
-		get_lines = io.lines
-	end
-
 	local lines = {}
 
-	for line in get_lines(file) do 
-		table.insert(lines, line)
+	for s in file:gmatch("[^\r\n]+") do
+		table.insert(lines, s)
 	end
-
-	return loader.parse(lines)
 end
 
 function loader.parse(object)
@@ -110,14 +98,6 @@ function loader.parse(object)
 	end
 
 	return obj
-end
-
-function file_exists(file)
-	if love then return love.filesystem.getInfo(file) ~= nil end
-
-	local f = io.open(file, "r")
-	if f then f:close() end
-	return f ~= nil
 end
 
 -- http://wiki.interfaceware.com/534.html

@@ -55,7 +55,8 @@ function server.load()
     -- grass: 1
     -- moon: 2
     -- water: 3
-    SortedLevels = {3,1,2}
+    -- rainbow: 4
+    SortedLevels = {4}
     LevelIndex = 1
 
     share.level = SortedLevels[LevelIndex]
