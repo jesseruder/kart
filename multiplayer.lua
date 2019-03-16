@@ -120,7 +120,7 @@ function getMultiplayerUpdate(dt)
 
         for id, car in pairs(share.cars) do
             NumPlayers = NumPlayers + 1
-            if GameState == "running" then
+            if GameState == "running" or GameState == "countdown" then
                 if id ~= client.id or USE_REMOTE_CAR then -- Not me
                     if not car and otherCard[id] then
                         removeCar(otherCars[id])
