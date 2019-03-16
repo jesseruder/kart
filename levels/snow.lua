@@ -44,10 +44,11 @@ function loadSnowLevel()
     terrain(snowTerrainImage)
     clearItems()
     makeItems(40)
-    makeItems(140)
+    makeItems(100)
+    makeItems(160)
     makeItems(230)
     makeItems(350)
-    makeItems(420)
+    makeItems(425)
 
     FogColor = {1,1,1,1}
     FogStartDist = 0
