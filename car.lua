@@ -17,7 +17,7 @@ function makeCar(characterName, accessoryName, color)
         characterName = characterName,
         accessoryName = accessoryName,
         size = 0.2,
-        roadIndex = 0,
+        roadIndex = 1,
         accel = 500,
         turnAngle = math.pi*0.25,
         turnSpeed = 1.5,

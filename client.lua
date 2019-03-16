@@ -16,7 +16,6 @@ function resetGame()
         Laps = 1
     end
 
-    GameState = "intro"
     GameCountdownTime = 1000000
     GameCountdownBright = 0.0
     Lap = 1
@@ -27,12 +26,16 @@ function resetGame()
     MyItem = nil
     MyTakenItem = nil
 
+    Car.roadIndex = 1
     Car.x = PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.z = PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0 + CAR_RANDOM_POS * math.random()
     Car.y = roadHeightAtPoint(PATH_POINTS[1][1] * RoadScale - RoadScale / 2.0, PATH_POINTS[1][2] * RoadScale - RoadScale / 2.0, 1).height + 0.3
     Car.angle = PATH_POINTS[1][3]
     Car.angleUp = 0
     Car.angleSide = 0
+    Car.vel.x = 0
+    Car.vel.y = 0
+    Car.vel.z = 0
 end
 
 local time3 = 0.666
