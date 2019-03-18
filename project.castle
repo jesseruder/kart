@@ -1,7 +1,7 @@
 main: entry-prod.lua
 multiplayer:
   enabled: true
-  serverMain: server.lua
+  serverMain: entry-prod-server.lua
 owner: jesse
 title: Kart
 coverImage: https://raw.githubusercontent.com/jesseruder/kart/master/assets/levels/grass/icon.png
