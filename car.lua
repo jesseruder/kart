@@ -20,7 +20,7 @@ function makeCar(characterName, accessoryName, color)
         roadIndex = 1,
         accel = 500,
         turnAngle = math.pi*0.25,
-        turnSpeed = 1.5,
+        turnSpeed = 1.0,
         vel = {x = 0, y = 0, z = 0},
         isTouchingGround = true,
         offRoadMaxSpeed = 1.5,

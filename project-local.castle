@@ -1,4 +1,4 @@
-main: entry-prod.lua
+main: entry-local.lua
 multiplayer:
   enabled: true
   serverMain: server.lua

@@ -332,6 +332,11 @@ function love.keypressed(key)
         MyItem.action()
         MyItem = nil
     end
+
+    local turnDirection = love.keyboard.isDown("left") and -1 or (love.keyboard.isDown("right") and 1 or 0)
+    if GameState == "running" and (key == "lshift" or key == "rshift") and turnDirection ~= 0 then
+        -- Car.angle = Car.angle + 0.1 * turnDirection
+    end
 end
 
 function client.update(dt)
@@ -454,8 +459,7 @@ function client.update(dt)
 
     local turnAngle
     if isDrift and Car.isTouchingGround then
-        frictionConst = 150
-        turnAngle = Car.angle + turnDirection * -math.pi / 4
+        turnAngle = Car.angle-- + turnDirection * -math.pi / 5
     else
         turnAngle = Car.angle + turnDirection * Car.turnAngle
     end
@@ -471,7 +475,7 @@ function client.update(dt)
         caraz = 0
     else
         if isDrift then
-            Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt * 0.5
+            Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt * 1.3
         else
             Car.angle = Car.angle + turnDirection * Car.turnSpeed * dt
         end
@@ -851,7 +855,7 @@ function client.draw()
                     if MyItem then
                         local size = 100
                         local padding = 20
-                        love.graphics.print("[return] to use", GraphicsWidth - size - padding, GraphicsHeight - size - padding - 20)
+                        love.graphics.print("[ENTER] to use", GraphicsWidth - size - padding, GraphicsHeight - size - padding - 20)
                         love.graphics.setColor(1, 1, 1, 0.9)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
@@ -875,6 +879,14 @@ function client.draw()
                                 mmy + ((v.z + RoadScale / 2.0) / RoadScale) * MinimapInnerSize + MinimapPadding)
                         end
                     end
+                end
+
+                if GameState == "intro" then
+                    love.graphics.setFont(BigFont)
+                    love.graphics.setColor(1.0, 165/256.0, 0.0, 1)
+                    love.graphics.print("[SPACE] to accelerate [LEFT] [RIGHT] to steer [SHIFT] to drift", GraphicsWidth / 2 - 350, GraphicsHeight - 80)
+                    love.graphics.setColor(1, 0, 0, 1)
+                    love.graphics.setFont(DefaultFont)
                 end
 
                 if GameState == "choose_character" then
