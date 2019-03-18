@@ -7,3 +7,4 @@ RESET_CAR = true
 PLAY_MUSIC = true
 
 require('client')
+require "server"

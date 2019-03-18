@@ -1,5 +1,4 @@
 require "constants"
-require "server"
 Engine = require "engine"
 require "car"
 require "multiplayer"
