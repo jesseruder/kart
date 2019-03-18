@@ -852,9 +852,9 @@ function client.draw()
                     end
 
                     if MyItem then
-                        local size = 100
-                        local padding = 20
-                        love.graphics.print("[ENTER] to use", GraphicsWidth - size - padding, GraphicsHeight - size - padding - 20)
+                        local size = 160
+                        local padding = 30
+                        love.graphics.print("[ENTER] to use", GraphicsWidth - size - padding + 15, GraphicsHeight - size - padding - 20)
                         love.graphics.setColor(1, 1, 1, 0.9)
                         love.graphics.draw(MyItem.image, GraphicsWidth - size - padding, GraphicsHeight - size - padding, 0, size / MyItem.image:getWidth(), size / MyItem.image:getHeight(), 0, 0)
                     end
