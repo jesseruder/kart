@@ -740,7 +740,9 @@ function client.draw()
             love.graphics.print("FPS: " .. love.timer.getFPS(), 20, 20)
             if client.connected then
                 love.graphics.print("Ping: " .. client.getPing(), 20, 40)
-                love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 100, 20)
+                if GameState ~= "choose_character" then
+                    love.graphics.print("Players: " .. NumPlayers, GraphicsWidth - 100, 20)
+                end
                 love.graphics.setColor(1,1,1,1)
 
                 if GameState == "level_select" then
