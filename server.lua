@@ -235,6 +235,8 @@ function server.update(dt)
                     acks[home.addShell.id] = true
                 end
             end
+        else
+            share.cars[id] = nil
         end
     end
 
