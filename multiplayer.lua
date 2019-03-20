@@ -13,6 +13,7 @@ local home = client.home -- Maps to `server.homes[id]` with our `id` -- can writ
 
 function sendMultiplayerUpdate()
     if client.connected then
+        home.stateId = stateId
         if not home.car then
             home.car = {}
         end
@@ -98,6 +99,7 @@ function getMultiplayerUpdate(dt)
         Bananas = share.bananas
         Shells = share.shells
         ServerAcks = share.acks
+        stateId = share.stateId
 
         if ServerAddBanana and ServerAcks[ServerAddBanana.id] then
             ServerAddBanana = nil
