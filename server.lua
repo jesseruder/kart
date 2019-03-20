@@ -17,9 +17,14 @@ local homes = server.homes -- `homes[id]` maps to `client.home` for that `id` --
 local gameState = ACTUAL_GAME and "level_select" or "running"
 local startTime = nil
 local winner = nil
+local stateId = nil
 local bananas = {}
 local shells = {}
 local acks = {}
+
+function newStateId()
+    stateId = math.floor(math.random() * 10000000)
+end
 
 function server.connect(id) -- Called on connect from client with `id`
     print('client ' .. id .. ' connected')
@@ -121,6 +126,7 @@ function server.update(dt)
 
     if gameState == "level_select" and startTime and os.time() >= startTime then
         gameState = "intro"
+        newStateId()
         startTime = os.time() + 4
         resetServerState()
 
@@ -132,18 +138,21 @@ function server.update(dt)
 
     if gameState == "intro" and startTime and os.time() >= startTime then
         gameState = "countdown"
+        newStateId()
         startTime = os.time() + 4
         resetServerState()
     end
 
     if gameState == "countdown" and startTime and os.time() >= startTime then
         gameState = "running"
+        newStateId()
         startTime = nil
         resetServerState()
     end
 
     if gameState == "postgame" and startTime and os.time() >= startTime then
         gameState = "level_select"
+        newStateId()
         startTime = nil
         resetServerState()
     end
@@ -154,74 +163,77 @@ function server.update(dt)
     local dizzyItemUsers = {}
 
     for id, home in pairs(server.homes) do -- Combine mouse info from clients into share
-        if home.car then
-            if not share.cars[id] then
-                share.cars[id] = home.car
-            else
-                -- don't overwite values set on the server
-                share.cars[id].size = home.car.size
-                share.cars[id].vel = home.car.vel
-                share.cars[id].color = home.car.color
-                share.cars[id].roadIndex = home.car.roadIndex
-                share.cars[id].characterName = home.car.characterName
-                share.cars[id].accessoryName = home.car.accessoryName
-                share.cars[id].x = home.car.x
-                share.cars[id].y = home.car.y
-                share.cars[id].z = home.car.z
-                share.cars[id].angle = home.car.angle
-                share.cars[id].angleUp = home.car.angleUp
-                share.cars[id].angleSide = home.car.angleSide
-                share.cars[id].lap = home.car.lap
+        if home.stateId == stateId then
+            if home.car then
+                if not share.cars[id] then
+                    share.cars[id] = home.car
+                else
+                    -- don't overwite values set on the server
+                    share.cars[id].size = home.car.size
+                    share.cars[id].vel = home.car.vel
+                    share.cars[id].color = home.car.color
+                    share.cars[id].roadIndex = home.car.roadIndex
+                    share.cars[id].characterName = home.car.characterName
+                    share.cars[id].accessoryName = home.car.accessoryName
+                    share.cars[id].x = home.car.x
+                    share.cars[id].y = home.car.y
+                    share.cars[id].z = home.car.z
+                    share.cars[id].angle = home.car.angle
+                    share.cars[id].angleUp = home.car.angleUp
+                    share.cars[id].angleSide = home.car.angleSide
+                    share.cars[id].lap = home.car.lap
+                end
             end
-        end
 
-        if home.requestingLevel then
-            isRequestingLevel = true
-        end
-
-        if home.takenItem then
-            takenItems[home.takenItem] = true
-        end
-
-        if home.isFinished and gameState == "running" then
-            gameState = "postgame"
-            winner = id
-            startTime = os.time() + 8
-        end
-
-        if home.switchItemEnabled then
-            switchItemUsers[id] = true
-        end
-
-        if home.dizzyItemEnabled then
-            dizzyItemUsers[id] = true
-        end
-
-        if home.addBanana then
-            if not acks[home.addBanana.id] then
-                print("add banana")
-                table.insert(bananas, home.addBanana)
-                acks[home.addBanana.id] = true
+            if home.requestingLevel then
+                isRequestingLevel = true
             end
-        end
 
-        if home.removeBanana then
-            if not acks[home.removeBanana.id] then
-                for k,v in pairs(bananas) do
-                    if v.id == home.removeBanana.originalId then
-                        print("remove banana")
-                        table.remove(bananas, k)
-                        acks[home.removeBanana.id] = true
-                        break
+            if home.takenItem then
+                takenItems[home.takenItem] = true
+            end
+
+            if home.isFinished and gameState == "running" then
+                gameState = "postgame"
+                newStateId()
+                winner = id
+                startTime = os.time() + 8
+            end
+
+            if home.switchItemEnabled then
+                switchItemUsers[id] = true
+            end
+
+            if home.dizzyItemEnabled then
+                dizzyItemUsers[id] = true
+            end
+
+            if home.addBanana then
+                if not acks[home.addBanana.id] then
+                    print("add banana")
+                    table.insert(bananas, home.addBanana)
+                    acks[home.addBanana.id] = true
+                end
+            end
+
+            if home.removeBanana then
+                if not acks[home.removeBanana.id] then
+                    for k,v in pairs(bananas) do
+                        if v.id == home.removeBanana.originalId then
+                            print("remove banana")
+                            table.remove(bananas, k)
+                            acks[home.removeBanana.id] = true
+                            break
+                        end
                     end
                 end
             end
-        end
 
-        if home.addShell then
-            if not acks[home.addShell.id] then
-                table.insert(shells, home.addShell)
-                acks[home.addShell.id] = true
+            if home.addShell then
+                if not acks[home.addShell.id] then
+                    table.insert(shells, home.addShell)
+                    acks[home.addShell.id] = true
+                end
             end
         end
     end
@@ -296,6 +308,7 @@ function server.update(dt)
     end
 
     share.gameState = gameState
+    share.stateId = stateId
     share.isRequestingLevel = startTime and isRequestingLevel
     share.takenItems = takenItems
     share.winner = winner
