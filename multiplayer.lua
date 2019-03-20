@@ -88,6 +88,11 @@ otherCars = {}
 NumPlayers = 0
 function getMultiplayerUpdate(dt)
     if client.connected then
+        if stateId ~= share.stateId and ServerGameState == "running" and share.gameState == "running" then
+            -- you paused and resumed while it was running, but we're now at a different level. reset
+            resetGame()
+        end
+
         ServerGameState = share.gameState
         ServerLevel = share.level
         IsRequestingLevel = share.isRequestingLevel or false
