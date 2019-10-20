@@ -164,8 +164,8 @@ function engine.newScene(renderWidth,renderHeight)
         uniform float fog_amt;
         uniform float fog_startDist;
         uniform float fog_divide;
-        uniform float wave;
-        uniform float time;
+        uniform mediump float wave;
+        uniform mediump float time;
         uniform vec4 fogColor;
         varying float fogDistance;
 
@@ -213,7 +213,7 @@ function engine.newScene(renderWidth,renderHeight)
 
     scene.particleShader = love.graphics.newShader[[
         uniform mat4 view;
-        uniform float time;
+        uniform mediump float time;
         varying float dist;
 
         #ifdef VERTEX
@@ -221,7 +221,7 @@ function engine.newScene(renderWidth,renderHeight)
             vec4 p = vertex_position;
             p.y = p.y - time * 0.015;
             p.y = mod(p.y, 1.0);
-            p.y = p.y * 100 - 50;
+            p.y = p.y * 100.0 - 50.0;
             vec4 result = view * p;
             dist = length(result.xyz);
             return result;
@@ -232,7 +232,7 @@ function engine.newScene(renderWidth,renderHeight)
         vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
             vec2 coord = gl_PointCoord - vec2(0.5);
             float radius = 0.5;
-            radius = 10 * radius / dist;
+            radius = 10.0 * radius / dist;
 
             if (radius > 0.5) {
                 radius = 0.5;
@@ -268,7 +268,7 @@ function engine.newScene(renderWidth,renderHeight)
             vec4 outColor;
         
             vec4 o = Texel(texture, texture_coords);
-            outColor = (o * 2 + blurColor(texture, texture_coords, 1)) / 3.0;
+            outColor = (o * 2.0 + blurColor(texture, texture_coords, 1.0)) / 3.0;
             
             return outColor * overlayOpacity + vec4(0.0, 0.0, 0.0, 1.0) * (1.0 - overlayOpacity);
         }
