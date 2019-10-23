@@ -159,14 +159,14 @@ function engine.newScene(renderWidth,renderHeight)
 
     -- define the shaders used in rendering the scene
     scene.threeShader = love.graphics.newShader[[
-        uniform mat4 view;
-        uniform mat4 model_matrix;
-        uniform float fog_amt;
-        uniform float fog_startDist;
-        uniform float fog_divide;
-        uniform mediump float wave;
-        uniform mediump float time;
-        uniform vec4 fogColor;
+        uniform highp mat4 view;
+        uniform highp mat4 model_matrix;
+        uniform mediump float fog_amt;
+        uniform mediump float fog_startDist;
+        uniform mediump float fog_divide;
+        uniform highp float wave;
+        uniform highp float time;
+        uniform highp vec4 fogColor;
         varying float fogDistance;
 
         #ifdef VERTEX
@@ -212,8 +212,8 @@ function engine.newScene(renderWidth,renderHeight)
     ]]
 
     scene.particleShader = love.graphics.newShader[[
-        uniform mat4 view;
-        uniform mediump float time;
+        uniform highp mat4 view;
+        uniform highp float time;
         varying float dist;
 
         #ifdef VERTEX
